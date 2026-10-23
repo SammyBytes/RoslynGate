@@ -5,15 +5,17 @@ token-efficient MCP server for .NET symbol lookup.
 
 ## Usage
 
+Install the wrapper from this repository:
+
 ```bash
-npx roslyngate --solution /path/to/repository
+npm install -g ./packaging/npm
+roslyngate --solution /path/to/repository
 ```
 
-Or install globally:
+After the package is published to npm:
 
 ```bash
-npm install -g roslyngate
-roslyngate --solution /path/to/repository
+npx -y roslyngate --solution /path/to/repository
 ```
 
 The first run downloads the self-contained binary for the current platform,
@@ -27,6 +29,9 @@ Linux/macOS or `%LOCALAPPDATA%\roslyngate` on Windows.
 - macOS arm64
 
 Unsupported platforms fail with a clear message instead of a stack trace.
+
+The package version is checked against `<Version>` in
+`Directory.Build.props`; `npm test` fails if they drift.
 
 ## Environment
 

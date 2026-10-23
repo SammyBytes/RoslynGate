@@ -36,6 +36,13 @@ jobs:
         with:
           dotnet-version: 10.0.x
 
+      - name: Validate version
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          props_version="$(sed -n 's:.*<Version>\(.*\)</Version>.*:\1:p' Directory.Build.props | head -1)"
+          test "$version" = "$props_version"
+          npm test --prefix packaging/npm
+
       - name: Publish
         run: |
           version="${GITHUB_REF_NAME#v}"
