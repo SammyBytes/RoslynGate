@@ -60,8 +60,8 @@ roslyngate setup claude
 Or run it without installing:
 
 ```bash
-npx -y roslyngate@0.1.4 setup claude
-bunx roslyngate@0.1.4 setup claude
+npx -y roslyngate@0.1.5 setup claude
+bunx roslyngate@0.1.5 setup claude
 ```
 
 `setup claude` writes `.mcp.json` with the native binary path, solution path,
@@ -82,6 +82,25 @@ x64, Windows x64, and macOS arm64. Release binaries are available on the
 You can also download the binary for your platform from
 [Releases](https://github.com/SammyBytes/RoslynGate/releases) and verify its
 `.sha256` file.
+
+## Upgrade
+
+```bash
+roslyngate upgrade
+```
+
+This updates the global npm package, downloads the matching binary, and
+updates the `roslyngate.command` path in `.mcp.json` in the current directory
+without touching its `args`, `timeout`, or other MCP servers. Restart Claude
+Code or run `/mcp` afterwards.
+
+Use `--check` to compare the installed and latest versions, or `--dry-run` to
+see the actions without installing or writing:
+
+```bash
+roslyngate upgrade --check
+roslyngate upgrade --dry-run
+```
 
 ## Build
 
