@@ -23,6 +23,7 @@
 - [ ] Configure logging to stderr only.
 - [ ] Document MCP client setup for Claude Code, Cursor, VS Code, and a
       generic `mcpServers` JSON block.
+- [ ] Add the `opencode.jsonc` example and verify the connection.
 - [ ] Document `--check` and the stdout/stderr split for troubleshooting.
 
 ## F1 - Workspace
