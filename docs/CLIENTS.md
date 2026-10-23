@@ -1,10 +1,12 @@
 # MCP clients
 
 The recommended command is the npm wrapper, which downloads and caches the
-self-contained binary on first use:
+self-contained binary on first use. Install it from a checkout with
+`npm install -g ./packaging/npm`; use `npx -y roslyngate` once the package is
+published to npm.
 
 ```bash
-npx -y roslyngate --solution /absolute/path/to/repository
+roslyngate --solution /absolute/path/to/repository
 ```
 
 Replace `/absolute/path/to/repository` with the solution directory. `--solution`
@@ -27,13 +29,8 @@ Claude Desktop, Cursor, Cline, and other clients that use `mcpServers`:
 {
   "mcpServers": {
     "roslyngate": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "roslyngate",
-        "--solution",
-        "/absolute/path/to/repository"
-      ]
+      "command": "roslyngate",
+      "args": ["--solution", "/absolute/path/to/repository"]
     }
   }
 }
@@ -42,7 +39,7 @@ Claude Desktop, Cursor, Cline, and other clients that use `mcpServers`:
 ## Claude Code
 
 ```bash
-claude mcp add roslyngate -- npx -y roslyngate --solution /absolute/path/to/repository
+claude mcp add roslyngate -- roslyngate --solution /absolute/path/to/repository
 ```
 
 Or add the server to the project `.mcp.json` using the generic `mcpServers`
@@ -62,13 +59,8 @@ the global Cursor MCP configuration.
   "servers": {
     "roslyngate": {
       "type": "stdio",
-      "command": "npx",
-      "args": [
-        "-y",
-        "roslyngate",
-        "--solution",
-        "/absolute/path/to/repository"
-      ]
+      "command": "roslyngate",
+      "args": ["--solution", "/absolute/path/to/repository"]
     }
   }
 }
@@ -94,7 +86,7 @@ built DLL:
 }
 ```
 
-For an installed version, use:
+For an installed version, use `roslyngate` on PATH. If you use `npx` after npm publication, replace the command with `npx` and prefix the arguments with `-y roslyngate`.
 
 ```jsonc
 {
@@ -102,7 +94,7 @@ For an installed version, use:
     "servers": {
       "roslyngate": {
         "type": "local",
-        "command": ["npx", "-y", "roslyngate", "--solution", "/absolute/path/to/repository"],
+        "command": ["roslyngate", "--solution", "/absolute/path/to/repository"],
         "codemode": false
       }
     }

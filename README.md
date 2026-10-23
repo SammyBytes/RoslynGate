@@ -27,22 +27,23 @@ Every response is JSON. `detail=compact` (default) keeps the wire small;
 
 ## Install
 
-Use the npm wrapper:
+Install the wrapper from this repository:
+
+```bash
+npm install -g ./packaging/npm
+roslyngate --solution /path/to/repository
+```
+
+Once the package is published to npm, this also works:
 
 ```bash
 npx -y roslyngate --solution /path/to/repository
 ```
 
-Or install it globally:
-
-```bash
-npm install -g roslyngate
-roslyngate --solution /path/to/repository
-```
-
 The first run downloads the self-contained binary for the current platform,
 verifies its SHA-256 checksum, and caches it. Supported platforms are Linux
-x64, Windows x64, and macOS arm64.
+x64, Windows x64, and macOS arm64. `v0.1.0` release binaries are available on
+the [Releases](https://github.com/SammyBytes/RoslynGate/releases) page.
 
 You can also download the binary for your platform from
 [Releases](https://github.com/SammyBytes/RoslynGate/releases) and verify its

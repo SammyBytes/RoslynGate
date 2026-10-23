@@ -15,7 +15,8 @@
     "node": ">=20"
   },
   "scripts": {
-    "test": "node --test"
+    "test": "node --test && node scripts/check-version.js",
+    "check-version": "node scripts/check-version.js"
   },
   "repository": {
     "type": "git",
