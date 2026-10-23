@@ -9,9 +9,10 @@ public static class Check
 {
     public static async Task<int> RunAsync(ServerOptions options, CancellationToken cancellationToken)
     {
+        var output = Console.Out;
+
         try
         {
-            var output = Console.Out;
             Console.SetOut(Console.Error);
 
             var stopwatch = Stopwatch.StartNew();
@@ -28,6 +29,12 @@ public static class Check
 
             output.WriteLine($"{ProductInfo.Name}  {BuildInfo.Version}");
             Write(output, CheckText.Solution, snapshot.SolutionPath);
+            Write(output, CheckText.Sdk, Workspace.Sdk?.Version ?? "MSBuild default");
+            if (Workspace.Sdk is not null)
+            {
+                Write(output, CheckText.SdkPath, Workspace.Sdk.Path);
+            }
+
             Write(output, CheckText.Projects, snapshot.Solution.Projects.Count().ToString());
             Write(output, CheckText.Load, $"{stopwatch.ElapsedMilliseconds}ms");
             Write(output, CheckText.Detail, options.Detail.ToString().ToLowerInvariant());
@@ -40,14 +47,25 @@ public static class Check
         }
         catch (SolutionNotFoundException exception)
         {
-            Console.Error.WriteLine($"{CliText.ErrorPrefix}{exception.Message}");
+            WriteFailure(output, exception.Message, null);
             return ExitCodes.InvalidConfiguration;
         }
         catch (WorkspaceLoadException exception)
         {
-            Console.Error.WriteLine($"{CliText.ErrorPrefix}{exception.Message}");
+            WriteFailure(output, exception.Message, exception.Hint);
             return ExitCodes.InvalidConfiguration;
         }
+    }
+
+    private static void WriteFailure(TextWriter output, string message, string? hint)
+    {
+        Console.Error.WriteLine($"{CliText.ErrorPrefix}{message}");
+        if (!string.IsNullOrWhiteSpace(hint))
+        {
+            Console.Error.WriteLine($"{CliText.ErrorPrefix}hint: {hint}");
+        }
+
+        Write(output, CheckText.Status, CheckText.Failed);
     }
 
     private static void Write(TextWriter output, string label, string value)

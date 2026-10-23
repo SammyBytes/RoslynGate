@@ -18,5 +18,5 @@ public static class ToolErrors
         => ToolJson.Error(new ToolError(
             ToolErrorCodes.SolutionLoadFailed,
             exception.Message,
-            "Run roslyngate --check to inspect the solution."));
+            exception.Hint ?? "Run roslyngate --check to inspect the solution."));
 }

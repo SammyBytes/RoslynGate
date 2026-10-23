@@ -1,4 +1,3 @@
-using Microsoft.Build.Locator;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.MSBuild;
 using Microsoft.Extensions.Logging;
@@ -8,9 +7,6 @@ namespace RoslynGate.Engine;
 
 public sealed class Workspace : IDisposable
 {
-    private static readonly object RegistrationGate = new();
-    private static bool _msbuildRegistered;
-
     private readonly string? _solutionPath;
     private readonly ILogger<Workspace> _logger;
     private readonly SemaphoreSlim _gate = new(1, 1);
@@ -22,6 +18,8 @@ public sealed class Workspace : IDisposable
     private bool _disposed;
 
     public IReadOnlyList<string> Diagnostics => _diagnostics;
+
+    public static DotNetSdk? Sdk => MsBuildRegistration.Sdk;
 
     public Workspace(string? solutionPath, ILogger<Workspace>? logger = null)
     {
@@ -90,7 +88,7 @@ public sealed class Workspace : IDisposable
     private async Task<WorkspaceSnapshot> LoadCoreAsync(CancellationToken cancellationToken)
     {
         var solutionPath = SolutionLocator.Locate(_solutionPath, Environment.CurrentDirectory);
-        EnsureMSBuildRegistered();
+        MsBuildRegistration.Ensure(Path.GetDirectoryName(solutionPath) ?? Environment.CurrentDirectory);
 
         var msbuildWorkspace = MSBuildWorkspace.Create();
         msbuildWorkspace.SkipUnrecognizedProjects = true;
@@ -144,24 +142,6 @@ public sealed class Workspace : IDisposable
         {
             msbuildWorkspace.Dispose();
             throw new WorkspaceLoadException($"Failed to load {solutionPath}: {exception.Message}", exception);
-        }
-    }
-
-    private static void EnsureMSBuildRegistered()
-    {
-        lock (RegistrationGate)
-        {
-            if (_msbuildRegistered)
-            {
-                return;
-            }
-
-            if (!MSBuildLocator.IsRegistered)
-            {
-                MSBuildLocator.RegisterDefaults();
-            }
-
-            _msbuildRegistered = true;
         }
     }
 

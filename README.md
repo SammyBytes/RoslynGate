@@ -44,8 +44,23 @@ also extracts the single-file binary (~1.4 s). See
 
 ## Requirements
 
-- .NET 10 SDK
+- .NET SDK. RoslynGate does not install or bundle the SDK; it uses the one
+  selected by the solution's `global.json`, or the latest installed SDK.
 - Linux, macOS, or Windows
+
+The binary is self-contained, so the .NET runtime is included. The SDK is still
+required because `MSBuildWorkspace` uses MSBuild to evaluate projects, targets,
+references, and generated code.
+
+`--check` shows the selected SDK:
+
+```bash
+roslyngate --solution . --check
+```
+
+If a `global.json` pins an SDK that is not installed, RoslynGate fails with the
+requested version and the list of installed SDKs instead of silently using
+another one.
 
 ## Install
 
@@ -60,8 +75,8 @@ roslyngate setup claude
 Or run it without installing:
 
 ```bash
-npx -y roslyngate@0.1.7 setup claude
-bunx roslyngate@0.1.7 setup claude
+npx -y roslyngate@0.1.8 setup claude
+bunx roslyngate@0.1.8 setup claude
 ```
 
 `setup claude` writes `.mcp.json` with the native binary path, solution path,
