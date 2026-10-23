@@ -6,6 +6,33 @@ All notable changes to RoslynGate are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.1.8] - 2026-10-23
+
+**In plain terms:** before loading a solution, RoslynGate now checks for a
+usable .NET SDK and shows which one it selected. If `global.json` requires an
+SDK that is not installed, it says exactly what is missing instead of crashing
+or silently using a different SDK.
+
+### Added
+
+- Resolve the SDK with `dotnet --version` and `dotnet --list-sdks`, honoring
+  `global.json`.
+- Register MSBuild from the selected SDK path, avoiding the `hostfxr` lookup
+  failure in self-contained single-file builds.
+- Show `sdk` and `sdk-path` in `--check`.
+- Return an actionable hint when no SDK, or the SDK pinned by `global.json`, is
+  installed.
+
+### Fixed
+
+- Include native libraries in the single-file Windows build.
+- Report SDK/MSBuild registration failures as workspace errors instead of raw
+  stack traces.
+
+### Tests
+
+- Cover missing pinned SDKs and the SDK information shown by `--check`.
+
 ## [0.1.7] - 2026-10-23
 
 **In plain terms:** `roslyngate upgrade` now detects whether the active command

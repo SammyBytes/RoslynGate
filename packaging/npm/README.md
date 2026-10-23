@@ -16,8 +16,8 @@ roslyngate setup claude
 Or run it without installing:
 
 ```bash
-npx -y roslyngate@0.1.7 setup claude
-bunx roslyngate@0.1.7 setup claude
+npx -y roslyngate@0.1.8 setup claude
+bunx roslyngate@0.1.8 setup claude
 ```
 
 `setup claude` writes or merges `.mcp.json` with the native binary path and

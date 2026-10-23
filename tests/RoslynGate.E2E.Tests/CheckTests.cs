@@ -14,6 +14,8 @@ public sealed class CheckTests
 
         Assert.Equal(ExitCodes.Success, result.ExitCode);
         Assert.Contains(TestPaths.SampleSolutionFileName, result.Stdout);
+        Assert.Matches($@"{CheckText.Sdk}\s+\S+", result.Stdout);
+        Assert.Matches($@"{CheckText.SdkPath}\s+.+", result.Stdout);
         Assert.Matches($@"{CheckText.Projects}\s+{TestPaths.SampleProjectCount}", result.Stdout);
         Assert.Matches($@"{CheckText.Status}\s+{CheckText.Ok}", result.Stdout);
         Assert.Empty(result.Stderr);
