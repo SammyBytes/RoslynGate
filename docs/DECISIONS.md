@@ -1,0 +1,17 @@
+# Decisions
+
+One line per decision. If a decision changes, change this file in the same
+pull request.
+
+| ID | Decision | Reason |
+| --- | --- | --- |
+| D-01 | Use `ModelContextProtocol` 2.3.x with `Microsoft.Extensions.Hosting`. | The official SDK owns framing, lifecycle, and source-generated tools. Hand-written JSON-RPC adds code without adding value. |
+| D-02 | Three projects: `Engine`, `Mcp`, `Cli`. | The protocol layer is the SDK. `Engine` stays free of MCP types; `Mcp` stays free of Roslyn types. |
+| D-03 | Four tools: definition, references, hierarchy, search. | Search is what replaces `grep`; without it an agent still explores by text. |
+| D-04 | `detail=compact` (default) or `detail=verbose`. | Compact keeps list responses small; verbose exists for humans and edge cases. |
+| D-05 | Load the solution lazily and prewarm in the background. | The MCP handshake must stay fast; MSBuild cost belongs to the first query, not to `initialize`. |
+| D-06 | One solution per process, read-only. | No cache invalidation, no shared mutable state, no surprises. |
+| D-07 | Publish self-contained single-file, no AOT in v1. | The MCP SDK supports AOT; `MSBuildWorkspace` does not. AOT stays a measured spike, not a promise. |
+| D-08 | Every actionable error carries `code`, `hint`, and `try`. | An agent must be able to recover without reading external documentation. |
+| D-09 | Caps and stable ordering everywhere. | Determinism is a feature; unbounded responses defeat the purpose of the tool. |
+| D-10 | Flags and environment variables, no config file. | Unix composition and predictable precedence: flag > environment > default. |

@@ -1,0 +1,30 @@
+# Build output
+bin/
+obj/
+artifacts/
+TestResults/
+coverage/
+*.binlog
+
+# IDE
+.vs/
+.idea/
+.vscode/
+*.user
+*.suo
+*.sln.docstates
+
+# Packages and tooling
+node_modules/
+*.nupkg
+*.snupkg
+
+# Local configuration and secrets
+.env
+.env.*
+*.pfx
+*.snk
+
+# OS
+.DS_Store
+Thumbs.db
