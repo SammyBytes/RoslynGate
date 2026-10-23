@@ -3,6 +3,17 @@ const { spawn } = require("node:child_process");
 const PACKAGE = "roslyngate";
 const REGISTRY = "https://registry.npmjs.org";
 
+function detectPackageManager({ env = process.env, scriptPath = process.argv[1] } = {}) {
+  const normalized = (scriptPath || "").replace(/\\/g, "/").toLowerCase();
+  const bunRoot = (env.BUN_INSTALL || "").replace(/\\/g, "/").toLowerCase();
+
+  if (bunRoot && normalized.startsWith(`${bunRoot}/`)) {
+    return "bun";
+  }
+
+  return normalized.includes("/bun/install/global/") ? "bun" : "npm";
+}
+
 function isNewer(candidate, current) {
   const parse = (value) => value.split("-")[0].split(".").map(Number);
   const left = parse(candidate);
@@ -36,25 +47,40 @@ async function fetchLatestVersion({ fetchImpl = globalThis.fetch, registry = REG
   return data.version;
 }
 
-function installLatest(version, { platform = process.platform, spawnImpl = spawn } = {}) {
-  const command = platform === "win32" ? "npm.cmd" : "npm";
-  const useShell = platform === "win32";
+function installLatest(
+  version,
+  { manager = "npm", platform = process.platform, spawnImpl = spawn, env = process.env } = {}
+) {
+  if (!/^\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?$/.test(version)) {
+    throw new Error(`Invalid package version: ${version}`);
+  }
+
+  let command;
+  let args;
+
+  if (manager === "bun") {
+    command = platform === "win32" ? "bun.exe" : "bun";
+    args = ["install", "-g", `${PACKAGE}@${version}`];
+  } else if (platform === "win32") {
+    command = env.ComSpec || "cmd.exe";
+    args = ["/d", "/s", "/c", `npm install -g ${PACKAGE}@${version}`];
+  } else {
+    command = "npm";
+    args = ["install", "-g", `${PACKAGE}@${version}`];
+  }
 
   return new Promise((resolve, reject) => {
-    const child = spawnImpl(command, ["install", "-g", `${PACKAGE}@${version}`], {
-      stdio: "inherit",
-      shell: useShell
-    });
+    const child = spawnImpl(command, args, { stdio: "inherit" });
 
     child.on("error", reject);
     child.on("exit", (code, signal) => {
       if (signal) {
-        reject(new Error(`npm install stopped by ${signal}.`));
+        reject(new Error(`package install stopped by ${signal}.`));
         return;
       }
 
       if (code !== 0) {
-        reject(new Error(`npm install exited with code ${code}.`));
+        reject(new Error(`package install exited with code ${code}.`));
         return;
       }
 
@@ -66,6 +92,7 @@ function installLatest(version, { platform = process.platform, spawnImpl = spawn
 module.exports = {
   PACKAGE,
   REGISTRY,
+  detectPackageManager,
   fetchLatestVersion,
   installLatest,
   isNewer
