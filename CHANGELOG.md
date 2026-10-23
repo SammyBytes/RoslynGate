@@ -6,6 +6,27 @@ All notable changes to RoslynGate are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.1.7] - 2026-10-23
+
+**In plain terms:** `roslyngate upgrade` now detects whether the active command
+was installed with npm or Bun, so it updates the installation you actually use.
+It also removes the Windows `DEP0190` warning and accepts `-v` as a version
+alias.
+
+### Fixed
+
+- Detect Bun from the global install path and run `bun install -g` instead of
+  npm.
+- Add `--manager npm|bun` for an explicit override.
+- Run npm through `cmd.exe` on Windows without `shell: true`, removing the
+  `DEP0190` warning.
+- Accept `-v` as an alias for `--version`.
+
+### Tests
+
+- Cover Bun detection, Bun installs, the Windows npm path, and the manager
+  option.
+
 ## [0.1.6] - 2026-10-23
 
 **In plain terms:** RoslynGate now returns the definition and references in one

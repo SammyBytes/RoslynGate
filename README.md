@@ -60,8 +60,8 @@ roslyngate setup claude
 Or run it without installing:
 
 ```bash
-npx -y roslyngate@0.1.6 setup claude
-bunx roslyngate@0.1.6 setup claude
+npx -y roslyngate@0.1.7 setup claude
+bunx roslyngate@0.1.7 setup claude
 ```
 
 `setup claude` writes `.mcp.json` with the native binary path, solution path,
@@ -105,7 +105,9 @@ when that command is a RoslynGate-managed cache path. It does not touch its
 afterwards.
 
 If the command is portable (for example `roslyngate` or `npx`), the config is
-left unchanged. To update only npm and the binary:
+left unchanged. The upgrade detects whether the active command came from npm
+or Bun; use `--manager npm|bun` to override that detection. To update only npm
+and the binary:
 
 ```bash
 roslyngate upgrade --no-config

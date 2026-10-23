@@ -3,15 +3,24 @@ const { assetName, resolveRid } = require("./platform");
 const { binaryPath, cacheRoot } = require("./cache");
 const { ensureBinary } = require("./download");
 const { CONFIG_FILE, SERVER_NAME, updateConfig } = require("./upgrade-config");
-const { fetchLatestVersion, installLatest, isNewer } = require("./upgrade-npm");
+const {
+  PACKAGE,
+  detectPackageManager,
+  fetchLatestVersion,
+  installLatest,
+  isNewer
+} = require("./upgrade-npm");
 
 function parseUpgradeArgs(args) {
   let check = false;
   let dryRun = false;
   let noConfig = false;
+  let manager;
   let help = false;
 
-  for (const argument of args) {
+  for (let index = 0; index < args.length; index += 1) {
+    const argument = args[index];
+
     if (argument === "upgrade") {
       continue;
     }
@@ -31,6 +40,15 @@ function parseUpgradeArgs(args) {
       continue;
     }
 
+    if (argument === "--manager") {
+      const value = args[++index];
+      if (value !== "npm" && value !== "bun") {
+        throw new Error("--manager must be npm or bun.");
+      }
+      manager = value;
+      continue;
+    }
+
     if (argument === "--help" || argument === "-h") {
       help = true;
       continue;
@@ -39,7 +57,7 @@ function parseUpgradeArgs(args) {
     throw new Error(`Unknown upgrade option: ${argument}`);
   }
 
-  return { check, dryRun, noConfig, help };
+  return { check, dryRun, noConfig, manager, help };
 }
 
 function isManagedCommand(command, { env, platform }) {
@@ -63,6 +81,8 @@ async function runUpgrade(args, options = {}) {
     env = process.env,
     platform = process.platform,
     arch = process.arch,
+    packageManager,
+    scriptPath,
     fetchImpl,
     spawnImpl,
     ensureBinaryImpl = ensureBinary
@@ -71,8 +91,8 @@ async function runUpgrade(args, options = {}) {
   const parsed = parseUpgradeArgs(args);
   if (parsed.help) {
     process.stdout.write(
-      "Usage: roslyngate upgrade [--check] [--dry-run] [--no-config]\n" +
-      "Updates the global npm package and matching binary. Unless --no-config\n" +
+      "Usage: roslyngate upgrade [--check] [--dry-run] [--no-config] [--manager npm|bun]\n" +
+      "Updates the global package and matching binary. Unless --no-config\n" +
       "is set, refreshes a managed roslyngate entry in .mcp.json.\n"
     );
     return;
@@ -92,13 +112,19 @@ async function runUpgrade(args, options = {}) {
   const newer = isNewer(latest, version);
   const targetVersion = newer ? latest : version;
   const target = binaryPath({ version: targetVersion, asset, env, platform });
+  const manager = parsed.manager || packageManager || detectPackageManager({ env, scriptPath });
 
   if (newer) {
     if (parsed.dryRun) {
-      process.stdout.write(`Would run npm install -g roslyngate@${latest}.\n`);
+      process.stdout.write(`Would run ${manager} install -g ${PACKAGE}@${latest}.\n`);
     } else {
-      process.stdout.write(`roslyngate: updating ${version} -> ${latest}...\n`);
-      await (options.install || installLatest)(latest, { platform, spawnImpl });
+      process.stdout.write(`roslyngate: updating ${version} -> ${latest} with ${manager}...\n`);
+      await (options.install || installLatest)(latest, {
+        manager,
+        platform,
+        spawnImpl,
+        env
+      });
     }
   } else {
     process.stdout.write(`roslyngate: ${version} is up to date.\n`);

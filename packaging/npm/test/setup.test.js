@@ -128,7 +128,7 @@ test("setup writes config without downloading when a binary is provided", async 
 
   try {
     await runSetup(["claude"], {
-      version: "0.1.6",
+      version: "0.1.7",
       cwd: root,
       env: { ROSLYGATE_BINARY: binary }
     });
@@ -166,7 +166,7 @@ test("setup --skill writes the skill without downloading", async () => {
 
   try {
     await runSetup(["claude", "--skill"], {
-      version: "0.1.6",
+      version: "0.1.7",
       cwd: root,
       env: { ROSLYGATE_BINARY: binary }
     });

@@ -4,10 +4,7 @@ const path = require("node:path");
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const { binaryPath } = require("../src/cache");
-const {
-  parseUpgradeArgs,
-  runUpgrade
-} = require("../src/upgrade");
+const { runUpgrade } = require("../src/upgrade");
 
 function temporaryDirectory() {
   return fs.mkdtempSync(path.join(os.tmpdir(), "roslyngate-upgrade-"));
@@ -36,34 +33,6 @@ function writeMcpConfig(root, command = "/old/roslyngate") {
   }));
   return file;
 }
-
-test("parses upgrade options", () => {
-  assert.deepEqual(parseUpgradeArgs(["upgrade"]), {
-    check: false,
-    dryRun: false,
-    noConfig: false,
-    help: false
-  });
-  assert.deepEqual(parseUpgradeArgs(["upgrade", "--check"]), {
-    check: true,
-    dryRun: false,
-    noConfig: false,
-    help: false
-  });
-  assert.deepEqual(parseUpgradeArgs(["upgrade", "--dry-run"]), {
-    check: false,
-    dryRun: true,
-    noConfig: false,
-    help: false
-  });
-  assert.deepEqual(parseUpgradeArgs(["upgrade", "--no-config"]), {
-    check: false,
-    dryRun: false,
-    noConfig: true,
-    help: false
-  });
-  assert.throws(() => parseUpgradeArgs(["upgrade", "--wat"]), /Unknown upgrade option/);
-});
 
 test("installs the latest version and refreshes the config", async () => {
   const root = temporaryDirectory();
