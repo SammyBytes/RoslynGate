@@ -53,6 +53,7 @@ jobs:
             -p:PublishSingleFile=true \
             -p:IncludeAllContentForSelfExtract=true \
             -p:EnableCompressionInSingleFile=true \
+            -p:PublishReadyToRun=true \
             -p:DebugType=None \
             -p:DebugSymbols=false \
             -p:Version="$version" \

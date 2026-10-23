@@ -69,5 +69,6 @@
 - [x] Document flags, environment variables, defaults, and output modes.
 - [x] Measure token volume and latency against `rg`.
 - [x] Publish `v0.1.0` with binaries and checksums.
+- [x] Reduce startup with an empty host builder and ReadyToRun.
 - [ ] Wait for explicit approval before the AOT spike. If approved, run it on a
       separate experimental branch and record the result.
