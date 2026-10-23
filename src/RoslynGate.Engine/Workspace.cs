@@ -1,6 +1,8 @@
 using Microsoft.Build.Locator;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.MSBuild;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace RoslynGate.Engine;
 
@@ -10,7 +12,7 @@ public sealed class Workspace : IDisposable
     private static bool _msbuildRegistered;
 
     private readonly string? _solutionPath;
-    private readonly Action<string> _log;
+    private readonly ILogger<Workspace> _logger;
     private readonly SemaphoreSlim _gate = new(1, 1);
 
     private WorkspaceSnapshot? _snapshot;
@@ -18,10 +20,10 @@ public sealed class Workspace : IDisposable
     private MSBuildWorkspace? _msbuildWorkspace;
     private bool _disposed;
 
-    public Workspace(string? solutionPath, Action<string>? log = null)
+    public Workspace(string? solutionPath, ILogger<Workspace>? logger = null)
     {
         _solutionPath = solutionPath;
-        _log = log ?? (_ => { });
+        _logger = logger ?? NullLogger<Workspace>.Instance;
     }
 
     public async Task<WorkspaceSnapshot> GetAsync(CancellationToken cancellationToken)
@@ -77,7 +79,7 @@ public sealed class Workspace : IDisposable
             catch (Exception exception)
 #pragma warning restore CA1031
             {
-                _log($"prewarm failed: {exception.Message}");
+                _logger.LogError(exception, "Prewarm failed.");
             }
         }, CancellationToken.None);
     }
@@ -97,6 +99,11 @@ public sealed class Workspace : IDisposable
             if (args.Diagnostic.Kind == WorkspaceDiagnosticKind.Failure)
             {
                 failures.Add(args.Diagnostic.Message);
+                _logger.LogError("MSBuild: {Message}", args.Diagnostic.Message);
+            }
+            else
+            {
+                _logger.LogWarning("MSBuild: {Message}", args.Diagnostic.Message);
             }
         });
 
@@ -110,7 +117,9 @@ public sealed class Workspace : IDisposable
             {
                 throw new WorkspaceLoadException(
                     $"Failed to load {solutionPath}:{Environment.NewLine}" +
-                    string.Join(Environment.NewLine, failures.Take(5)));
+                    string.Join(
+                        Environment.NewLine,
+                        failures.Take(WorkspaceLimits.MaxLoadDiagnostics)));
             }
 
             if (!solution.Projects.Any())

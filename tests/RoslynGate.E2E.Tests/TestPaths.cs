@@ -7,8 +7,11 @@ internal static class TestPaths
     public static string SampleSolutionDirectory { get; } =
         Path.Combine(RepositoryRoot, "fixtures", "SampleSolution");
 
+    public const string SampleSolutionFileName = "SampleSolution.sln";
+    public const int SampleProjectCount = 2;
+
     public static string SampleSolution { get; } =
-        Path.Combine(SampleSolutionDirectory, "SampleSolution.sln");
+        Path.Combine(SampleSolutionDirectory, SampleSolutionFileName);
 
     private static string FindRepositoryRoot()
     {

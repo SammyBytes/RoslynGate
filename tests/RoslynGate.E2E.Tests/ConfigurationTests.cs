@@ -1,3 +1,6 @@
+using RoslynGate.Cli;
+using RoslynGate.Mcp;
+
 namespace RoslynGate.E2E.Tests;
 
 public sealed class ConfigurationTests
@@ -7,21 +10,21 @@ public sealed class ConfigurationTests
     {
         var environment = new Dictionary<string, string?>
         {
-            ["ROSLYGATE_DETAIL"] = "verbose",
-            ["ROSLYGATE_PREWARM"] = "off",
-            ["ROSLYGATE_REF_LIMIT"] = "999"
+            [EnvironmentVariables.Detail] = "verbose",
+            [EnvironmentVariables.Prewarm] = "off",
+            [EnvironmentVariables.RefLimit] = "999"
         };
 
         var result = await CliRunner.RunAsync(
             TestPaths.SampleSolutionDirectory,
             string.Empty,
             environment,
-            "--check");
+            CliNames.Check);
 
-        Assert.Equal(0, result.ExitCode);
-        Assert.Contains("detail      verbose", result.Stdout);
-        Assert.Contains("ref-limit   200", result.Stdout);
-        Assert.Contains("prewarm     off", result.Stdout);
+        Assert.Equal(ExitCodes.Success, result.ExitCode);
+        Assert.Matches($@"{CheckText.Detail}\s+verbose", result.Stdout);
+        Assert.Matches($@"{CheckText.RefLimit}\s+{ServerOptions.MaxReferenceLimit}", result.Stdout);
+        Assert.Matches($@"{CheckText.Prewarm}\s+{CheckText.Off}", result.Stdout);
     }
 
     [Fact]
@@ -29,19 +32,19 @@ public sealed class ConfigurationTests
     {
         var environment = new Dictionary<string, string?>
         {
-            ["ROSLYGATE_DETAIL"] = "compact"
+            [EnvironmentVariables.Detail] = "compact"
         };
 
         var result = await CliRunner.RunAsync(
             TestPaths.SampleSolutionDirectory,
             string.Empty,
             environment,
-            "--check",
-            "--detail",
+            CliNames.Check,
+            CliNames.Detail,
             "verbose");
 
-        Assert.Equal(0, result.ExitCode);
-        Assert.Contains("detail      verbose", result.Stdout);
+        Assert.Equal(ExitCodes.Success, result.ExitCode);
+        Assert.Matches($@"{CheckText.Detail}\s+verbose", result.Stdout);
     }
 
     [Fact]
@@ -51,12 +54,12 @@ public sealed class ConfigurationTests
         File.WriteAllText(Path.Combine(directory.Root, "Sample.sln"), string.Empty);
         var environment = new Dictionary<string, string?>
         {
-            ["ROSLYGATE_DETAIL"] = "nope"
+            [EnvironmentVariables.Detail] = "nope"
         };
 
-        var result = await CliRunner.RunAsync(directory.Root, string.Empty, environment, "--check");
+        var result = await CliRunner.RunAsync(directory.Root, string.Empty, environment, CliNames.Check);
 
-        Assert.Equal(1, result.ExitCode);
+        Assert.Equal(ExitCodes.InvalidConfiguration, result.ExitCode);
         Assert.Contains("Invalid detail level", result.Stderr);
     }
 
@@ -65,7 +68,7 @@ public sealed class ConfigurationTests
     {
         var environment = new Dictionary<string, string?>
         {
-            ["ROSLYGATE_DETAIL"] = "nope"
+            [EnvironmentVariables.Detail] = "nope"
         };
 
         var result = await CliRunner.RunAsync(
@@ -74,7 +77,7 @@ public sealed class ConfigurationTests
             environment,
             "--help");
 
-        Assert.Equal(0, result.ExitCode);
+        Assert.Equal(ExitCodes.Success, result.ExitCode);
         Assert.Contains("Usage:", result.Stdout);
     }
 
@@ -83,7 +86,7 @@ public sealed class ConfigurationTests
     {
         var result = await CliRunner.RunAsync(AppContext.BaseDirectory, string.Empty, "--nope");
 
-        Assert.Equal(1, result.ExitCode);
+        Assert.Equal(ExitCodes.InvalidConfiguration, result.ExitCode);
         Assert.Contains("Unrecognized", result.Stderr);
     }
 
@@ -93,11 +96,12 @@ public sealed class ConfigurationTests
         var result = await CliRunner.RunAsync(
             AppContext.BaseDirectory,
             string.Empty,
-            "--check",
-            "--prewarm",
-            "--no-prewarm");
+            CliNames.Check,
+            CliNames.Prewarm,
+            CliNames.NoPrewarm);
 
-        Assert.Equal(1, result.ExitCode);
-        Assert.Contains("either --prewarm or --no-prewarm", result.Stderr);
+        Assert.Equal(ExitCodes.InvalidConfiguration, result.ExitCode);
+        Assert.Contains(CliNames.Prewarm, result.Stderr);
+        Assert.Contains(CliNames.NoPrewarm, result.Stderr);
     }
 }

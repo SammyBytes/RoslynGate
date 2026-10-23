@@ -9,25 +9,25 @@ internal sealed record CliDefaults(ServerOptions Options, string? Error)
     {
         var errors = new List<string>();
         var options = new ServerOptions(
-            OptionValues.NullIfEmpty(Environment.GetEnvironmentVariable("ROSLYGATE_SOLUTION")),
+            OptionValues.NullIfEmpty(Environment.GetEnvironmentVariable(EnvironmentVariables.Solution)),
             Read(errors, DetailLevel.Compact, () => OptionValues.ParseDetail(
-                Environment.GetEnvironmentVariable("ROSLYGATE_DETAIL"))),
+                Environment.GetEnvironmentVariable(EnvironmentVariables.Detail))),
             Read(errors, ServerOptions.DefaultReferenceLimit, () => OptionValues.ParseLimit(
-                "ROSLYGATE_REF_LIMIT",
-                Environment.GetEnvironmentVariable("ROSLYGATE_REF_LIMIT"),
+                EnvironmentVariables.RefLimit,
+                Environment.GetEnvironmentVariable(EnvironmentVariables.RefLimit),
                 ServerOptions.DefaultReferenceLimit,
                 ServerOptions.MaxReferenceLimit)),
             Read(errors, ServerOptions.DefaultSearchLimit, () => OptionValues.ParseLimit(
-                "ROSLYGATE_SEARCH_LIMIT",
-                Environment.GetEnvironmentVariable("ROSLYGATE_SEARCH_LIMIT"),
+                EnvironmentVariables.SearchLimit,
+                Environment.GetEnvironmentVariable(EnvironmentVariables.SearchLimit),
                 ServerOptions.DefaultSearchLimit,
                 ServerOptions.MaxSearchLimit)),
             Read(errors, true, () => OptionValues.ParseBool(
-                "ROSLYGATE_PREWARM",
-                Environment.GetEnvironmentVariable("ROSLYGATE_PREWARM"),
+                EnvironmentVariables.Prewarm,
+                Environment.GetEnvironmentVariable(EnvironmentVariables.Prewarm),
                 defaultValue: true)),
             Read(errors, LogLevel.Error, () => OptionValues.ParseLogLevel(
-                Environment.GetEnvironmentVariable("ROSLYGATE_LOG_LEVEL"))));
+                Environment.GetEnvironmentVariable(EnvironmentVariables.LogLevel))));
 
         return new CliDefaults(options, errors.Count == 0 ? null : string.Join("; ", errors));
     }

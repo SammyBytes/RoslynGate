@@ -6,7 +6,8 @@ Roslyn. Agents read this file before changing code.
 ## Invariants
 
 1. `stdout` carries MCP messages only while the server runs. Logs, banners,
-   progress, and exceptions go to `stderr`. The SDK owns the transport.
+   progress, and exceptions go to `stderr` through `ILogger<T>`. The SDK owns
+   the transport; `Console.SetOut(Console.Error)` is the only protocol guard.
    `--help`, `--version`, `--check`, and argument-parse output are the only
    stdout exceptions.
 2. Never guess. If a name matches more than one symbol, return candidates.
