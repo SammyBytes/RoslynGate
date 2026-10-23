@@ -10,9 +10,10 @@
 - [x] Add build props, package pinning, NuGet config, and editor config.
 - [x] Add README, CONTRIBUTING, SECURITY, LICENSE, decisions, roadmap.
 - [x] Add CI, PR title lint, pull request template, and Dependabot.
-- [ ] Validate restore, build, test, and format.
-- [ ] Create the public repository and push the bootstrap commit.
-- [ ] Configure merge settings and protect `main`.
+- [x] Validate restore, build, test, and format.
+- [x] Create the public repository and push the bootstrap commit.
+- [x] Configure merge settings and protect `main`.
+- [ ] Confirm the environment before starting F0.
 
 ## F0 - MCP host
 
