@@ -15,7 +15,7 @@ public sealed class WorkspaceTests
         Assert.Same(first, second);
         Assert.Equal(TestPaths.SampleSolution, first.SolutionPath);
         Assert.EndsWith("SampleSolution", first.RootPath, StringComparison.Ordinal);
-        Assert.Equal(2, first.Solution.Projects.Count());
+        Assert.Equal(TestPaths.SampleProjectCount, first.Solution.Projects.Count());
     }
 
     [Fact]
@@ -42,7 +42,7 @@ public sealed class WorkspaceTests
 
         var snapshot = await workspace.GetAsync(CancellationToken.None);
 
-        Assert.Equal(2, snapshot.Solution.Projects.Count());
+        Assert.Equal(TestPaths.SampleProjectCount, snapshot.Solution.Projects.Count());
     }
 
     [Fact]

@@ -11,8 +11,8 @@ public static class McpHost
 {
     public static async Task<int> RunAsync(ServerOptions options, CancellationToken cancellationToken = default)
     {
-        // stdout belongs to the MCP transport. Any Console.Out write from a dependency is noise.
-        Console.SetOut(TextWriter.Null);
+        // stdout belongs to the MCP transport. Accidental Console.Out writes go to stderr.
+        Console.SetOut(Console.Error);
 
         var builder = Host.CreateApplicationBuilder();
 
@@ -21,17 +21,17 @@ public static class McpHost
         builder.Logging.SetMinimumLevel(options.LogLevel);
 
         builder.Services.AddSingleton(options);
-        builder.Services.AddSingleton(_ => new Workspace(
+        builder.Services.AddSingleton(serviceProvider => new Workspace(
             options.SolutionPath,
-            message => Console.Error.WriteLine($"roslyngate: {message}")));
+            serviceProvider.GetRequiredService<ILogger<Workspace>>()));
 
         builder.Services
             .AddMcpServer(server =>
             {
                 server.ServerInfo = new Implementation
                 {
-                    Name = "roslyngate",
-                    Title = "RoslynGate",
+                    Name = ProductInfo.Name,
+                    Title = ProductInfo.Title,
                     Version = BuildInfo.Version
                 };
                 server.Capabilities = new ServerCapabilities

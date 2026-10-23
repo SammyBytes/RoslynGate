@@ -246,14 +246,6 @@
           "Microsoft.Extensions.Options": "10.0.13"
         }
       },
-      "Microsoft.Extensions.Logging.Abstractions": {
-        "type": "Transitive",
-        "resolved": "10.0.13",
-        "contentHash": "aSZEhEig4fvNiw2zs8Z6NyDlniKtq6YjcF3DyHuqTEHcZ2VKA/6itMPZ+dW+yWABWExlDcQwwdbqX1Rcb7W8WQ==",
-        "dependencies": {
-          "Microsoft.Extensions.DependencyInjection.Abstractions": "10.0.13"
-        }
-      },
       "Microsoft.Extensions.Logging.Configuration": {
         "type": "Transitive",
         "resolved": "10.0.13",
@@ -472,7 +464,8 @@
         "dependencies": {
           "Microsoft.Build.Locator": "[1.11.2, )",
           "Microsoft.CodeAnalysis.CSharp.Workspaces": "[5.9.0, )",
-          "Microsoft.CodeAnalysis.Workspaces.MSBuild": "[5.9.0, )"
+          "Microsoft.CodeAnalysis.Workspaces.MSBuild": "[5.9.0, )",
+          "Microsoft.Extensions.Logging.Abstractions": "[10.0.13, )"
         }
       },
       "roslyngate.mcp": {
@@ -550,6 +543,15 @@
           "Microsoft.Extensions.Logging.EventLog": "10.0.13",
           "Microsoft.Extensions.Logging.EventSource": "10.0.13",
           "Microsoft.Extensions.Options": "10.0.13"
+        }
+      },
+      "Microsoft.Extensions.Logging.Abstractions": {
+        "type": "CentralTransitive",
+        "requested": "[10.0.13, )",
+        "resolved": "10.0.13",
+        "contentHash": "aSZEhEig4fvNiw2zs8Z6NyDlniKtq6YjcF3DyHuqTEHcZ2VKA/6itMPZ+dW+yWABWExlDcQwwdbqX1Rcb7W8WQ==",
+        "dependencies": {
+          "Microsoft.Extensions.DependencyInjection.Abstractions": "10.0.13"
         }
       },
       "ModelContextProtocol": {

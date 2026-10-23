@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using Microsoft.Extensions.Logging.Abstractions;
 using RoslynGate.Engine;
 using RoslynGate.Mcp;
 
@@ -11,36 +12,39 @@ public static class Check
         try
         {
             var output = Console.Out;
-            Console.SetOut(TextWriter.Null);
+            Console.SetOut(Console.Error);
 
             var stopwatch = Stopwatch.StartNew();
             using var workspace = new Workspace(
                 options.SolutionPath,
-                message => Console.Error.WriteLine($"roslyngate: {message}"));
+                NullLogger<Workspace>.Instance);
             var snapshot = await workspace.GetAsync(cancellationToken).ConfigureAwait(false);
             stopwatch.Stop();
 
-            output.WriteLine($"roslyngate  {BuildInfo.Version}");
-            output.WriteLine($"solution    {snapshot.SolutionPath}");
-            output.WriteLine($"projects    {snapshot.Solution.Projects.Count()}");
-            output.WriteLine($"load        {stopwatch.ElapsedMilliseconds}ms");
-            output.WriteLine($"detail      {options.Detail.ToString().ToLowerInvariant()}");
-            output.WriteLine($"ref-limit   {options.ReferenceLimit}");
-            output.WriteLine($"search-limit {options.SearchLimit}");
-            output.WriteLine($"prewarm     {(options.Prewarm ? "on" : "off")}");
-            output.WriteLine($"log-level   {options.LogLevel.ToString().ToLowerInvariant()}");
-            output.WriteLine("status      ok");
-            return 0;
+            output.WriteLine($"{ProductInfo.Name}  {BuildInfo.Version}");
+            Write(output, CheckText.Solution, snapshot.SolutionPath);
+            Write(output, CheckText.Projects, snapshot.Solution.Projects.Count().ToString());
+            Write(output, CheckText.Load, $"{stopwatch.ElapsedMilliseconds}ms");
+            Write(output, CheckText.Detail, options.Detail.ToString().ToLowerInvariant());
+            Write(output, CheckText.RefLimit, options.ReferenceLimit.ToString());
+            Write(output, CheckText.SearchLimit, options.SearchLimit.ToString());
+            Write(output, CheckText.Prewarm, options.Prewarm ? CheckText.On : CheckText.Off);
+            Write(output, CheckText.LogLevel, options.LogLevel.ToString().ToLowerInvariant());
+            Write(output, CheckText.Status, CheckText.Ok);
+            return ExitCodes.Success;
         }
         catch (SolutionNotFoundException exception)
         {
-            Console.Error.WriteLine($"roslyngate: {exception.Message}");
-            return 1;
+            Console.Error.WriteLine($"{CliText.ErrorPrefix}{exception.Message}");
+            return ExitCodes.InvalidConfiguration;
         }
         catch (WorkspaceLoadException exception)
         {
-            Console.Error.WriteLine($"roslyngate: {exception.Message}");
-            return 1;
+            Console.Error.WriteLine($"{CliText.ErrorPrefix}{exception.Message}");
+            return ExitCodes.InvalidConfiguration;
         }
     }
+
+    private static void Write(TextWriter output, string label, string value)
+        => output.WriteLine($"{label,-12} {value}");
 }

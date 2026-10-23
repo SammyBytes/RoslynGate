@@ -26,6 +26,8 @@
 - [x] Add the `opencode.jsonc` example and verify the connection.
 - [x] Document `--check` and the stdout/stderr split for troubleshooting.
 - [x] Replace the hand-written parser with `System.CommandLine`.
+- [x] Use `ILogger` for diagnostics, guard `stdout` at the transport boundary,
+      and extract shared names, limits, and exit codes.
 
 ## F1 - Workspace
 

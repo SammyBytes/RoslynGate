@@ -16,12 +16,16 @@ internal static class OptionValues
             return DetailLevel.Compact;
         }
 
-        return value.ToLowerInvariant() switch
+        if (!Enum.TryParse<DetailLevel>(value, ignoreCase: true, out var detail)
+            || !Enum.IsDefined(detail))
         {
-            "compact" => DetailLevel.Compact,
-            "verbose" => DetailLevel.Verbose,
-            _ => throw new CliException($"Invalid detail level: '{value}'. Expected compact or verbose")
-        };
+            var allowed = string.Join(
+                " or ",
+                Enum.GetNames<DetailLevel>().Select(name => name.ToLowerInvariant()));
+            throw new CliException($"Invalid detail level: '{value}'. Expected {allowed}");
+        }
+
+        return detail;
     }
 
     public static LogLevel ParseLogLevel(string? value)

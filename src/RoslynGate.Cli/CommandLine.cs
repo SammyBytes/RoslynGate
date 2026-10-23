@@ -12,62 +12,62 @@ public static class CommandLine
     {
         var defaults = CliDefaults.FromEnvironment();
 
-        var solution = new Option<string?>("--solution", "-s")
+        var solution = new Option<string?>(CliNames.Solution, CliNames.SolutionShort)
         {
-            Description = "Solution file or directory (env: ROSLYGATE_SOLUTION).",
+            Description = $"Solution file or directory (env: {EnvironmentVariables.Solution}).",
             DefaultValueFactory = _ => defaults.Options.SolutionPath
         };
 
-        var detail = new Option<DetailLevel>("--detail")
+        var detail = new Option<DetailLevel>(CliNames.Detail)
         {
-            Description = "Output detail: compact or verbose (env: ROSLYGATE_DETAIL).",
+            Description = $"Output detail: compact or verbose (env: {EnvironmentVariables.Detail}).",
             DefaultValueFactory = _ => defaults.Options.Detail
         };
 
-        var logLevel = new Option<LogLevel>("--log-level", "-l")
+        var logLevel = new Option<LogLevel>(CliNames.LogLevel, CliNames.LogLevelShort)
         {
-            Description = "error, warn, info, or debug (env: ROSLYGATE_LOG_LEVEL).",
+            Description = $"error, warn, info, or debug (env: {EnvironmentVariables.LogLevel}).",
             DefaultValueFactory = _ => defaults.Options.LogLevel
         };
 
-        var referenceLimit = new Option<int>("--ref-limit")
+        var referenceLimit = new Option<int>(CliNames.RefLimit)
         {
-            Description = "References per response, 1-200 (env: ROSLYGATE_REF_LIMIT).",
+            Description = $"References per response, 1-{ServerOptions.MaxReferenceLimit} (env: {EnvironmentVariables.RefLimit}).",
             DefaultValueFactory = _ => defaults.Options.ReferenceLimit,
             CustomParser = result => ParseLimit(
                 result,
-                "--ref-limit",
+                CliNames.RefLimit,
                 ServerOptions.DefaultReferenceLimit,
                 ServerOptions.MaxReferenceLimit)
         };
 
-        var searchLimit = new Option<int>("--search-limit")
+        var searchLimit = new Option<int>(CliNames.SearchLimit)
         {
-            Description = "Search hits per response, 1-50 (env: ROSLYGATE_SEARCH_LIMIT).",
+            Description = $"Search hits per response, 1-{ServerOptions.MaxSearchLimit} (env: {EnvironmentVariables.SearchLimit}).",
             DefaultValueFactory = _ => defaults.Options.SearchLimit,
             CustomParser = result => ParseLimit(
                 result,
-                "--search-limit",
+                CliNames.SearchLimit,
                 ServerOptions.DefaultSearchLimit,
                 ServerOptions.MaxSearchLimit)
         };
 
-        var prewarm = new Option<bool>("--prewarm")
+        var prewarm = new Option<bool>(CliNames.Prewarm)
         {
             Description = "Load the solution in the background (default)."
         };
 
-        var noPrewarm = new Option<bool>("--no-prewarm")
+        var noPrewarm = new Option<bool>(CliNames.NoPrewarm)
         {
             Description = "Disable background loading."
         };
 
-        var check = new Option<bool>("--check")
+        var check = new Option<bool>(CliNames.Check)
         {
             Description = "Validate configuration and exit."
         };
 
-        var root = new RootCommand("RoslynGate - Roslyn-powered MCP server for .NET symbols");
+        var root = new RootCommand($"{ProductInfo.Title} - Roslyn-powered MCP server for .NET symbols");
         root.Options.Add(solution);
         root.Options.Add(detail);
         root.Options.Add(logLevel);
@@ -81,16 +81,17 @@ public static class CommandLine
         {
             if (defaults.Error is not null)
             {
-                Console.Error.WriteLine($"roslyngate: {defaults.Error}");
-                return 1;
+                Console.Error.WriteLine($"{CliText.ErrorPrefix}{defaults.Error}");
+                return ExitCodes.InvalidConfiguration;
             }
 
             var prewarmSpecified = parseResult.GetResult(prewarm) is { Implicit: false };
             var noPrewarmSpecified = parseResult.GetResult(noPrewarm) is { Implicit: false };
             if (prewarmSpecified && noPrewarmSpecified)
             {
-                Console.Error.WriteLine("roslyngate: Use either --prewarm or --no-prewarm, not both.");
-                return 1;
+                Console.Error.WriteLine(
+                    $"{CliText.ErrorPrefix}Use either {CliNames.Prewarm} or {CliNames.NoPrewarm}, not both.");
+                return ExitCodes.InvalidConfiguration;
             }
 
             var prewarmValue = prewarmSpecified
@@ -108,8 +109,8 @@ public static class CommandLine
                 }
                 catch (SolutionNotFoundException exception)
                 {
-                    Console.Error.WriteLine($"roslyngate: {exception.Message}");
-                    return 1;
+                    Console.Error.WriteLine($"{CliText.ErrorPrefix}{exception.Message}");
+                    return ExitCodes.InvalidConfiguration;
                 }
             }
 

@@ -1,3 +1,5 @@
+using RoslynGate.Cli;
+
 namespace RoslynGate.E2E.Tests;
 
 public sealed class CheckTests
@@ -8,12 +10,12 @@ public sealed class CheckTests
         var result = await CliRunner.RunAsync(
             TestPaths.SampleSolutionDirectory,
             string.Empty,
-            "--check");
+            CliNames.Check);
 
-        Assert.Equal(0, result.ExitCode);
-        Assert.Contains("SampleSolution.sln", result.Stdout);
-        Assert.Contains("projects    2", result.Stdout);
-        Assert.Contains("status      ok", result.Stdout);
+        Assert.Equal(ExitCodes.Success, result.ExitCode);
+        Assert.Contains(TestPaths.SampleSolutionFileName, result.Stdout);
+        Assert.Matches($@"{CheckText.Projects}\s+{TestPaths.SampleProjectCount}", result.Stdout);
+        Assert.Matches($@"{CheckText.Status}\s+{CheckText.Ok}", result.Stdout);
         Assert.Empty(result.Stderr);
     }
 
@@ -23,9 +25,9 @@ public sealed class CheckTests
         using var directory = new TempDirectory();
         File.WriteAllText(Path.Combine(directory.Root, "Bad.sln"), "not a solution");
 
-        var result = await CliRunner.RunAsync(directory.Root, string.Empty, "--check");
+        var result = await CliRunner.RunAsync(directory.Root, string.Empty, CliNames.Check);
 
-        Assert.Equal(1, result.ExitCode);
+        Assert.Equal(ExitCodes.InvalidConfiguration, result.ExitCode);
         Assert.Contains("Failed to load", result.Stderr);
     }
 
@@ -35,10 +37,10 @@ public sealed class CheckTests
         var result = await CliRunner.RunAsync(
             AppContext.BaseDirectory,
             string.Empty,
-            "--solution",
+            CliNames.Solution,
             Path.Combine(Path.GetTempPath(), "missing-roslyngate.sln"));
 
-        Assert.Equal(1, result.ExitCode);
+        Assert.Equal(ExitCodes.InvalidConfiguration, result.ExitCode);
         Assert.Contains("does not exist", result.Stderr);
     }
 
@@ -47,9 +49,9 @@ public sealed class CheckTests
     {
         using var directory = new TempDirectory();
 
-        var result = await CliRunner.RunAsync(directory.Root, string.Empty, "--check");
+        var result = await CliRunner.RunAsync(directory.Root, string.Empty, CliNames.Check);
 
-        Assert.Equal(1, result.ExitCode);
+        Assert.Equal(ExitCodes.InvalidConfiguration, result.ExitCode);
         Assert.Contains("No .sln or .slnx", result.Stderr);
     }
 
@@ -59,11 +61,11 @@ public sealed class CheckTests
         var result = await CliRunner.RunAsync(
             TestPaths.RepositoryRoot,
             string.Empty,
-            "--check",
-            $"--solution={TestPaths.SampleSolution}",
-            "--no-prewarm");
+            CliNames.Check,
+            $"{CliNames.Solution}={TestPaths.SampleSolution}",
+            CliNames.NoPrewarm);
 
-        Assert.Equal(0, result.ExitCode);
-        Assert.Contains("prewarm     off", result.Stdout);
+        Assert.Equal(ExitCodes.Success, result.ExitCode);
+        Assert.Matches($@"{CheckText.Prewarm}\s+{CheckText.Off}", result.Stdout);
     }
 }
