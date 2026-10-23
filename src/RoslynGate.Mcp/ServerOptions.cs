@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using RoslynGate.Engine;
 
 namespace RoslynGate.Mcp;
 
@@ -10,10 +11,10 @@ public sealed record ServerOptions(
     bool Prewarm,
     LogLevel LogLevel)
 {
-    public const int DefaultReferenceLimit = 50;
-    public const int MaxReferenceLimit = 200;
-    public const int DefaultSearchLimit = 20;
-    public const int MaxSearchLimit = 50;
+    public const int DefaultReferenceLimit = QueryLimits.DefaultReferenceLimit;
+    public const int MaxReferenceLimit = QueryLimits.MaxReferenceLimit;
+    public const int DefaultSearchLimit = QueryLimits.DefaultSearchLimit;
+    public const int MaxSearchLimit = QueryLimits.MaxSearchLimit;
 }
 
 public enum DetailLevel

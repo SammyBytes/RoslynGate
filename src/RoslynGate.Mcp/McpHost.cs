@@ -41,7 +41,9 @@ public static class McpHost
                 server.ServerInstructions = Instructions.Text;
             })
             .WithStdioServerTransport()
-            .WithTools<DefinitionTool>();
+            .WithTools<DefinitionTool>()
+            .WithTools<ReferencesTool>()
+            .WithTools<HierarchyTool>();
 
         using var host = builder.Build();
 

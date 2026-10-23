@@ -48,10 +48,11 @@
 
 ## F3 - References and hierarchy
 
-- [ ] Find semantic references with stable order.
-- [ ] Paginate with `offset`, `limit`, and `total`.
-- [ ] Return base types, interfaces, derived types, and implementations.
-- [ ] Enforce the token budget.
+- [x] Find semantic references with stable order.
+- [x] Paginate with `offset`, `limit`, and `total`.
+- [x] Return base types, interfaces, derived types, and implementations.
+- [x] Enforce the token budget.
+- [x] Expose `find_symbol_references` and `get_type_hierarchy` over MCP.
 
 ## F4 - Search and errors
 

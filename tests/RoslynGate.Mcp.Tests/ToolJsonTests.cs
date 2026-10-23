@@ -19,7 +19,7 @@ public sealed class ToolJsonTests
     [Fact]
     public void CompactDefinitionUsesShortKeys()
     {
-        var json = ReadText(ToolJson.Definition(new DefinitionResult(Symbol, false, []), DetailLevel.Compact));
+        var json = ReadText(DefinitionJson.Definition(new DefinitionResult(Symbol, false, []), DetailLevel.Compact));
 
         Assert.Equal("Open", json.GetProperty("n").GetString());
         Assert.Equal("SampleSdk.Widget.Open", json.GetProperty("q").GetString());
@@ -31,7 +31,7 @@ public sealed class ToolJsonTests
     [Fact]
     public void VerboseDefinitionIncludesLocationAndNamespace()
     {
-        var json = ReadText(ToolJson.Definition(new DefinitionResult(Symbol, false, []), DetailLevel.Verbose));
+        var json = ReadText(DefinitionJson.Definition(new DefinitionResult(Symbol, false, []), DetailLevel.Verbose));
 
         var symbol = json.GetProperty("symbol");
         Assert.Equal("SampleSdk", symbol.GetProperty("namespace").GetString());
@@ -43,7 +43,7 @@ public sealed class ToolJsonTests
     {
         var result = new DefinitionResult(null, true, [Symbol, Symbol with { Signature = "public Task Open()" }]);
 
-        var json = ReadText(ToolJson.Definition(result, DetailLevel.Compact));
+        var json = ReadText(DefinitionJson.Definition(result, DetailLevel.Compact));
 
         Assert.True(json.GetProperty("ambiguous").GetBoolean());
         Assert.Equal(2, json.GetProperty("candidates").GetArrayLength());
@@ -66,7 +66,7 @@ public sealed class ToolJsonTests
     {
         var symbol = Symbol with { Documentation = new string('x', 500) };
 
-        var json = ReadText(ToolJson.Definition(new DefinitionResult(symbol, false, []), DetailLevel.Compact));
+        var json = ReadText(DefinitionJson.Definition(new DefinitionResult(symbol, false, []), DetailLevel.Compact));
         var documentation = json.GetProperty("d").GetString();
 
         Assert.NotNull(documentation);
