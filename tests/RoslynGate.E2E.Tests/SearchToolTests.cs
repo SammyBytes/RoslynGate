@@ -47,7 +47,24 @@ public sealed class SearchToolTests(McpFixture fixture)
 
         Assert.Single(text.GetProperty("hits").EnumerateArray());
         Assert.True(text.GetProperty("truncated").GetBoolean());
-        Assert.True(text.TryGetProperty("hint", out _));
+        Assert.Equal(1, text.GetProperty("nextOffset").GetInt32());
+        Assert.Contains(
+            "offset=1",
+            text.GetProperty("hint").GetString(),
+            StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task CompleteSearchPageOmitsNextOffset()
+    {
+        using var response = await fixture.Session.CallToolAsync(
+            ToolNames.SearchSymbols,
+            new { query = "Widget", limit = 50 });
+        var text = ToolTestHelpers.ToolText(response);
+
+        Assert.False(text.GetProperty("truncated").GetBoolean());
+        Assert.False(text.TryGetProperty("nextOffset", out _));
+        Assert.False(text.TryGetProperty("hint", out _));
     }
 
     [Fact]

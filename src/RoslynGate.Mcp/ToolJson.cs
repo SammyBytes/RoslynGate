@@ -67,6 +67,17 @@ public static class ToolJson
                 new Dictionary<string, object?> { ["query"] = searchQuery }));
     }
 
+    internal static void WriteNextPage(
+        Utf8JsonWriter writer,
+        int nextOffset,
+        string tool)
+    {
+        writer.WriteNumber("nextOffset", nextOffset);
+        writer.WriteString(
+            "hint",
+            $"Call {tool} again with offset={nextOffset} and the same arguments.");
+    }
+
     internal static string? SearchQueryFor(string? name)
     {
         if (string.IsNullOrWhiteSpace(name))

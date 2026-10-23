@@ -20,3 +20,4 @@ pull request.
 | D-13 | Diagnostics use `ILogger<T>` to stderr; `Console.SetOut(Console.Error)` is the only protocol guard. | Keeps `stdout` clean without discarding dependency output, and avoids scattered `Console.Error` callbacks in `Engine`. |
 | D-14 | Ship self-contained single-file binaries with content self-extract; the npm wrapper verifies SHA-256 and caches. | Avoids the MSBuild/AOT incompatibility while keeping installation to one file and one command. |
 | D-15 | Use an empty host builder and ReadyToRun binaries to reduce startup; keep <50 ms as an AOT/low-level-host goal. | Warm handshake drops from ~1.0 s to ~0.32 s; the first run still pays single-file extraction (~1.4 s), and workspace loading stays deferred. |
+| D-16 | Truncated reference and search pages carry `nextOffset` and an explicit follow-up hint. | Agents should not have to infer the next offset from `total`, `offset`, and page length; incomplete answers are worse than an extra call. |

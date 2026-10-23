@@ -51,6 +51,42 @@ public sealed class ToolJsonTests
     }
 
     [Fact]
+    public void CompactReferencesPageIncludesNextOffset()
+    {
+        var result = new ReferencesResult(
+            Symbol,
+            false,
+            [],
+            [new SymbolReference("call", Symbol.Location)],
+            20,
+            10,
+            1,
+            true);
+
+        var json = ReadText(ReferencesJson.References(result, DetailLevel.Compact));
+
+        Assert.Equal(11, json.GetProperty("nextOffset").GetInt32());
+        Assert.Contains(
+            "find_symbol_references",
+            json.GetProperty("hint").GetString(),
+            StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void VerboseSearchPageIncludesNextOffset()
+    {
+        var result = new SearchResult([Symbol], 20, 10, 1, true);
+
+        var json = ReadText(SearchJson.Search(result, DetailLevel.Verbose));
+
+        Assert.Equal(11, json.GetProperty("nextOffset").GetInt32());
+        Assert.Contains(
+            "search_symbols",
+            json.GetProperty("hint").GetString(),
+            StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void ErrorsSetIsErrorAndCarryHint()
     {
         var result = ToolJson.Error("invalid_target", "No target.", "Pass name or file.");

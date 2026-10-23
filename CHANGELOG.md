@@ -6,15 +6,29 @@ All notable changes to RoslynGate are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.1.4] - 2026-10-23
+
+**In plain terms:** when a reference or search result has more items than fit
+on one page, RoslynGate now returns the exact offset for the next page and a
+hint that tells the agent how to ask for it. Agents no longer have to calculate
+the next call or stop with an incomplete answer.
+
+### Added
+
+- Return `nextOffset` and an actionable `hint` when `find_symbol_references` or
+  `search_symbols` truncates a page.
+- Cover compact references, verbose search, and non-truncated responses with
+  tests.
+
 ### Fixed
 
-- Fix `benchmarks/claude-ab.ps1` so the MCP config parameter is not
-  overwritten by a case-insensitive local variable, and write the baseline
-  config as UTF-8 without a BOM.
+- Fix `benchmarks/claude-ab.ps1` so the MCP config parameter is not overwritten
+  by a case-insensitive local variable, and write the baseline config as UTF-8
+  without a BOM.
 - Record per-run input, output, cache, turn, and duration data in the Claude
   A/B benchmark, and keep each raw JSON response for inspection.
-- Restrict built-in tools with `--tools` so the `with` run cannot silently
-  use `Read`, `Grep`, or `Glob` alongside RoslynGate.
+- Restrict built-in tools with `--tools` so the `with` run cannot silently use
+  `Read`, `Grep`, or `Glob` alongside RoslynGate.
 
 ## [0.1.3] - 2026-10-23
 

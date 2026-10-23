@@ -50,6 +50,15 @@ public static class ReferencesJson
                 }
 
                 writer.WriteEndArray();
+
+                if (result.Truncated)
+                {
+                    ToolJson.WriteNextPage(
+                        writer,
+                        result.Offset + result.References.Count,
+                        ToolNames.FindSymbolReferences);
+                }
+
                 writer.WriteEndObject();
             }
         }
@@ -109,6 +118,14 @@ public static class ReferencesJson
                 }
 
                 writer.WriteEndArray();
+
+                if (result.Truncated)
+                {
+                    ToolJson.WriteNextPage(
+                        writer,
+                        result.Offset + result.References.Count,
+                        ToolNames.FindSymbolReferences);
+                }
             }
 
             writer.WriteEndObject();
