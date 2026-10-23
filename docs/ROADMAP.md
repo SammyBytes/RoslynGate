@@ -80,6 +80,7 @@
 - [x] Write a formal `CHANGELOG.md` with plain-language summaries.
 - [x] Publish GitHub Releases for `v0.1.0` and `v0.1.1` with changelog bodies.
 - [x] Run published E2E on Linux x64 against the release binary.
-- [ ] Run published E2E on Linux x64 through `npx roslyngate@0.1.2`.
+- [x] Run published E2E on Linux x64 through `npx roslyngate@0.1.2`.
 - [x] Run published E2E on Linux x64 against the `v0.1.2` release binary.
+- [x] Verify `roslyngate setup claude` against the published npm package.
 - [ ] Smoke-test the Windows and macOS binaries on their platforms.
