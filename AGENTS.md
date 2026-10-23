@@ -7,7 +7,8 @@ Roslyn. Agents read this file before changing code.
 
 1. `stdout` carries MCP messages only while the server runs. Logs, banners,
    progress, and exceptions go to `stderr`. The SDK owns the transport.
-   `--help`, `--version`, and `--check` are the only stdout exceptions.
+   `--help`, `--version`, `--check`, and argument-parse output are the only
+   stdout exceptions.
 2. Never guess. If a name matches more than one symbol, return candidates.
 3. Determinism. Same workspace and query produce the same response: stable
    order, solution-relative paths, no timestamps, no random IDs.
@@ -16,7 +17,8 @@ Roslyn. Agents read this file before changing code.
 5. Layers flow one way. `Cli` composes, `Mcp` speaks MCP, `Engine` speaks
    Roslyn. `Engine` must not reference MCP. `Mcp` must not reference Roslyn.
 6. Dependencies are deliberate. Pin them in `Directory.Packages.props` and
-   justify new ones in the pull request.
+   justify new ones in the pull request. `Cli` uses `System.CommandLine`;
+   `Mcp` uses the official MCP SDK; `Engine` stays on Roslyn and MSBuild.
 7. Silence on success. The server does not narrate what it does.
 8. Errors teach. Every actionable error has `code`, `message`, `hint`, and
    when possible `try` with the exact next call.

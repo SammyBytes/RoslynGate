@@ -6,29 +6,6 @@ namespace RoslynGate.Cli;
 
 internal static class OptionValues
 {
-    public static string NextValue(string[] args, ref int index, string option)
-    {
-        if (index + 1 >= args.Length)
-        {
-            throw new CliException($"Missing value for {option}");
-        }
-
-        return args[++index];
-    }
-
-    public static bool TryReadLongValue(string argument, string option, out string value)
-    {
-        var prefix = option + "=";
-        if (argument.StartsWith(prefix, StringComparison.Ordinal))
-        {
-            value = argument[prefix.Length..];
-            return true;
-        }
-
-        value = string.Empty;
-        return false;
-    }
-
     public static string? NullIfEmpty(string? value)
         => string.IsNullOrWhiteSpace(value) ? null : value;
 

@@ -25,6 +25,7 @@
       generic `mcpServers` JSON block.
 - [x] Add the `opencode.jsonc` example and verify the connection.
 - [x] Document `--check` and the stdout/stderr split for troubleshooting.
+- [x] Replace the hand-written parser with `System.CommandLine`.
 
 ## F1 - Workspace
 

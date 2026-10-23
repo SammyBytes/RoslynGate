@@ -70,7 +70,7 @@ public sealed class HostTests
         var result = await CliRunner.RunAsync(AppContext.BaseDirectory, string.Empty, "--version");
 
         Assert.Equal(0, result.ExitCode);
-        Assert.Contains("roslyngate 0.1.0", result.Stdout);
+        Assert.Contains("0.1.0", result.Stdout);
         Assert.Empty(result.Stderr);
     }
 
@@ -110,6 +110,123 @@ public sealed class HostTests
 
         Assert.Equal(1, result.ExitCode);
         Assert.Contains("No .sln or .slnx", result.Stderr);
+    }
+
+    [Fact]
+    public async Task SolutionEqualsFormAndNoPrewarmAreAccepted()
+    {
+        using var directory = new TempDirectory();
+        var solution = Path.Combine(directory.Root, "Sample.sln");
+        File.WriteAllText(solution, string.Empty);
+
+        var result = await CliRunner.RunAsync(
+            directory.Root,
+            string.Empty,
+            "--check",
+            $"--solution={solution}",
+            "--no-prewarm");
+
+        Assert.Equal(0, result.ExitCode);
+        Assert.Contains("prewarm     off", result.Stdout);
+    }
+
+    [Fact]
+    public async Task EnvironmentVariablesProvideDefaults()
+    {
+        using var directory = new TempDirectory();
+        File.WriteAllText(Path.Combine(directory.Root, "Sample.sln"), string.Empty);
+        var environment = new Dictionary<string, string?>
+        {
+            ["ROSLYGATE_DETAIL"] = "verbose",
+            ["ROSLYGATE_PREWARM"] = "off",
+            ["ROSLYGATE_REF_LIMIT"] = "999"
+        };
+
+        var result = await CliRunner.RunAsync(directory.Root, string.Empty, environment, "--check");
+
+        Assert.Equal(0, result.ExitCode);
+        Assert.Contains("detail      verbose", result.Stdout);
+        Assert.Contains("ref-limit   200", result.Stdout);
+        Assert.Contains("prewarm     off", result.Stdout);
+    }
+
+    [Fact]
+    public async Task CommandLineFlagsOverrideEnvironment()
+    {
+        using var directory = new TempDirectory();
+        File.WriteAllText(Path.Combine(directory.Root, "Sample.sln"), string.Empty);
+        var environment = new Dictionary<string, string?>
+        {
+            ["ROSLYGATE_DETAIL"] = "compact"
+        };
+
+        var result = await CliRunner.RunAsync(
+            directory.Root,
+            string.Empty,
+            environment,
+            "--check",
+            "--detail",
+            "verbose");
+
+        Assert.Equal(0, result.ExitCode);
+        Assert.Contains("detail      verbose", result.Stdout);
+    }
+
+    [Fact]
+    public async Task InvalidEnvironmentFailsCheck()
+    {
+        using var directory = new TempDirectory();
+        File.WriteAllText(Path.Combine(directory.Root, "Sample.sln"), string.Empty);
+        var environment = new Dictionary<string, string?>
+        {
+            ["ROSLYGATE_DETAIL"] = "nope"
+        };
+
+        var result = await CliRunner.RunAsync(directory.Root, string.Empty, environment, "--check");
+
+        Assert.Equal(1, result.ExitCode);
+        Assert.Contains("Invalid detail level", result.Stderr);
+    }
+
+    [Fact]
+    public async Task InvalidEnvironmentDoesNotBreakHelp()
+    {
+        var environment = new Dictionary<string, string?>
+        {
+            ["ROSLYGATE_DETAIL"] = "nope"
+        };
+
+        var result = await CliRunner.RunAsync(
+            AppContext.BaseDirectory,
+            string.Empty,
+            environment,
+            "--help");
+
+        Assert.Equal(0, result.ExitCode);
+        Assert.Contains("Usage:", result.Stdout);
+    }
+
+    [Fact]
+    public async Task UnknownOptionFailsWithParseError()
+    {
+        var result = await CliRunner.RunAsync(AppContext.BaseDirectory, string.Empty, "--nope");
+
+        Assert.Equal(1, result.ExitCode);
+        Assert.Contains("Unrecognized", result.Stderr);
+    }
+
+    [Fact]
+    public async Task ConflictingPrewarmFlagsFail()
+    {
+        var result = await CliRunner.RunAsync(
+            AppContext.BaseDirectory,
+            string.Empty,
+            "--check",
+            "--prewarm",
+            "--no-prewarm");
+
+        Assert.Equal(1, result.ExitCode);
+        Assert.Contains("either --prewarm or --no-prewarm", result.Stderr);
     }
 
     private static async Task<JsonDocument> ReadMessageAsync(Process process)
