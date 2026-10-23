@@ -48,10 +48,14 @@ $baselineTools = "Read,Grep,Glob"
 $artifacts = Join-Path $env:TEMP ("roslyngate-claude-ab-" + [guid]::NewGuid().ToString("N"))
 New-Item -ItemType Directory -Path $artifacts | Out-Null
 
-$withConfig = Join-Path $artifacts "mcp-with.json"
-$withoutConfig = Join-Path $artifacts "mcp-without.json"
-Copy-Item $WithConfig $withConfig
-'{ "mcpServers": {} }' | Set-Content -Path $withoutConfig -Encoding utf8
+$withConfigPath = Join-Path $artifacts "mcp-with.json"
+$withoutConfigPath = Join-Path $artifacts "mcp-without.json"
+Copy-Item $WithConfig $withConfigPath
+[System.IO.File]::WriteAllText(
+    $withoutConfigPath,
+    '{ "mcpServers": {} }',
+    (New-Object System.Text.UTF8Encoding($false))
+)
 
 function Get-Median {
     param([double[]]$Values)
@@ -150,10 +154,10 @@ for ($iteration = 1; $iteration -le $Runs; $iteration++) {
 
     foreach ($mode in $order) {
         if ($mode -eq "with") {
-            $results += Invoke-ClaudeRun -Mode "with" -Config $withConfig -AllowedTools $mcpTools -Iteration $iteration
+            $results += Invoke-ClaudeRun -Mode "with" -Config $withConfigPath -AllowedTools $mcpTools -Iteration $iteration
         }
         else {
-            $results += Invoke-ClaudeRun -Mode "without" -Config $withoutConfig -AllowedTools $baselineTools -Iteration $iteration
+            $results += Invoke-ClaudeRun -Mode "without" -Config $withoutConfigPath -AllowedTools $baselineTools -Iteration $iteration
         }
     }
 }

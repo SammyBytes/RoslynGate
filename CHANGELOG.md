@@ -6,6 +6,12 @@ All notable changes to RoslynGate are documented here. The format follows
 
 ## [Unreleased]
 
+### Fixed
+
+- Fix `benchmarks/claude-ab.ps1` so the MCP config parameter is not
+  overwritten by a case-insensitive local variable, and write the baseline
+  config as UTF-8 without a BOM.
+
 ## [0.1.3] - 2026-10-23
 
 **In plain terms:** RoslynGate no longer refuses to open a large solution just
