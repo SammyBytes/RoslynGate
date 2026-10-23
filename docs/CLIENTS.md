@@ -1,13 +1,14 @@
 # MCP clients
 
 The recommended command is the npm wrapper, which downloads and caches the
-self-contained binary on first use. Install it from a checkout with
-`npm install -g ./packaging/npm`; use `npx -y roslyngate` once the package is
-published to npm.
+self-contained binary on first use:
 
 ```bash
+npm install -g roslyngate
 roslyngate --solution /absolute/path/to/repository
 ```
+
+You can also use `npx -y roslyngate` or `bunx roslyngate` without installing.
 
 Replace `/absolute/path/to/repository` with the solution directory. `--solution`
 is optional when the client starts the server with the repository as its
