@@ -73,6 +73,20 @@ function Get-Median {
     return ([double]$sorted[$middle - 1] + [double]$sorted[$middle]) / 2
 }
 
+function Get-UsageCount {
+    param(
+        [object]$Usage,
+        [string]$Name
+    )
+
+    $value = $Usage.$Name
+    if ($null -eq $value) {
+        return [int64]0
+    }
+
+    return [int64]$value
+}
+
 function Invoke-ClaudeRun {
     param(
         [string]$Mode,
@@ -113,18 +127,20 @@ function Invoke-ClaudeRun {
         throw "Claude response has no usage field ($Mode). Inspect the raw output."
     }
 
-    $tokens = 0
-    foreach ($field in @(
-        "input_tokens",
-        "output_tokens",
-        "cache_creation_input_tokens",
-        "cache_read_input_tokens"
-    )) {
-        $value = $result.usage.$field
-        if ($null -ne $value) {
-            $tokens += [int64]$value
-        }
-    }
+    $inputTokens = Get-UsageCount $result.usage "input_tokens"
+    $outputTokens = Get-UsageCount $result.usage "output_tokens"
+    $cacheWriteTokens = Get-UsageCount $result.usage "cache_creation_input_tokens"
+    $cacheReadTokens = Get-UsageCount $result.usage "cache_read_input_tokens"
+    $tokens = $inputTokens + $outputTokens + $cacheWriteTokens + $cacheReadTokens
+
+    $turns = if ($null -ne $result.num_turns) { [int]$result.num_turns } else { 0 }
+    $durationMs = if ($null -ne $result.duration_ms) { [int64]$result.duration_ms } else { 0 }
+    $rawFile = Join-Path $artifacts "$Mode-$Iteration.json"
+    [System.IO.File]::WriteAllText(
+        $rawFile,
+        $stdout,
+        (New-Object System.Text.UTF8Encoding($false))
+    )
 
     $cost = if ($null -ne $result.total_cost_usd) {
         [double]$result.total_cost_usd
@@ -134,10 +150,17 @@ function Invoke-ClaudeRun {
     }
 
     [pscustomobject]@{
-        Iteration = $Iteration
-        Mode      = $Mode
-        Tokens    = $tokens
-        CostUSD   = $cost
+        Iteration   = $Iteration
+        Mode        = $Mode
+        Tokens      = $tokens
+        Input       = $inputTokens
+        Output      = $outputTokens
+        CacheWrite  = $cacheWriteTokens
+        CacheRead   = $cacheReadTokens
+        Turns       = $turns
+        DurationMs  = $durationMs
+        CostUSD     = $cost
+        RawFile     = $rawFile
     }
 }
 
@@ -180,7 +203,11 @@ else {
 
 Write-Host ""
 Write-Host "Raw runs:"
-$results | Format-Table -AutoSize | Out-String | Write-Host
+$results |
+    Select-Object Iteration, Mode, Tokens, Input, Output, CacheWrite, CacheRead, Turns, DurationMs, CostUSD |
+    Format-Table -AutoSize |
+    Out-String |
+    Write-Host
 
 Write-Host ("Median with RoslynGate:    {0:N0} tokens, ${1:N6}" -f $withMedian, $withCostMedian)
 Write-Host ("Median without RoslynGate: {0:N0} tokens, ${1:N6}" -f $withoutMedian, $withoutCostMedian)
@@ -197,4 +224,4 @@ else {
 
 Write-Host ""
 Write-Host "Run several symbols to include tool-schema overhead fairly."
-Write-Host "Artifacts: $artifacts"
+Write-Host "Raw JSON and stderr: $artifacts"
