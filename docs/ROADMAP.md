@@ -65,6 +65,7 @@
 
 - [x] Add the release workflow for linux-x64, win-x64, and osx-arm64.
 - [x] Add the npm wrapper with checksum verification and cache.
+- [x] Publish the npm wrapper (`roslyngate@0.1.1`).
 - [x] Document installation paths and `npx` usage.
 - [x] Document flags, environment variables, defaults, and output modes.
 - [x] Measure token volume and latency against `rg`.

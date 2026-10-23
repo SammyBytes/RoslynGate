@@ -36,17 +36,18 @@ also extracts the single-file binary (~1.4 s). See
 
 ## Install
 
-Install the wrapper from this repository:
+Install the wrapper from npm:
 
 ```bash
-npm install -g ./packaging/npm
+npm install -g roslyngate
 roslyngate --solution /path/to/repository
 ```
 
-Once the package is published to npm, this also works:
+Or run it without installing:
 
 ```bash
 npx -y roslyngate --solution /path/to/repository
+bunx roslyngate --solution /path/to/repository
 ```
 
 The first run downloads the self-contained binary for the current platform,
