@@ -13,7 +13,7 @@ the context window.
 | Tool | Purpose |
 | --- | --- |
 | `get_symbol_definition` | Resolve one symbol by qualified name or file + line. |
-| `find_symbol_references` | Find semantic references, paginated. |
+| `find_symbol_references` | Find semantic references, paginated; `includeDefinition=true` also returns the resolved symbol. |
 | `get_type_hierarchy` | Base types, interfaces, derived types, implementations. |
 | `search_symbols` | Find symbols by name fragment before resolving. |
 
@@ -60,13 +60,22 @@ roslyngate setup claude
 Or run it without installing:
 
 ```bash
-npx -y roslyngate@0.1.5 setup claude
-bunx roslyngate@0.1.5 setup claude
+npx -y roslyngate@0.1.6 setup claude
+bunx roslyngate@0.1.6 setup claude
 ```
 
 `setup claude` writes `.mcp.json` with the native binary path, solution path,
 and no `npx` or `cmd /c` indirection. Open Claude Code and approve
 `roslyngate` in `/mcp`.
+
+For teams, add the opt-in project skill:
+
+```bash
+roslyngate setup claude --skill
+```
+
+That writes `.claude/skills/roslyn-symbols/SKILL.md`, which can be committed.
+An existing skill is left unchanged.
 
 To use it as a plain CLI:
 
@@ -91,8 +100,16 @@ roslyngate upgrade
 
 This updates the global npm package, downloads the matching binary, and
 updates the `roslyngate.command` path in `.mcp.json` in the current directory
-without touching its `args`, `timeout`, or other MCP servers. Restart Claude
-Code or run `/mcp` afterwards.
+when that command is a RoslynGate-managed cache path. It does not touch its
+`args`, `timeout`, or other MCP servers. Restart Claude Code or run `/mcp`
+afterwards.
+
+If the command is portable (for example `roslyngate` or `npx`), the config is
+left unchanged. To update only npm and the binary:
+
+```bash
+roslyngate upgrade --no-config
+```
 
 Use `--check` to compare the installed and latest versions, or `--dry-run` to
 see the actions without installing or writing:

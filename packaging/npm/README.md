@@ -16,12 +16,19 @@ roslyngate setup claude
 Or run it without installing:
 
 ```bash
-npx -y roslyngate@0.1.5 setup claude
-bunx roslyngate@0.1.5 setup claude
+npx -y roslyngate@0.1.6 setup claude
+bunx roslyngate@0.1.6 setup claude
 ```
 
 `setup claude` writes or merges `.mcp.json` with the native binary path and
-solution path. To use it as a plain CLI:
+solution path. Add `--skill` to also write `.claude/skills/roslyn-symbols/SKILL.md`:
+
+```bash
+roslyngate setup claude --skill
+```
+
+The skill is opt-in and an existing file is left unchanged. To use the CLI
+directly:
 
 ```bash
 roslyngate --solution /path/to/repository
@@ -41,10 +48,11 @@ roslyngate upgrade
 ```
 
 This updates the global npm package, downloads the matching binary, and
-refreshes the `roslyngate.command` path in `.mcp.json` in the current
-directory. It preserves the existing arguments, timeout, and other MCP
-servers. Use `--check` to only compare versions or `--dry-run` to preview the
-actions.
+refreshes a RoslynGate-managed `roslyngate.command` path in `.mcp.json` in the
+current directory. It preserves the existing arguments, timeout, and other MCP
+servers. Portable commands such as `roslyngate` or `npx` are left alone. Use
+`--no-config` to update only npm and the binary, `--check` to compare versions,
+or `--dry-run` to preview the actions.
 
 ## Supported platforms
 

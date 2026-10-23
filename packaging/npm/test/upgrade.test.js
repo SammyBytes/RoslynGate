@@ -4,13 +4,10 @@ const path = require("node:path");
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const { binaryPath } = require("../src/cache");
-const { updateConfig } = require("../src/upgrade-config");
 const {
-  fetchLatestVersion,
-  installLatest,
-  isNewer
-} = require("../src/upgrade-npm");
-const { parseUpgradeArgs, runUpgrade } = require("../src/upgrade");
+  parseUpgradeArgs,
+  runUpgrade
+} = require("../src/upgrade");
 
 function temporaryDirectory() {
   return fs.mkdtempSync(path.join(os.tmpdir(), "roslyngate-upgrade-"));
@@ -24,13 +21,13 @@ function latestFetch(version) {
   });
 }
 
-function writeMcpConfig(root) {
+function writeMcpConfig(root, command = "/old/roslyngate") {
   const file = path.join(root, ".mcp.json");
   fs.writeFileSync(file, JSON.stringify({
     timeout: 1800000,
     mcpServers: {
       roslyngate: {
-        command: "/old/roslyngate",
+        command,
         args: ["--solution", "repo.sln", "--no-prewarm"],
         timeout: 900000
       },
@@ -44,75 +41,37 @@ test("parses upgrade options", () => {
   assert.deepEqual(parseUpgradeArgs(["upgrade"]), {
     check: false,
     dryRun: false,
+    noConfig: false,
     help: false
   });
   assert.deepEqual(parseUpgradeArgs(["upgrade", "--check"]), {
     check: true,
     dryRun: false,
+    noConfig: false,
     help: false
   });
   assert.deepEqual(parseUpgradeArgs(["upgrade", "--dry-run"]), {
     check: false,
     dryRun: true,
+    noConfig: false,
+    help: false
+  });
+  assert.deepEqual(parseUpgradeArgs(["upgrade", "--no-config"]), {
+    check: false,
+    dryRun: false,
+    noConfig: true,
     help: false
   });
   assert.throws(() => parseUpgradeArgs(["upgrade", "--wat"]), /Unknown upgrade option/);
 });
 
-test("compares versions without downgrading", () => {
-  assert.equal(isNewer("0.1.5", "0.1.4"), true);
-  assert.equal(isNewer("0.1.4", "0.1.4"), false);
-  assert.equal(isNewer("0.1.3", "0.1.4"), false);
-  assert.equal(isNewer("0.2.0", "0.1.9"), true);
-});
-
-test("uses a shell for npm.cmd on Windows", async () => {
-  const { EventEmitter } = require("node:events");
-  let captured;
-
-  await installLatest("0.1.5", {
-    platform: "win32",
-    spawnImpl: (command, args, options) => {
-      captured = { command, args, options };
-      const child = new EventEmitter();
-      setImmediate(() => child.emit("exit", 0, null));
-      return child;
-    }
-  });
-
-  assert.equal(captured.command, "npm.cmd");
-  assert.deepEqual(captured.args, ["install", "-g", "roslyngate@0.1.5"]);
-  assert.equal(captured.options.shell, true);
-});
-
-test("reads the latest version from npm", async () => {
-  const version = await fetchLatestVersion({ fetchImpl: latestFetch("0.2.0") });
-  assert.equal(version, "0.2.0");
-});
-
-test("updates only the roslyngate command and preserves the rest", () => {
-  const root = temporaryDirectory();
-  const file = writeMcpConfig(root);
-
-  const result = updateConfig(root, "/new/roslyngate");
-
-  assert.equal(result.updated, true);
-  const config = JSON.parse(fs.readFileSync(file, "utf8"));
-  assert.equal(config.timeout, 1800000);
-  assert.equal(config.mcpServers.roslyngate.command, "/new/roslyngate");
-  assert.deepEqual(config.mcpServers.roslyngate.args, [
-    "--solution",
-    "repo.sln",
-    "--no-prewarm"
-  ]);
-  assert.equal(config.mcpServers.roslyngate.timeout, 900000);
-  assert.equal(config.mcpServers.other.command, "keep-me");
-});
-
 test("installs the latest version and refreshes the config", async () => {
   const root = temporaryDirectory();
   const cache = temporaryDirectory();
-  const file = writeMcpConfig(root);
+  const file = writeMcpConfig(
+    root,
+    path.join(cache, "0.1.4", "roslyngate-linux-x64")
+  );
   const installed = [];
   let downloaded;
 
@@ -148,7 +107,10 @@ test("installs the latest version and refreshes the config", async () => {
 test("does not downgrade when the installed version is newer", async () => {
   const root = temporaryDirectory();
   const cache = temporaryDirectory();
-  const file = writeMcpConfig(root);
+  const file = writeMcpConfig(
+    root,
+    path.join(cache, "0.1.4", "roslyngate-linux-x64")
+  );
   let downloadedVersion;
 
   await runUpgrade([], {
@@ -170,6 +132,42 @@ test("does not downgrade when the installed version is newer", async () => {
   assert.equal(downloadedVersion, "0.1.5");
   const config = JSON.parse(fs.readFileSync(file, "utf8"));
   assert.match(config.mcpServers.roslyngate.command, /0\.1\.5\/roslyngate-linux-x64$/);
+});
+
+test("--no-config updates the binary and leaves the config alone", async () => {
+  const root = temporaryDirectory();
+  const file = writeMcpConfig(root);
+  const before = fs.readFileSync(file, "utf8");
+
+  await runUpgrade(["upgrade", "--no-config"], {
+    version: "0.1.5",
+    cwd: root,
+    env: { ROSLYGATE_CACHE_DIR: temporaryDirectory() },
+    platform: "linux",
+    arch: "x64",
+    fetchImpl: latestFetch("0.1.5"),
+    ensureBinaryImpl: async ({ target }) => target
+  });
+
+  assert.equal(fs.readFileSync(file, "utf8"), before);
+});
+
+test("leaves an unmanaged config command alone", async () => {
+  const root = temporaryDirectory();
+  const file = writeMcpConfig(root, "roslyngate");
+  const before = fs.readFileSync(file, "utf8");
+
+  await runUpgrade([], {
+    version: "0.1.5",
+    cwd: root,
+    env: { ROSLYGATE_CACHE_DIR: temporaryDirectory() },
+    platform: "linux",
+    arch: "x64",
+    fetchImpl: latestFetch("0.1.5"),
+    ensureBinaryImpl: async ({ target }) => target
+  });
+
+  assert.equal(fs.readFileSync(file, "utf8"), before);
 });
 
 test("--check does not install or write", async () => {

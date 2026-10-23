@@ -6,6 +6,33 @@ All notable changes to RoslynGate are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.1.6] - 2026-10-23
+
+**In plain terms:** RoslynGate now returns the definition and references in one
+call when asked, can install a committable Claude Code skill, and upgrades only
+touch an MCP config that RoslynGate manages. A new `--no-config` option updates
+the package and binary without touching any project files.
+
+### Added
+
+- Add `includeDefinition=true` to `find_symbol_references`, returning the
+  resolved symbol in the same response.
+- Add opt-in `roslyngate setup claude --skill`, which writes a project skill
+  under `.claude/skills/roslyn-symbols/` and leaves an existing skill alone.
+- Add `roslyngate upgrade --no-config`.
+- Document per-prompt Claude Code A/B with `claude-ab.ps1 -Prompt`.
+
+### Changed
+
+- `roslyngate upgrade` now rewrites `roslyngate.command` only when it points to
+  a RoslynGate-managed cache path. Portable commands such as `roslyngate` or
+  `npx` are left unchanged.
+
+### Tests
+
+- Cover `includeDefinition` in compact and E2E responses, the opt-in skill,
+  managed versus portable command detection, and `--no-config`.
+
 ## [0.1.5] - 2026-10-23
 
 **In plain terms:** `roslyngate upgrade` updates the global npm package, gets

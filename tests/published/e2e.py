@@ -85,7 +85,7 @@ def main() -> int:
     parser.add_argument("--command", required=True, help="Binary path or wrapper command.")
     parser.add_argument("--solution", required=True, type=Path)
     parser.add_argument("--repo", default=Path("."), type=Path)
-    parser.add_argument("--version", default="0.1.5")
+    parser.add_argument("--version", default="0.1.6")
     args = parser.parse_args()
 
     command = shlex.split(args.command)

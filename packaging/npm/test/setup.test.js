@@ -11,6 +11,7 @@ const {
   runSetup,
   writeConfig
 } = require("../src/setup");
+const { skillPath, writeSkill } = require("../src/skill");
 
 function temporaryDirectory() {
   return fs.mkdtempSync(path.join(os.tmpdir(), "roslyngate-setup-"));
@@ -20,17 +21,26 @@ test("parses setup options", () => {
   assert.deepEqual(parseArgs(["claude"]), {
     solution: ".",
     print: false,
-    dryRun: false
+    dryRun: false,
+    skill: false
   });
   assert.deepEqual(parseArgs(["claude", "--solution", "repo", "--print"]), {
     solution: "repo",
     print: true,
-    dryRun: false
+    dryRun: false,
+    skill: false
   });
   assert.deepEqual(parseArgs(["claude", "--solution=repo", "--dry-run"]), {
     solution: "repo",
     print: false,
-    dryRun: true
+    dryRun: true,
+    skill: false
+  });
+  assert.deepEqual(parseArgs(["claude", "--skill"]), {
+    solution: ".",
+    print: false,
+    dryRun: false,
+    skill: true
   });
 });
 
@@ -118,7 +128,7 @@ test("setup writes config without downloading when a binary is provided", async 
 
   try {
     await runSetup(["claude"], {
-      version: "0.1.5",
+      version: "0.1.6",
       cwd: root,
       env: { ROSLYGATE_BINARY: binary }
     });
@@ -126,6 +136,44 @@ test("setup writes config without downloading when a binary is provided", async 
     const config = JSON.parse(fs.readFileSync(path.join(root, ".mcp.json"), "utf8"));
     assert.equal(config.mcpServers.roslyngate.command, binary);
     assert.deepEqual(config.mcpServers.roslyngate.args, ["--solution", root]);
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("writes the opt-in skill once", () => {
+  const root = temporaryDirectory();
+  const file = skillPath(root);
+
+  try {
+    const first = writeSkill(root);
+    assert.equal(first.written, true);
+    assert.match(fs.readFileSync(file, "utf8"), /name: roslyn-symbols/);
+
+    fs.writeFileSync(file, "custom skill");
+    const second = writeSkill(root);
+    assert.equal(second.written, false);
+    assert.equal(fs.readFileSync(file, "utf8"), "custom skill");
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("setup --skill writes the skill without downloading", async () => {
+  const root = temporaryDirectory();
+  const binary = path.join(root, "roslyngate");
+  fs.writeFileSync(binary, "");
+
+  try {
+    await runSetup(["claude", "--skill"], {
+      version: "0.1.6",
+      cwd: root,
+      env: { ROSLYGATE_BINARY: binary }
+    });
+
+    const file = skillPath(root);
+    assert.equal(fs.existsSync(file), true);
+    assert.match(fs.readFileSync(file, "utf8"), /includeDefinition=true/);
   } finally {
     fs.rmSync(root, { recursive: true, force: true });
   }

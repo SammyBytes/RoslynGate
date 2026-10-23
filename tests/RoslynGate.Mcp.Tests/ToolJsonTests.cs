@@ -51,6 +51,27 @@ public sealed class ToolJsonTests
     }
 
     [Fact]
+    public void CompactReferencesIncludeDefinitionWhenRequested()
+    {
+        var result = new ReferencesResult(
+            Symbol,
+            false,
+            [],
+            [new SymbolReference("call", Symbol.Location)],
+            1,
+            0,
+            50,
+            false);
+
+        var json = ReadText(ReferencesJson.References(result, DetailLevel.Compact, null, true));
+
+        var definition = json.GetProperty("definition");
+        Assert.Equal("SampleSdk.Widget.Open", definition.GetProperty("q").GetString());
+        Assert.Equal("method", definition.GetProperty("k").GetString());
+        Assert.False(definition.TryGetProperty("namespace", out _));
+    }
+
+    [Fact]
     public void CompactReferencesPageIncludesNextOffset()
     {
         var result = new ReferencesResult(

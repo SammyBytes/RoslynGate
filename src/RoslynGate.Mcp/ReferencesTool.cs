@@ -13,7 +13,7 @@ public sealed class ReferencesTool(Workspace workspace, ServerOptions options)
         ReadOnly = true,
         Idempotent = true,
         OpenWorld = false)]
-    [Description("Find semantic references to a .NET symbol, with deterministic paging.")]
+    [Description("Find semantic references to a .NET symbol, with deterministic paging. Set includeDefinition=true to return the resolved definition in the same call.")]
     public async Task<CallToolResult> FindSymbolReferencesAsync(
         [Description("Qualified or partial symbol name, e.g. SampleSdk.Widget.Open. Ignored when file is provided.")]
         string? name = null,
@@ -25,6 +25,8 @@ public sealed class ReferencesTool(Workspace workspace, ServerOptions options)
         int? column = null,
         [Description("Include declaration locations. Defaults to false.")]
         bool includeDeclarations = false,
+        [Description("Include the resolved definition in the response. Defaults to false.")]
+        bool includeDefinition = false,
         [Description("References to skip. Defaults to 0.")]
         int? offset = null,
         [Description("References to return. Defaults to the server reference limit.")]
@@ -49,7 +51,8 @@ public sealed class ReferencesTool(Workspace workspace, ServerOptions options)
             return ReferencesJson.References(
                 result,
                 detail ?? options.Detail,
-                ToolJson.SearchQueryFor(name));
+                ToolJson.SearchQueryFor(name),
+                includeDefinition);
         }
         catch (QueryException exception)
         {
