@@ -4,14 +4,13 @@ const path = require("node:path");
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const { binaryPath } = require("../src/cache");
+const { updateConfig } = require("../src/upgrade-config");
 const {
   fetchLatestVersion,
   installLatest,
-  isNewer,
-  parseUpgradeArgs,
-  runUpgrade,
-  updateConfig
-} = require("../src/upgrade");
+  isNewer
+} = require("../src/upgrade-npm");
+const { parseUpgradeArgs, runUpgrade } = require("../src/upgrade");
 
 function temporaryDirectory() {
   return fs.mkdtempSync(path.join(os.tmpdir(), "roslyngate-upgrade-"));
