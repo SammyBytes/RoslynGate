@@ -11,6 +11,8 @@ All notable changes to RoslynGate are documented here. The format follows
 - Fix `benchmarks/claude-ab.ps1` so the MCP config parameter is not
   overwritten by a case-insensitive local variable, and write the baseline
   config as UTF-8 without a BOM.
+- Record per-run input, output, cache, turn, and duration data in the Claude
+  A/B benchmark, and keep each raw JSON response for inspection.
 
 ## [0.1.3] - 2026-10-23
 
