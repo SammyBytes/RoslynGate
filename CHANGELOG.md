@@ -13,6 +13,8 @@ All notable changes to RoslynGate are documented here. The format follows
   config as UTF-8 without a BOM.
 - Record per-run input, output, cache, turn, and duration data in the Claude
   A/B benchmark, and keep each raw JSON response for inspection.
+- Restrict built-in tools with `--tools` so the `with` run cannot silently
+  use `Read`, `Grep`, or `Glob` alongside RoslynGate.
 
 ## [0.1.3] - 2026-10-23
 

@@ -92,6 +92,7 @@ function Invoke-ClaudeRun {
         [string]$Mode,
         [string]$Config,
         [string]$AllowedTools,
+        [string]$BuiltInTools,
         [int]$Iteration
     )
 
@@ -103,6 +104,13 @@ function Invoke-ClaudeRun {
         "--output-format", "json",
         "--no-session-persistence"
     )
+
+    if ([string]::IsNullOrEmpty($BuiltInTools)) {
+        $claudeArgs += "--tools="
+    }
+    else {
+        $claudeArgs += @("--tools", $BuiltInTools)
+    }
 
     if (-not [string]::IsNullOrWhiteSpace($Model)) {
         $claudeArgs += @("--model", $Model)
@@ -177,10 +185,10 @@ for ($iteration = 1; $iteration -le $Runs; $iteration++) {
 
     foreach ($mode in $order) {
         if ($mode -eq "with") {
-            $results += Invoke-ClaudeRun -Mode "with" -Config $withConfigPath -AllowedTools $mcpTools -Iteration $iteration
+            $results += Invoke-ClaudeRun -Mode "with" -Config $withConfigPath -AllowedTools $mcpTools -BuiltInTools "" -Iteration $iteration
         }
         else {
-            $results += Invoke-ClaudeRun -Mode "without" -Config $withoutConfigPath -AllowedTools $baselineTools -Iteration $iteration
+            $results += Invoke-ClaudeRun -Mode "without" -Config $withoutConfigPath -AllowedTools $baselineTools -BuiltInTools $baselineTools -Iteration $iteration
         }
     }
 }
