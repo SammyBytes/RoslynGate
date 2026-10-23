@@ -15,3 +15,4 @@ pull request.
 | D-08 | Every actionable error carries `code`, `hint`, and `try`. | An agent must be able to recover without reading external documentation. |
 | D-09 | Caps and stable ordering everywhere. | Determinism is a feature; unbounded responses defeat the purpose of the tool. |
 | D-10 | Flags and environment variables, no config file. | Unix composition and predictable precedence: flag > environment > default. |
+| D-11 | Use `System.CommandLine` 2.0.x in `Cli` only. | Replaces hand-written parsing and help with the Microsoft standard, keeps environment precedence and limit clamping in `OptionValues`, and leaves `Engine` and `Mcp` untouched. |

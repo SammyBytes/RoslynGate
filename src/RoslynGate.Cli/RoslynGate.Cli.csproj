@@ -2,7 +2,13 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
+    <AssemblyName>roslyngate</AssemblyName>
+    <ToolCommandName>roslyngate</ToolCommandName>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.CommandLine" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\RoslynGate.Engine\RoslynGate.Engine.csproj" />

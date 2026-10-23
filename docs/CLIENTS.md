@@ -10,7 +10,7 @@ Use the built DLL or a published binary. Never use `dotnet run` in a client
 configuration: its build output can write to stdout and corrupt the MCP stream.
 
 ```text
-/absolute/path/to/RoslynGate/src/RoslynGate.Cli/bin/Debug/net10.0/RoslynGate.Cli.dll
+/absolute/path/to/RoslynGate/src/RoslynGate.Cli/bin/Debug/net10.0/roslyngate.dll
 ```
 
 Replace `/absolute/path/to/repository` with the solution directory. `--solution`
@@ -27,7 +27,7 @@ Claude Desktop, Cursor, Cline, and other clients that use `mcpServers`:
     "roslyngate": {
       "command": "dotnet",
       "args": [
-        "/absolute/path/to/RoslynGate.Cli.dll",
+        "/absolute/path/to/roslyngate.dll",
         "--solution",
         "/absolute/path/to/repository"
       ]
@@ -39,7 +39,7 @@ Claude Desktop, Cursor, Cline, and other clients that use `mcpServers`:
 ## Claude Code
 
 ```bash
-claude mcp add roslyngate -- dotnet /absolute/path/to/RoslynGate.Cli.dll --solution /absolute/path/to/repository
+claude mcp add roslyngate -- dotnet /absolute/path/to/roslyngate.dll --solution /absolute/path/to/repository
 ```
 
 Or add the server to the project `.mcp.json` using the generic `mcpServers`
@@ -61,7 +61,7 @@ the global Cursor MCP configuration.
       "type": "stdio",
       "command": "dotnet",
       "args": [
-        "/absolute/path/to/RoslynGate.Cli.dll",
+        "/absolute/path/to/roslyngate.dll",
         "--solution",
         "/absolute/path/to/repository"
       ]
@@ -80,7 +80,7 @@ The repository includes `opencode.jsonc`:
     "servers": {
       "roslyngate": {
         "type": "local",
-        "command": ["dotnet", "src/RoslynGate.Cli/bin/Debug/net10.0/RoslynGate.Cli.dll"],
+        "command": ["dotnet", "src/RoslynGate.Cli/bin/Debug/net10.0/roslyngate.dll"],
         "cwd": ".",
         "codemode": false
       }

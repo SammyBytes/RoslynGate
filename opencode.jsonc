@@ -6,7 +6,7 @@
         "type": "local",
         "command": [
           "dotnet",
-          "src/RoslynGate.Cli/bin/Debug/net10.0/RoslynGate.Cli.dll"
+          "src/RoslynGate.Cli/bin/Debug/net10.0/roslyngate.dll"
         ],
         "cwd": ".",
         // Expose the four tools directly instead of through Code Mode.

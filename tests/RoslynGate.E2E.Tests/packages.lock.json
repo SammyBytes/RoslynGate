@@ -467,11 +467,12 @@
           "xunit.extensibility.core": "[2.9.3]"
         }
       },
-      "roslyngate.cli": {
+      "roslyngate": {
         "type": "Project",
         "dependencies": {
           "RoslynGate.Engine": "[0.1.0, )",
-          "RoslynGate.Mcp": "[0.1.0, )"
+          "RoslynGate.Mcp": "[0.1.0, )",
+          "System.CommandLine": "[2.0.13, )"
         }
       },
       "roslyngate.engine": {
@@ -569,6 +570,12 @@
           "Microsoft.Extensions.Hosting.Abstractions": "10.0.13",
           "ModelContextProtocol.Core": "[2.3.0]"
         }
+      },
+      "System.CommandLine": {
+        "type": "CentralTransitive",
+        "requested": "[2.0.13, )",
+        "resolved": "2.0.13",
+        "contentHash": "TIO2lMV+sSP7WW7pD/oCRHD9ENWY+jqwXmYzgks3R46cEdDzwjQOAhsiBn+M3EegfGjgTpa2h+eIrcU+AM2k6A=="
       }
     }
   }
