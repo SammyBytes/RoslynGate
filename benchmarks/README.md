@@ -58,6 +58,8 @@ A single small question often shows no gain because the four tool schemas and
 server instructions add fixed context. Use several symbols and a real repository
 to measure the net effect. On a large solution, the first call also pays the
 workspace-load time; `--no-prewarm` makes that cost visible in the run duration.
+Use fully qualified names for ambiguous symbols such as `Doors`, and raise
+`--ref-limit` when a query asks for all references.
 
 If Claude Code reports an error about a missing `usage` field, inspect the raw
 JSON printed by the script; the field layout varies by Claude Code version.
