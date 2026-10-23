@@ -40,7 +40,8 @@ public static class McpHost
                 };
                 server.ServerInstructions = Instructions.Text;
             })
-            .WithStdioServerTransport();
+            .WithStdioServerTransport()
+            .WithTools<DefinitionTool>();
 
         using var host = builder.Build();
 

@@ -2,6 +2,7 @@ using RoslynGate.Engine;
 
 namespace RoslynGate.Engine.Tests;
 
+[Collection(WorkspaceTestGroup.Name)]
 public sealed class WorkspaceTests
 {
     [Fact]
