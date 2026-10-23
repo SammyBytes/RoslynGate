@@ -62,6 +62,24 @@ public sealed class ToolJsonTests
     }
 
     [Fact]
+    public void ErrorWithSuggestionIncludesTry()
+    {
+        var result = ToolJson.Error(new ToolError(
+            "query_too_short",
+            "Query is too short.",
+            "Use at least 2 characters.",
+            new ToolSuggestion(
+                ToolNames.SearchSymbols,
+                new Dictionary<string, object?> { ["query"] = "Widget" })));
+
+        var json = ReadText(result);
+        var suggestion = json.GetProperty("error").GetProperty("try");
+
+        Assert.Equal(ToolNames.SearchSymbols, suggestion.GetProperty("tool").GetString());
+        Assert.Equal("Widget", suggestion.GetProperty("arguments").GetProperty("query").GetString());
+    }
+
+    [Fact]
     public void CompactDocumentationIsTruncated()
     {
         var symbol = Symbol with { Documentation = new string('x', 500) };

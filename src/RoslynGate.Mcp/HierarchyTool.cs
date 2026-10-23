@@ -34,25 +34,22 @@ public sealed class HierarchyTool(Workspace workspace, ServerOptions options)
                 .GetAsync(snapshot, new SymbolTarget(name, file, line, column), cancellationToken)
                 .ConfigureAwait(false);
 
-            return HierarchyJson.Hierarchy(result, detail ?? options.Detail);
+            return HierarchyJson.Hierarchy(
+                result,
+                detail ?? options.Detail,
+                ToolJson.SearchQueryFor(name));
         }
-        catch (DefinitionException exception)
+        catch (QueryException exception)
         {
-            return ToolJson.Error(exception.Code, exception.Message, exception.Hint);
+            return ToolErrors.From(exception);
         }
         catch (SolutionNotFoundException exception)
         {
-            return ToolJson.Error(
-                ToolErrorCodes.SolutionNotFound,
-                exception.Message,
-                "Pass --solution when starting the server, or run roslyngate --check.");
+            return ToolErrors.From(exception);
         }
         catch (WorkspaceLoadException exception)
         {
-            return ToolJson.Error(
-                ToolErrorCodes.SolutionLoadFailed,
-                exception.Message,
-                "Run roslyngate --check to inspect the solution.");
+            return ToolErrors.From(exception);
         }
     }
 }

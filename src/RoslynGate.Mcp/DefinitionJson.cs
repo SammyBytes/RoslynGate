@@ -7,16 +7,19 @@ namespace RoslynGate.Mcp;
 
 public static class DefinitionJson
 {
-    public static CallToolResult Definition(DefinitionResult result, DetailLevel detail)
+    public static CallToolResult Definition(
+        DefinitionResult result,
+        DetailLevel detail,
+        string? searchQuery = null)
     {
         var json = detail == DetailLevel.Verbose
-            ? WriteVerbose(result)
-            : WriteCompact(result);
+            ? WriteVerbose(result, searchQuery)
+            : WriteCompact(result, searchQuery);
 
         return ToolJson.Text(json);
     }
 
-    private static string WriteCompact(DefinitionResult result)
+    private static string WriteCompact(DefinitionResult result, string? searchQuery)
     {
         using var stream = new MemoryStream();
         using (var writer = new Utf8JsonWriter(stream, ToolJson.WriterOptions))
@@ -31,16 +34,14 @@ public static class DefinitionJson
             }
             else
             {
-                writer.WriteStartObject();
-                writer.WriteNull("symbol");
-                writer.WriteEndObject();
+                ToolJson.WriteNotFound(writer, "symbol", searchQuery);
             }
         }
 
         return Encoding.UTF8.GetString(stream.ToArray());
     }
 
-    private static string WriteVerbose(DefinitionResult result)
+    private static string WriteVerbose(DefinitionResult result, string? searchQuery)
     {
         using var stream = new MemoryStream();
         using (var writer = new Utf8JsonWriter(stream, ToolJson.WriterOptions))
@@ -55,6 +56,10 @@ public static class DefinitionJson
             else
             {
                 writer.WriteNull("symbol");
+                if (searchQuery is not null)
+                {
+                    ToolJson.WriteSuggestion(writer, searchQuery);
+                }
             }
 
             writer.WriteBoolean("ambiguous", result.Ambiguous);
