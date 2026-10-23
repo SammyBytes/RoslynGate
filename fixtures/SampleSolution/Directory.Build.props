@@ -1,0 +1,9 @@
+<Project>
+
+  <!-- Test fixture: warnings are irrelevant and must not fail the build. -->
+  <PropertyGroup>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <EnableNETAnalyzers>false</EnableNETAnalyzers>
+  </PropertyGroup>
+
+</Project>

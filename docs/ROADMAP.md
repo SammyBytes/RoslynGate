@@ -29,11 +29,12 @@
 
 ## F1 - Workspace
 
-- [ ] Add the sample solution fixture.
-- [ ] Implement solution discovery with actionable errors.
-- [ ] Implement lazy loading and single-flight.
-- [ ] Add background prewarm and cancellation.
-- [ ] Test 0, 1, and 2 solutions.
+- [x] Add the sample solution fixture.
+- [x] Implement solution discovery with actionable errors.
+- [x] Implement lazy loading and single-flight.
+- [x] Add background prewarm and cancellation.
+- [x] Test 0, 1, and 2 solutions.
+- [x] Make `--check` load the solution and report projects and load time.
 
 ## F2 - Definition
 

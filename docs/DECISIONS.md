@@ -16,3 +16,4 @@ pull request.
 | D-09 | Caps and stable ordering everywhere. | Determinism is a feature; unbounded responses defeat the purpose of the tool. |
 | D-10 | Flags and environment variables, no config file. | Unix composition and predictable precedence: flag > environment > default. |
 | D-11 | Use `System.CommandLine` 2.0.x in `Cli` only. | Replaces hand-written parsing and help with the Microsoft standard, keeps environment precedence and limit clamping in `OptionValues`, and leaves `Engine` and `Mcp` untouched. |
+| D-12 | Pin `global.json` to an SDK present in the installation used by MSBuild. | A mismatch makes the MSBuild build host print SDK discovery output, which can leak into `stdout`. |
