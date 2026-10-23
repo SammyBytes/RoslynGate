@@ -4,9 +4,9 @@
     "net10.0": {
       "Microsoft.Build.Framework": {
         "type": "Direct",
-        "requested": "[17.11.48, )",
-        "resolved": "17.11.48",
-        "contentHash": "C3WIMt2wBl4++NX3jSEpTq5KXBhvAV154R4JrYHkfy9JSBcXWiL0mkgpspk5xSdOj+fS/uz7zluIy6bMM1fkkQ=="
+        "requested": "[17.14.28, )",
+        "resolved": "17.14.28",
+        "contentHash": "wRcyTzGV0LRAtFdrddtioh59Ky4/zbvyraP0cQkDzRSRkhgAQb0K88D/JNC6VHLIXanRi3mtV1jU0uQkBwmiVg=="
       },
       "Microsoft.Build.Locator": {
         "type": "Direct",
