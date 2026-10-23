@@ -25,6 +25,29 @@ Every response is JSON. `detail=compact` (default) keeps the wire small;
 - .NET 10 SDK
 - Linux, macOS, or Windows
 
+## Install
+
+Use the npm wrapper:
+
+```bash
+npx -y roslyngate --solution /path/to/repository
+```
+
+Or install it globally:
+
+```bash
+npm install -g roslyngate
+roslyngate --solution /path/to/repository
+```
+
+The first run downloads the self-contained binary for the current platform,
+verifies its SHA-256 checksum, and caches it. Supported platforms are Linux
+x64, Windows x64, and macOS arm64.
+
+You can also download the binary for your platform from
+[Releases](https://github.com/SammyBytes/RoslynGate/releases) and verify its
+`.sha256` file.
+
 ## Build
 
 ```bash
@@ -47,8 +70,8 @@ to stop it.
 {
   "mcpServers": {
     "roslyngate": {
-      "command": "/path/to/roslyngate",
-      "args": ["--solution", "/path/to/repository"]
+      "command": "npx",
+      "args": ["-y", "roslyngate", "--solution", "/path/to/repository"]
     }
   }
 }
@@ -126,6 +149,7 @@ dotnet restore fixtures/SampleSolution/SampleSolution.sln
 dotnet build RoslynGate.sln -warnaserror
 dotnet test RoslynGate.sln
 dotnet format RoslynGate.sln --verify-no-changes
+npm test --prefix packaging/npm
 ```
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for the trunk-based workflow.

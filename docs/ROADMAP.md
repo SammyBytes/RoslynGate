@@ -63,11 +63,10 @@
 
 ## F5 - Distribution
 
-- [ ] Publish self-contained binaries for three RIDs.
-- [ ] Add the npm wrapper.
-- [ ] Document installation paths and `npx`/`bunx` usage.
-- [ ] Document every flag, environment variable, default, and output mode
-      with copyable examples.
-- [ ] Publish `v0.1.0` with checksums.
+- [x] Add the release workflow for linux-x64, win-x64, and osx-arm64.
+- [x] Add the npm wrapper with checksum verification and cache.
+- [x] Document installation paths and `npx` usage.
+- [x] Document flags, environment variables, defaults, and output modes.
+- [ ] Publish `v0.1.0` with binaries and checksums.
 - [ ] Wait for explicit approval before the AOT spike. If approved, run it on a
       separate experimental branch and record the result.

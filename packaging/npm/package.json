@@ -1,0 +1,29 @@
+{
+  "name": "roslyngate",
+  "version": "0.1.0",
+  "description": "Token-efficient MCP server that answers .NET symbol questions with Roslyn instead of grep.",
+  "license": "MIT",
+  "bin": {
+    "roslyngate": "bin/roslyngate.js"
+  },
+  "files": [
+    "bin",
+    "src",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "test": "node --test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SammyBytes/RoslynGate.git",
+    "directory": "packaging/npm"
+  },
+  "homepage": "https://github.com/SammyBytes/RoslynGate",
+  "publishConfig": {
+    "access": "public"
+  }
+}

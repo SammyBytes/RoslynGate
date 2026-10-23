@@ -59,6 +59,7 @@ dotnet test RoslynGate.sln
 dotnet format RoslynGate.sln --verify-no-changes
 dotnet run --project src/RoslynGate.Cli -- --solution fixtures/SampleSolution
 dotnet run --project src/RoslynGate.Cli -- --check
+npm test --prefix packaging/npm
 ```
 
 ## stdout smoke test
