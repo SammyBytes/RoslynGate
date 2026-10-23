@@ -19,4 +19,4 @@ pull request.
 | D-12 | Pin `global.json` to an SDK present in the installation used by MSBuild. | A mismatch makes the MSBuild build host print SDK discovery output, which can leak into `stdout`. |
 | D-13 | Diagnostics use `ILogger<T>` to stderr; `Console.SetOut(Console.Error)` is the only protocol guard. | Keeps `stdout` clean without discarding dependency output, and avoids scattered `Console.Error` callbacks in `Engine`. |
 | D-14 | Ship self-contained single-file binaries with content self-extract; the npm wrapper verifies SHA-256 and caches. | Avoids the MSBuild/AOT incompatibility while keeping installation to one file and one command. |
-| D-15 | Accept ~1 s startup for v0.1.0; keep the <50 ms target as an AOT/low-level-host goal. | A minimal MCP SDK host starts in ~0.85 s and the release handshake is ~1 s; workspace loading is already deferred. |
+| D-15 | Use an empty host builder and ReadyToRun binaries to reduce startup; keep <50 ms as an AOT/low-level-host goal. | Warm handshake drops from ~1.0 s to ~0.32 s; the first run still pays single-file extraction (~1.4 s), and workspace loading stays deferred. |

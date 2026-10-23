@@ -22,10 +22,11 @@ Every response is JSON. `detail=compact` (default) keeps the wire small;
 
 ## Performance
 
-Against `rg` on this repository, compact responses used **76-91% fewer
+Against `rg` on this repository, compact responses used **76-92% fewer
 characters** for definition, references, hierarchy, and search tasks. Warm
-queries took 5-27 ms; the first query includes MSBuild loading (~14 s on this
-repository). The current MCP host starts in ~1 s. See
+queries took 4-11 ms; the first query includes MSBuild loading (~11 s on this
+repository). The MCP handshake takes ~0.33 s after the first run; the first run
+also extracts the single-file binary (~1.4 s). See
 [docs/BENCHMARKS.md](docs/BENCHMARKS.md) for methodology and caveats.
 
 ## Requirements
@@ -50,8 +51,8 @@ npx -y roslyngate --solution /path/to/repository
 
 The first run downloads the self-contained binary for the current platform,
 verifies its SHA-256 checksum, and caches it. Supported platforms are Linux
-x64, Windows x64, and macOS arm64. `v0.1.0` release binaries are available on
-the [Releases](https://github.com/SammyBytes/RoslynGate/releases) page.
+x64, Windows x64, and macOS arm64. Release binaries are available on the
+[Releases](https://github.com/SammyBytes/RoslynGate/releases) page.
 
 You can also download the binary for your platform from
 [Releases](https://github.com/SammyBytes/RoslynGate/releases) and verify its

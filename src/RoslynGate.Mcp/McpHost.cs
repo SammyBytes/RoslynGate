@@ -14,7 +14,7 @@ public static class McpHost
         // stdout belongs to the MCP transport. Accidental Console.Out writes go to stderr.
         Console.SetOut(Console.Error);
 
-        var builder = Host.CreateApplicationBuilder();
+        var builder = Host.CreateEmptyApplicationBuilder(new HostApplicationBuilderSettings());
 
         builder.Logging.ClearProviders();
         builder.Logging.AddConsole(console => console.LogToStandardErrorThreshold = LogLevel.Trace);

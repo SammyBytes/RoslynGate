@@ -7,7 +7,8 @@ public sealed class ContractTests
     [Fact]
     public void BuildInfoUsesTheProjectVersion()
     {
-        Assert.Equal("0.1.0", BuildInfo.Version);
+        var assemblyVersion = typeof(BuildInfo).Assembly.GetName().Version;
+        Assert.Equal(assemblyVersion?.ToString(3), BuildInfo.Version);
     }
 
     [Fact]
