@@ -6,6 +6,11 @@ All notable changes to RoslynGate are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- `benchmarks/claude-ab.ps1` for measuring real Claude Code token usage with
+  and without RoslynGate on Windows.
+
 ## [0.1.2] - 2026-10-23
 
 **In plain terms:** setup for Claude Code is now one command. It downloads the
