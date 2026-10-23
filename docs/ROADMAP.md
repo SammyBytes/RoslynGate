@@ -40,10 +40,11 @@
 
 ## F2 - Definition
 
-- [ ] Resolve by qualified name.
-- [ ] Resolve by file and line.
-- [ ] Return deterministic candidates for ambiguity.
-- [ ] Serialize compact and verbose.
+- [x] Resolve by qualified name.
+- [x] Resolve by file and line.
+- [x] Return deterministic candidates for ambiguity.
+- [x] Serialize compact and verbose.
+- [x] Expose `get_symbol_definition` over MCP with actionable errors.
 
 ## F3 - References and hierarchy
 

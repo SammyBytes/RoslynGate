@@ -31,7 +31,10 @@ public sealed class HostTests
 
             Assert.Equal(2, toolsList.RootElement.GetProperty("id").GetInt32());
             var tools = toolsList.RootElement.GetProperty("result").GetProperty("tools");
-            Assert.Equal(0, tools.GetArrayLength());
+            Assert.Equal(1, tools.GetArrayLength());
+            Assert.Equal(
+                ToolNames.GetSymbolDefinition,
+                tools[0].GetProperty("name").GetString());
 
             await process.StandardInput.WriteLineAsync(
                 """{"jsonrpc":"2.0","id":3,"method":"ping"}""");

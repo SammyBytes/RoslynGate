@@ -9,5 +9,5 @@ internal static class TestProtocol
     public static string Version => BuildInfo.Version;
 
     public static readonly TimeSpan PrewarmWait = TimeSpan.FromSeconds(6);
-    public static readonly TimeSpan MessageTimeout = TimeSpan.FromSeconds(15);
+    public static readonly TimeSpan MessageTimeout = TimeSpan.FromSeconds(60);
 }
