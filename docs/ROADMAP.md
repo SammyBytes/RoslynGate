@@ -63,4 +63,5 @@
 - [ ] Document every flag, environment variable, default, and output mode
       with copyable examples.
 - [ ] Publish `v0.1.0` with checksums.
-- [ ] Run the AOT spike and record the result.
+- [ ] Wait for explicit approval before the AOT spike. If approved, run it on a
+      separate experimental branch and record the result.
