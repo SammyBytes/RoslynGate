@@ -6,8 +6,6 @@ namespace RoslynGate.Mcp;
 
 public static class SearchJson
 {
-    private const string TruncatedHint = "Refine the query or increase limit.";
-
     public static CallToolResult Search(SearchResult result, DetailLevel detail)
     {
         var json = detail == DetailLevel.Verbose
@@ -41,7 +39,10 @@ public static class SearchJson
 
             if (result.Truncated)
             {
-                writer.WriteString("hint", TruncatedHint);
+                ToolJson.WriteNextPage(
+                    writer,
+                    result.Offset + result.Hits.Count,
+                    ToolNames.SearchSymbols);
             }
 
             writer.WriteEndObject();
@@ -70,7 +71,10 @@ public static class SearchJson
 
             if (result.Truncated)
             {
-                writer.WriteString("hint", TruncatedHint);
+                ToolJson.WriteNextPage(
+                    writer,
+                    result.Offset + result.Hits.Count,
+                    ToolNames.SearchSymbols);
             }
 
             writer.WriteEndObject();

@@ -20,6 +20,19 @@ the context window.
 Every response is JSON. `detail=compact` (default) keeps the wire small;
 `detail=verbose` adds namespace, container, column, and longer documentation.
 
+When a page is truncated, `find_symbol_references` and `search_symbols` also
+return `nextOffset` and a `hint`:
+
+```json
+{
+  "total": 120,
+  "offset": 0,
+  "truncated": true,
+  "nextOffset": 50,
+  "hint": "Call find_symbol_references again with offset=50 and the same arguments."
+}
+```
+
 ## Performance
 
 Against `rg` on this repository, compact responses used **76-92% fewer
@@ -47,8 +60,8 @@ roslyngate setup claude
 Or run it without installing:
 
 ```bash
-npx -y roslyngate@0.1.3 setup claude
-bunx roslyngate@0.1.3 setup claude
+npx -y roslyngate@0.1.4 setup claude
+bunx roslyngate@0.1.4 setup claude
 ```
 
 `setup claude` writes `.mcp.json` with the native binary path, solution path,

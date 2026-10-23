@@ -36,6 +36,25 @@ public sealed class ReferenceToolTests(McpFixture fixture)
 
         Assert.Equal(1, text.GetProperty("refs").GetArrayLength());
         Assert.True(text.GetProperty("truncated").GetBoolean());
+        Assert.Equal(1, text.GetProperty("nextOffset").GetInt32());
+        Assert.Contains(
+            "offset=1",
+            text.GetProperty("hint").GetString(),
+            StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task CompleteReferencePageOmitsNextOffset()
+    {
+        var line = FixtureSource.LineOf("SampleSdk/Widget.cs", "public Task Open(string doorId)");
+        using var response = await fixture.Session.CallToolAsync(
+            ToolNames.FindSymbolReferences,
+            new { file = "SampleSdk/Widget.cs", line, limit = 200 });
+        var text = ToolTestHelpers.ToolText(response);
+
+        Assert.False(text.GetProperty("truncated").GetBoolean());
+        Assert.False(text.TryGetProperty("nextOffset", out _));
+        Assert.False(text.TryGetProperty("hint", out _));
     }
 
     [Fact]
