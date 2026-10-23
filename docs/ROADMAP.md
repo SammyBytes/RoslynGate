@@ -67,6 +67,7 @@
 - [x] Add the npm wrapper with checksum verification and cache.
 - [x] Document installation paths and `npx` usage.
 - [x] Document flags, environment variables, defaults, and output modes.
+- [x] Measure token volume and latency against `rg`.
 - [x] Publish `v0.1.0` with binaries and checksums.
 - [ ] Wait for explicit approval before the AOT spike. If approved, run it on a
       separate experimental branch and record the result.

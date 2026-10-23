@@ -20,6 +20,14 @@ the context window.
 Every response is JSON. `detail=compact` (default) keeps the wire small;
 `detail=verbose` adds namespace, container, column, and longer documentation.
 
+## Performance
+
+Against `rg` on this repository, compact responses used **76-91% fewer
+characters** for definition, references, hierarchy, and search tasks. Warm
+queries took 5-27 ms; the first query includes MSBuild loading (~14 s on this
+repository). The current MCP host starts in ~1 s. See
+[docs/BENCHMARKS.md](docs/BENCHMARKS.md) for methodology and caveats.
+
 ## Requirements
 
 - .NET 10 SDK
@@ -153,7 +161,8 @@ dotnet format RoslynGate.sln --verify-no-changes
 npm test --prefix packaging/npm
 ```
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for the trunk-based workflow.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the trunk-based workflow and
+[docs/BENCHMARKS.md](docs/BENCHMARKS.md) for token and latency measurements.
 
 ## License
 

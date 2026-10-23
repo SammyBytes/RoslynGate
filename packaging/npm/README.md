@@ -22,6 +22,10 @@ The first run downloads the self-contained binary for the current platform,
 verifies its SHA-256 checksum, and caches it under `~/.cache/roslyngate` on
 Linux/macOS or `%LOCALAPPDATA%\roslyngate` on Windows.
 
+Bun consumes npm packages from the npm registry. After `roslyngate` is
+published there, `bunx roslyngate --solution /path/to/repository` works without
+a separate Bun package or registry publish.
+
 ## Supported platforms
 
 - Linux x64
