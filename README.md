@@ -72,8 +72,9 @@ the generic `mcpServers` shape.
 
 ## Check
 
-`--check` validates the configuration and locates the solution without starting
-the protocol. It exits `0` when the configuration is usable and `1` otherwise.
+`--check` validates the configuration, locates the solution, and loads it with
+MSBuild without starting the protocol. It reports the project count and load
+time, and exits `0` when the workspace is usable and `1` otherwise.
 
 ```bash
 roslyngate --solution . --check
@@ -121,6 +122,7 @@ Failures are self-correcting. When a call returns `isError: true`, read
 
 ```bash
 dotnet restore --locked-mode
+dotnet restore fixtures/SampleSolution/SampleSolution.sln
 dotnet build RoslynGate.sln -warnaserror
 dotnet test RoslynGate.sln
 dotnet format RoslynGate.sln --verify-no-changes

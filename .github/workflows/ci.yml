@@ -27,8 +27,14 @@ jobs:
       - name: Restore
         run: dotnet restore --locked-mode
 
+      - name: Restore fixture
+        run: dotnet restore fixtures/SampleSolution/SampleSolution.sln
+
       - name: Build
         run: dotnet build RoslynGate.sln -warnaserror --no-restore
+
+      - name: Build fixture
+        run: dotnet build fixtures/SampleSolution/SampleSolution.sln --no-restore
 
       - name: Test
         run: dotnet test RoslynGate.sln --no-build

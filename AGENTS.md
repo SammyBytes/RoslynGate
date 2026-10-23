@@ -52,6 +52,7 @@ writes to `stdout` outside the transport, and the roadmap is updated.
 ## Commands
 
 ```bash
+dotnet restore fixtures/SampleSolution/SampleSolution.sln
 dotnet build RoslynGate.sln -warnaserror
 dotnet test RoslynGate.sln
 dotnet format RoslynGate.sln --verify-no-changes

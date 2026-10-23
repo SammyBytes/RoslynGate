@@ -123,7 +123,7 @@ public static class CommandLine
 
             if (parseResult.GetValue(check))
             {
-                return Check.Run(options);
+                return await Check.RunAsync(options, cancellationToken).ConfigureAwait(false);
             }
 
             return await McpHost.RunAsync(options, cancellationToken);

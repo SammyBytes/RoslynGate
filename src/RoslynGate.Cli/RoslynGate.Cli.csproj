@@ -3,7 +3,6 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <AssemblyName>roslyngate</AssemblyName>
-    <ToolCommandName>roslyngate</ToolCommandName>
   </PropertyGroup>
 
   <ItemGroup>
