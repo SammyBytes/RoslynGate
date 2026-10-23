@@ -21,6 +21,11 @@ public static class Check
             var snapshot = await workspace.GetAsync(cancellationToken).ConfigureAwait(false);
             stopwatch.Stop();
 
+            foreach (var diagnostic in workspace.Diagnostics)
+            {
+                Console.Error.WriteLine($"roslyngate: warning: {diagnostic}");
+            }
+
             output.WriteLine($"{ProductInfo.Name}  {BuildInfo.Version}");
             Write(output, CheckText.Solution, snapshot.SolutionPath);
             Write(output, CheckText.Projects, snapshot.Solution.Projects.Count().ToString());

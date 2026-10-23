@@ -18,7 +18,10 @@ public sealed class Workspace : IDisposable
     private WorkspaceSnapshot? _snapshot;
     private Task<WorkspaceSnapshot>? _loading;
     private MSBuildWorkspace? _msbuildWorkspace;
+    private IReadOnlyList<string> _diagnostics = Array.Empty<string>();
     private bool _disposed;
+
+    public IReadOnlyList<string> Diagnostics => _diagnostics;
 
     public Workspace(string? solutionPath, ILogger<Workspace>? logger = null)
     {
@@ -96,15 +99,8 @@ public sealed class Workspace : IDisposable
         var failures = new List<string>();
         msbuildWorkspace.RegisterWorkspaceFailedHandler(args =>
         {
-            if (args.Diagnostic.Kind == WorkspaceDiagnosticKind.Failure)
-            {
-                failures.Add(args.Diagnostic.Message);
-                _logger.LogError("MSBuild: {Message}", args.Diagnostic.Message);
-            }
-            else
-            {
-                _logger.LogWarning("MSBuild: {Message}", args.Diagnostic.Message);
-            }
+            failures.Add(args.Diagnostic.Message);
+            _logger.LogWarning("MSBuild: {Message}", args.Diagnostic.Message);
         });
 
         try
@@ -113,20 +109,19 @@ public sealed class Workspace : IDisposable
                 .OpenSolutionAsync(solutionPath, progress: null, cancellationToken)
                 .ConfigureAwait(false);
 
-            if (failures.Count > 0)
-            {
-                throw new WorkspaceLoadException(
-                    $"Failed to load {solutionPath}:{Environment.NewLine}" +
-                    string.Join(
-                        Environment.NewLine,
-                        failures.Take(WorkspaceLimits.MaxLoadDiagnostics)));
-            }
-
+            // Legacy solutions report package-compatibility warnings as MSBuild
+            // failures. Keep the loaded projects usable and surface the warnings.
             if (!solution.Projects.Any())
             {
-                throw new WorkspaceLoadException($"No projects loaded from {solutionPath}.");
+                var details = failures.Count == 0
+                    ? string.Empty
+                    : Environment.NewLine + string.Join(
+                        Environment.NewLine,
+                        failures.Take(WorkspaceLimits.MaxLoadDiagnostics));
+                throw new WorkspaceLoadException($"No projects loaded from {solutionPath}.{details}");
             }
 
+            _diagnostics = failures.Take(WorkspaceLimits.MaxLoadDiagnostics).ToArray();
             _msbuildWorkspace = msbuildWorkspace;
             return new WorkspaceSnapshot(
                 solutionPath,

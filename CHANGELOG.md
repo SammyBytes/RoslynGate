@@ -6,10 +6,23 @@ All notable changes to RoslynGate are documented here. The format follows
 
 ## [Unreleased]
 
-### Added
+## [0.1.3] - 2026-10-23
 
-- `benchmarks/claude-ab.ps1` for measuring real Claude Code token usage with
-  and without RoslynGate on Windows.
+**In plain terms:** RoslynGate no longer refuses to open a large solution just
+because some old packages print compatibility warnings. It opens the projects
+it can load, prints those warnings, and lets you use the symbol tools.
+
+### Fixed
+
+- Accept MSBuild diagnostics when the solution still loads at least one project.
+- Report those diagnostics as warnings in `--check` and through `ILogger`.
+- Fail only when the solution produces no projects at all.
+
+### Tests
+
+- Workspace, CLI check, and published E2E suites remain green.
+- The change is designed for legacy solutions mixing .NET Framework packages
+  with modern target frameworks.
 
 ## [0.1.2] - 2026-10-23
 
