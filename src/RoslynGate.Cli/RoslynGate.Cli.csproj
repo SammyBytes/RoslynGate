@@ -5,6 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\RoslynGate.Engine\RoslynGate.Engine.csproj" />
     <ProjectReference Include="..\RoslynGate.Mcp\RoslynGate.Mcp.csproj" />
   </ItemGroup>
 

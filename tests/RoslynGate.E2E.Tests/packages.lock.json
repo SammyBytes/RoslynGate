@@ -470,6 +470,7 @@
       "roslyngate.cli": {
         "type": "Project",
         "dependencies": {
+          "RoslynGate.Engine": "[0.1.0, )",
           "RoslynGate.Mcp": "[0.1.0, )"
         }
       },

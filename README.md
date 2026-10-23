@@ -56,23 +56,24 @@ to stop it.
 
 ## Test with OpenCode
 
-The repository ships `opencode.jsonc`, a local stdio server entry. It is
-disabled until the MCP host exists.
+The repository ships `opencode.jsonc`, a local stdio server entry.
 
 1. Run `dotnet build`.
-2. Remove `"disabled": true` from `opencode.jsonc`.
-3. Start OpenCode in this repository and run `/mcps`.
-4. Confirm `roslyngate connected`.
-5. Ask the agent to use `roslyngate` to find a definition.
+2. Start OpenCode in this repository and run `/mcps`.
+3. Confirm `roslyngate connected`.
+4. Ask the agent to use `roslyngate` to find a definition.
 
 The command runs the built DLL, not `dotnet run`, so build output cannot
 corrupt the MCP stdout stream. For a published binary, replace `command` with
 the binary path and add `--solution /path/to/repository`.
 
+See [docs/CLIENTS.md](docs/CLIENTS.md) for Claude Code, Cursor, VS Code, and
+the generic `mcpServers` shape.
+
 ## Check
 
-`--check` validates the solution and configuration without starting the
-protocol. It exits `0` when the workspace is usable and `1` otherwise.
+`--check` validates the configuration and locates the solution without starting
+the protocol. It exits `0` when the configuration is usable and `1` otherwise.
 
 ```bash
 roslyngate --solution . --check

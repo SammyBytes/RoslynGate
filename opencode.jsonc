@@ -9,8 +9,6 @@
           "src/RoslynGate.Cli/bin/Debug/net10.0/RoslynGate.Cli.dll"
         ],
         "cwd": ".",
-        // Disabled until F0 exposes the MCP host. Remove this line to test.
-        "disabled": true,
         // Expose the four tools directly instead of through Code Mode.
         "codemode": false
       }

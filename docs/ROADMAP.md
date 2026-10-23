@@ -13,18 +13,18 @@
 - [x] Validate restore, build, test, and format.
 - [x] Create the public repository and push the bootstrap commit.
 - [x] Configure merge settings and protect `main`.
-- [ ] Confirm the environment before starting F0.
+- [x] Confirm the environment before starting F0.
 
 ## F0 - MCP host
 
-- [ ] Build the stdio host with the official SDK.
-- [ ] Add `--help`, `--version`, and `--check`.
-- [ ] Verify that every stdout line is valid JSON-RPC.
-- [ ] Configure logging to stderr only.
-- [ ] Document MCP client setup for Claude Code, Cursor, VS Code, and a
+- [x] Build the stdio host with the official SDK.
+- [x] Add `--help`, `--version`, and `--check`.
+- [x] Verify that every stdout line is valid JSON-RPC.
+- [x] Configure logging to stderr only.
+- [x] Document MCP client setup for Claude Code, Cursor, VS Code, and a
       generic `mcpServers` JSON block.
-- [ ] Add the `opencode.jsonc` example and verify the connection.
-- [ ] Document `--check` and the stdout/stderr split for troubleshooting.
+- [x] Add the `opencode.jsonc` example and verify the connection.
+- [x] Document `--check` and the stdout/stderr split for troubleshooting.
 
 ## F1 - Workspace
 
