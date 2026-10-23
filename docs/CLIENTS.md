@@ -67,6 +67,53 @@ the global Cursor MCP configuration.
 }
 ```
 
+## Windows and Claude Code
+
+Download `roslyngate-win-x64.exe` and its `.sha256` from
+[Releases](https://github.com/SammyBytes/RoslynGate/releases), verify the hash,
+and place it at a stable path such as `C:\Tools\roslyngate\roslyngate.exe`.
+
+```powershell
+Get-FileHash "C:\Tools\roslyngate\roslyngate.exe" -Algorithm SHA256
+& "C:\Tools\roslyngate\roslyngate.exe" --check --solution "C:\Dev\MyRepo"
+```
+
+Register it for the current repository:
+
+```powershell
+cd C:\Dev\MyRepo
+claude mcp add --scope project --transport stdio roslyngate -- "C:\Tools\roslyngate\roslyngate.exe" --solution "C:\Dev\MyRepo"
+```
+
+Or create `.mcp.json` at the repository root:
+
+```json
+{
+  "mcpServers": {
+    "roslyngate": {
+      "command": "C:\\Tools\\roslyngate\\roslyngate.exe",
+      "args": ["--solution", "C:\\Dev\\MyRepo"]
+    }
+  }
+}
+```
+
+Start `claude`, approve the project server, and check:
+
+```text
+/mcp
+claude mcp list
+```
+
+If you prefer the npm wrapper, Windows requires `cmd /c`:
+
+```powershell
+claude mcp add --scope user --transport stdio roslyngate -- cmd /c npx -y roslyngate@0.1.1 --solution "C:\Dev\MyRepo"
+```
+
+Test `npx` directly in PowerShell before using it from Claude Code. Use project
+scope, not user scope, when the server is tied to one repository path.
+
 ## OpenCode
 
 The repository includes a development `opencode.jsonc` that runs the locally
