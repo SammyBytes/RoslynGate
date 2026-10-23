@@ -6,6 +6,26 @@ All notable changes to RoslynGate are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.1.2] - 2026-10-23
+
+**In plain terms:** setup for Claude Code is now one command. It downloads the
+right program for your computer, writes the project configuration, and avoids
+making you copy paths or type `npx` commands.
+
+### Added
+
+- `roslyngate setup claude` writes or merges `.mcp.json`.
+- `--solution`, `--print`, and `--dry-run` options.
+- The generated config uses the cached native binary path, so Claude Code does
+  not need `npx` or `cmd /c`.
+- Existing MCP servers and top-level configuration keys are preserved.
+
+### Tests
+
+- Setup parser, path resolution, config merge, malformed config, and write
+  behavior are covered by wrapper tests.
+- `npm test` also checks the package version against `Directory.Build.props`.
+
 ## [0.1.1] - 2026-10-23
 
 **In plain terms:** RoslynGate now opens noticeably faster after the first run.

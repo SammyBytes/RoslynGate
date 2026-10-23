@@ -36,18 +36,29 @@ also extracts the single-file binary (~1.4 s). See
 
 ## Install
 
-Install the wrapper from npm:
+Install and configure Claude Code in one step:
 
 ```bash
 npm install -g roslyngate
-roslyngate --solution /path/to/repository
+cd /path/to/repository
+roslyngate setup claude
 ```
 
 Or run it without installing:
 
 ```bash
-npx -y roslyngate --solution /path/to/repository
-bunx roslyngate --solution /path/to/repository
+npx -y roslyngate@0.1.2 setup claude
+bunx roslyngate@0.1.2 setup claude
+```
+
+`setup claude` writes `.mcp.json` with the native binary path, solution path,
+and no `npx` or `cmd /c` indirection. Open Claude Code and approve
+`roslyngate` in `/mcp`.
+
+To use it as a plain CLI:
+
+```bash
+roslyngate --solution /path/to/repository
 ```
 
 The first run downloads the self-contained binary for the current platform,
