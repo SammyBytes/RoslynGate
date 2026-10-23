@@ -21,6 +21,9 @@
 - [ ] Add `--help`, `--version`, and `--check`.
 - [ ] Verify that every stdout line is valid JSON-RPC.
 - [ ] Configure logging to stderr only.
+- [ ] Document MCP client setup for Claude Code, Cursor, VS Code, and a
+      generic `mcpServers` JSON block.
+- [ ] Document `--check` and the stdout/stderr split for troubleshooting.
 
 ## F1 - Workspace
 
@@ -54,5 +57,8 @@
 
 - [ ] Publish self-contained binaries for three RIDs.
 - [ ] Add the npm wrapper.
+- [ ] Document installation paths and `npx`/`bunx` usage.
+- [ ] Document every flag, environment variable, default, and output mode
+      with copyable examples.
 - [ ] Publish `v0.1.0` with checksums.
 - [ ] Run the AOT spike and record the result.
