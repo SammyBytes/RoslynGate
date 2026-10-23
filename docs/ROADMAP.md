@@ -70,6 +70,10 @@
 - [x] Document installation paths and `npx` usage.
 - [x] Document flags, environment variables, defaults, and output modes.
 - [x] Measure token volume and latency against `rg`.
+- [x] Measure real Claude Code token usage with and without RoslynGate on a
+      99-project legacy solution (initial three-symbol run).
+- [ ] Repeat the Claude Code A/B with a broader symbol set and verify answer
+      completeness.
 - [x] Publish `v0.1.0` with binaries and checksums.
 - [x] Reduce startup with an empty host builder and ReadyToRun.
 - [ ] Wait for explicit approval before the AOT spike. If approved, run it on a
