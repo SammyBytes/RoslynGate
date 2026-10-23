@@ -60,6 +60,21 @@ RoslynGate and compares the real `usage` tokens:
 
 See [benchmarks/README.md](../benchmarks/README.md) for details.
 
+For a team member's own prompt, use `-Prompt` instead of `-Symbols`:
+
+```powershell
+.\benchmarks\claude-ab.ps1 `
+  -Prompt "Find every reference to ViewModels.DatabaseAccess.Doors and answer with file:line" `
+  -Runs 3 `
+  -Model sonnet
+```
+
+This runs the same prompt with and without RoslynGate and reports real tokens,
+cost, turns, and duration. It spends real tokens, so use it for representative
+prompts rather than every prompt. A skill cannot derive the counterfactual on
+its own. Keep prewarm consistent across both arms; the harness copies the
+current `.mcp.json`.
+
 ### Three-symbol query
 
 Measured on 2026-10-23 with Claude Code and Sonnet against a 99-project legacy

@@ -26,7 +26,7 @@ public static class DefinitionJson
         {
             if (result.Symbol is not null)
             {
-                WriteCompactSymbol(writer, result.Symbol);
+                ToolJson.WriteCompactSymbol(writer, result.Symbol);
             }
             else if (result.Ambiguous)
             {
@@ -80,26 +80,6 @@ public static class DefinitionJson
         }
 
         return Encoding.UTF8.GetString(stream.ToArray());
-    }
-
-    private static void WriteCompactSymbol(Utf8JsonWriter writer, SymbolDefinition symbol)
-    {
-        writer.WriteStartObject();
-        writer.WriteString("n", symbol.Name);
-        writer.WriteString("q", symbol.QualifiedName);
-        writer.WriteString("k", symbol.Kind);
-        writer.WriteString("s", symbol.Signature);
-
-        if (symbol.Documentation is { Length: > 0 } documentation)
-        {
-            writer.WriteString(
-                "d",
-                ToolJson.Truncate(documentation, OutputLimits.CompactDocumentationChars));
-        }
-
-        writer.WriteString("f", symbol.Location.File);
-        writer.WriteNumber("l", symbol.Location.Line);
-        writer.WriteEndObject();
     }
 
     private static void WriteAmbiguous(

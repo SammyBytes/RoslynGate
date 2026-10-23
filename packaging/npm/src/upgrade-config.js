@@ -4,7 +4,7 @@ const path = require("node:path");
 const CONFIG_FILE = ".mcp.json";
 const SERVER_NAME = "roslyngate";
 
-function updateConfig(root, binary) {
+function updateConfig(root, binary, { canUpdate } = {}) {
   const file = path.join(root, CONFIG_FILE);
   if (!fs.existsSync(file)) {
     return { updated: false, reason: "missing", file };
@@ -20,6 +20,10 @@ function updateConfig(root, binary) {
   const entry = config?.mcpServers?.[SERVER_NAME];
   if (!entry || typeof entry !== "object" || Array.isArray(entry)) {
     return { updated: false, reason: "missing-entry", file };
+  }
+
+  if (canUpdate && !canUpdate(entry.command)) {
+    return { updated: false, reason: "unmanaged", command: entry.command, file };
   }
 
   entry.command = binary;

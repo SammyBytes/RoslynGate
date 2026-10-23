@@ -1,6 +1,6 @@
 const path = require("node:path");
 const { assetName, resolveRid } = require("./platform");
-const { binaryPath } = require("./cache");
+const { binaryPath, cacheRoot } = require("./cache");
 const { ensureBinary } = require("./download");
 const { CONFIG_FILE, SERVER_NAME, updateConfig } = require("./upgrade-config");
 const { fetchLatestVersion, installLatest, isNewer } = require("./upgrade-npm");
@@ -8,6 +8,7 @@ const { fetchLatestVersion, installLatest, isNewer } = require("./upgrade-npm");
 function parseUpgradeArgs(args) {
   let check = false;
   let dryRun = false;
+  let noConfig = false;
   let help = false;
 
   for (const argument of args) {
@@ -25,6 +26,11 @@ function parseUpgradeArgs(args) {
       continue;
     }
 
+    if (argument === "--no-config") {
+      noConfig = true;
+      continue;
+    }
+
     if (argument === "--help" || argument === "-h") {
       help = true;
       continue;
@@ -33,7 +39,21 @@ function parseUpgradeArgs(args) {
     throw new Error(`Unknown upgrade option: ${argument}`);
   }
 
-  return { check, dryRun, help };
+  return { check, dryRun, noConfig, help };
+}
+
+function isManagedCommand(command, { env, platform }) {
+  if (typeof command !== "string" || command.length === 0) {
+    return false;
+  }
+
+  const root = path.resolve(cacheRoot(env, platform)) + path.sep;
+  const candidate = path.resolve(command);
+  const normalize = platform === "win32"
+    ? (value) => value.toLowerCase()
+    : (value) => value;
+
+  return normalize(candidate).startsWith(normalize(root));
 }
 
 async function runUpgrade(args, options = {}) {
@@ -51,9 +71,9 @@ async function runUpgrade(args, options = {}) {
   const parsed = parseUpgradeArgs(args);
   if (parsed.help) {
     process.stdout.write(
-      "Usage: roslyngate upgrade [--check] [--dry-run]\n" +
-      "Updates the global npm package, downloads the matching binary, and\n" +
-      "refreshes the roslyngate entry in .mcp.json in the current directory.\n"
+      "Usage: roslyngate upgrade [--check] [--dry-run] [--no-config]\n" +
+      "Updates the global npm package and matching binary. Unless --no-config\n" +
+      "is set, refreshes a managed roslyngate entry in .mcp.json.\n"
     );
     return;
   }
@@ -85,25 +105,39 @@ async function runUpgrade(args, options = {}) {
   }
 
   if (parsed.dryRun) {
-    process.stdout.write(`Would download ${target} and refresh ${path.join(cwd, CONFIG_FILE)}.\n`);
+    if (parsed.noConfig) {
+      process.stdout.write(`Would download ${target} and skip .mcp.json.\n`);
+    } else {
+      process.stdout.write(`Would download ${target} and refresh ${path.join(cwd, CONFIG_FILE)}.\n`);
+    }
     return;
   }
 
   const binary = await ensureBinaryImpl({ asset, version: targetVersion, target });
-  const result = updateConfig(cwd, binary);
 
-  if (result.updated) {
-    process.stdout.write(`roslyngate: updated ${result.file}\n`);
-  } else if (result.reason === "missing") {
-    process.stdout.write(`roslyngate: no ${CONFIG_FILE} here; run roslyngate setup claude --solution <path>.\n`);
+  if (parsed.noConfig) {
+    process.stdout.write("roslyngate: skipped .mcp.json because --no-config is set.\n");
   } else {
-    process.stdout.write(`roslyngate: ${result.file} has no ${SERVER_NAME} server; run setup.\n`);
+    const result = updateConfig(cwd, binary, {
+      canUpdate: (command) => isManagedCommand(command, { env, platform })
+    });
+
+    if (result.updated) {
+      process.stdout.write(`roslyngate: updated ${result.file}\n`);
+    } else if (result.reason === "missing") {
+      process.stdout.write(`roslyngate: no ${CONFIG_FILE} here; run roslyngate setup claude --solution <path>.\n`);
+    } else if (result.reason === "unmanaged") {
+      process.stdout.write(`roslyngate: left ${result.file} unchanged; its command is not managed by RoslynGate.\n`);
+    } else {
+      process.stdout.write(`roslyngate: ${result.file} has no ${SERVER_NAME} server; run setup.\n`);
+    }
   }
 
   process.stdout.write(`roslyngate: ${targetVersion} is ready. Restart Claude Code or run /mcp.\n`);
 }
 
 module.exports = {
+  isManagedCommand,
   parseUpgradeArgs,
   runUpgrade
 };

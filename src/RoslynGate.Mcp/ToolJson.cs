@@ -155,6 +155,26 @@ public static class ToolJson
         writer.WriteEndArray();
     }
 
+    internal static void WriteCompactSymbol(Utf8JsonWriter writer, SymbolDefinition symbol)
+    {
+        writer.WriteStartObject();
+        writer.WriteString("n", symbol.Name);
+        writer.WriteString("q", symbol.QualifiedName);
+        writer.WriteString("k", symbol.Kind);
+        writer.WriteString("s", symbol.Signature);
+
+        if (symbol.Documentation is { Length: > 0 } documentation)
+        {
+            writer.WriteString(
+                "d",
+                Truncate(documentation, OutputLimits.CompactDocumentationChars));
+        }
+
+        writer.WriteString("f", symbol.Location.File);
+        writer.WriteNumber("l", symbol.Location.Line);
+        writer.WriteEndObject();
+    }
+
     internal static void WriteVerboseSymbol(Utf8JsonWriter writer, SymbolDefinition symbol)
     {
         writer.WriteStartObject();

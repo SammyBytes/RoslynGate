@@ -10,16 +10,20 @@ public static class ReferencesJson
     public static CallToolResult References(
         ReferencesResult result,
         DetailLevel detail,
-        string? searchQuery = null)
+        string? searchQuery = null,
+        bool includeDefinition = false)
     {
         var json = detail == DetailLevel.Verbose
             ? WriteVerbose(result, searchQuery)
-            : WriteCompact(result, searchQuery);
+            : WriteCompact(result, searchQuery, includeDefinition);
 
         return ToolJson.Text(json);
     }
 
-    private static string WriteCompact(ReferencesResult result, string? searchQuery)
+    private static string WriteCompact(
+        ReferencesResult result,
+        string? searchQuery,
+        bool includeDefinition)
     {
         using var stream = new MemoryStream();
         using (var writer = new Utf8JsonWriter(stream, ToolJson.WriterOptions))
@@ -36,6 +40,13 @@ public static class ReferencesJson
             {
                 writer.WriteStartObject();
                 writer.WriteString("q", result.Symbol!.QualifiedName);
+
+                if (includeDefinition)
+                {
+                    writer.WritePropertyName("definition");
+                    ToolJson.WriteCompactSymbol(writer, result.Symbol);
+                }
+
                 writer.WriteNumber("total", result.Total);
                 writer.WriteNumber("offset", result.Offset);
                 writer.WriteBoolean("truncated", result.Truncated);

@@ -53,6 +53,8 @@
 - [x] Return base types, interfaces, derived types, and implementations.
 - [x] Enforce the token budget.
 - [x] Expose `find_symbol_references` and `get_type_hierarchy` over MCP.
+- [x] Return the resolved definition from `find_symbol_references` when
+      `includeDefinition=true`.
 
 ## F4 - Search and errors
 
@@ -67,10 +69,11 @@
 
 - [x] Add the release workflow for linux-x64, win-x64, and osx-arm64.
 - [x] Add the npm wrapper with checksum verification and cache.
-- [x] Publish the npm wrapper (`roslyngate@0.1.5`).
+- [x] Publish the npm wrapper (`roslyngate@0.1.6`).
 - [x] Add `roslyngate setup claude` with `--print` and `--dry-run`.
-- [x] Add `roslyngate upgrade` with `--check` and `--dry-run`; refresh the
-      native binary path without touching the rest of `.mcp.json`.
+- [x] Add opt-in `setup claude --skill` for a committable project skill.
+- [x] Add `roslyngate upgrade` with `--check`, `--dry-run`, and `--no-config`;
+      refresh only managed binary paths and preserve the rest of `.mcp.json`.
 - [x] Document installation paths and `npx` usage.
 - [x] Document flags, environment variables, defaults, and output modes.
 - [x] Measure token volume and latency against `rg`.
@@ -78,6 +81,7 @@
       99-project legacy solution (three-symbol and six-symbol runs).
 - [x] Repeat the Claude Code A/B with a broader symbol set and compare answer
       completeness.
+- [x] Document per-prompt Claude Code A/B with `claude-ab.ps1 -Prompt`.
 - [ ] Investigate the remaining missing references: 4 of 98 in the three-symbol
       run and 2 of 157 in the six-symbol run.
 - [x] Publish `v0.1.0` with binaries and checksums.
@@ -90,7 +94,7 @@
 - [x] Write a formal `CHANGELOG.md` with plain-language summaries.
 - [x] Publish GitHub Releases for `v0.1.0` and `v0.1.1` with changelog bodies.
 - [x] Run published E2E on Linux x64 against the release binary.
-- [x] Run published E2E on Linux x64 through `npx roslyngate@0.1.5`.
-- [x] Run published E2E on Linux x64 against the `v0.1.5` release binary.
+- [x] Run published E2E on Linux x64 through `npx roslyngate@0.1.6`.
+- [x] Run published E2E on Linux x64 against the `v0.1.6` release binary.
 - [x] Verify `roslyngate setup claude` against the published npm package.
 - [ ] Smoke-test the Windows and macOS binaries on their platforms.

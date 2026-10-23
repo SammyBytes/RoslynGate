@@ -58,6 +58,35 @@ public sealed class ReferenceToolTests(McpFixture fixture)
     }
 
     [Fact]
+    public async Task ReferencesIncludeDefinitionWhenRequested()
+    {
+        var line = FixtureSource.LineOf("SampleSdk/Widget.cs", "public Task Open(string doorId)");
+        using var response = await fixture.Session.CallToolAsync(
+            ToolNames.FindSymbolReferences,
+            new { file = "SampleSdk/Widget.cs", line, limit = 10, includeDefinition = true });
+        var text = ToolTestHelpers.ToolText(response);
+
+        Assert.False(ToolTestHelpers.IsError(response));
+        var definition = text.GetProperty("definition");
+        Assert.Equal("SampleSdk.Widget.Open", definition.GetProperty("q").GetString());
+        Assert.Equal("method", definition.GetProperty("k").GetString());
+        Assert.Equal("SampleSdk/Widget.cs", definition.GetProperty("f").GetString());
+        Assert.True(definition.GetProperty("l").GetInt32() > 0);
+    }
+
+    [Fact]
+    public async Task ReferencesOmitDefinitionByDefault()
+    {
+        var line = FixtureSource.LineOf("SampleSdk/Widget.cs", "public Task Open(string doorId)");
+        using var response = await fixture.Session.CallToolAsync(
+            ToolNames.FindSymbolReferences,
+            new { file = "SampleSdk/Widget.cs", line, limit = 10 });
+        var text = ToolTestHelpers.ToolText(response);
+
+        Assert.False(text.TryGetProperty("definition", out _));
+    }
+
+    [Fact]
     public async Task ReferencesReturnCandidatesForOverloads()
     {
         using var response = await fixture.Session.CallToolAsync(

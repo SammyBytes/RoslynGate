@@ -4,50 +4,11 @@ const path = require("node:path");
 const { assetName, resolveRid } = require("./platform");
 const { binaryPath } = require("./cache");
 const { ensureBinary } = require("./download");
+const { writeSkill } = require("./skill");
+const { parseArgs } = require("./setup-args");
 
 const CONFIG_FILE = ".mcp.json";
 const SERVER_NAME = "roslyngate";
-
-function parseArgs(args) {
-  let solution = ".";
-  let print = false;
-  let dryRun = false;
-
-  for (let index = 0; index < args.length; index += 1) {
-    const argument = args[index];
-
-    if (argument === "claude") {
-      continue;
-    }
-
-    if (argument === "--print") {
-      print = true;
-      continue;
-    }
-
-    if (argument === "--dry-run") {
-      dryRun = true;
-      continue;
-    }
-
-    if (argument === "--solution") {
-      if (index + 1 >= args.length) {
-        throw new Error("Missing value for --solution.");
-      }
-      solution = args[++index];
-      continue;
-    }
-
-    if (argument.startsWith("--solution=")) {
-      solution = argument.slice("--solution=".length);
-      continue;
-    }
-
-    throw new Error(`Unknown setup option: ${argument}`);
-  }
-
-  return { solution, print, dryRun };
-}
 
 function resolveSolution(value, cwd = process.cwd()) {
   const absolute = path.resolve(cwd, value);
@@ -120,7 +81,7 @@ function writeConfig(root, entry) {
 
 async function runSetup(args, options = {}) {
   const { version, cwd = process.cwd(), env = process.env } = options;
-  const { solution: solutionArg, print, dryRun } = parseArgs(args);
+  const { solution: solutionArg, print, dryRun, skill } = parseArgs(args);
   const { solution, root } = resolveSolution(solutionArg, cwd);
 
   let binary = env.ROSLYGATE_BINARY
@@ -152,11 +113,31 @@ async function runSetup(args, options = {}) {
   if (dryRun) {
     process.stdout.write(`Would write ${file}:\n`);
     process.stdout.write(`${JSON.stringify(mergeConfig({}, entry), null, 2)}\n`);
+
+    if (skill) {
+      const result = writeSkill(root, { dryRun: true });
+      process.stdout.write(
+        result.written
+          ? `Would write ${result.file}\n`
+          : `Would leave existing ${result.file}\n`
+      );
+    }
+
     return;
   }
 
   const written = writeConfig(root, entry);
   process.stdout.write(`roslyngate: wrote ${written.file}\n`);
+
+  if (skill) {
+    const result = writeSkill(root);
+    process.stdout.write(
+      result.written
+        ? `roslyngate: wrote ${result.file}\n`
+        : `roslyngate: left existing ${result.file}\n`
+    );
+  }
+
   process.stdout.write("Next: open Claude Code in that repository, run /mcp, and approve roslyngate.\n");
 }
 
