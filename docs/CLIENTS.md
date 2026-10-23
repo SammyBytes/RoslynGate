@@ -69,9 +69,29 @@ the global Cursor MCP configuration.
 
 ## Windows and Claude Code
 
-Download `roslyngate-win-x64.exe` and its `.sha256` from
-[Releases](https://github.com/SammyBytes/RoslynGate/releases), verify the hash,
-and place it at a stable path such as `C:\Tools\roslyngate\roslyngate.exe`.
+The simplest path is:
+
+```powershell
+npm install -g roslyngate
+cd C:\Dev\MyRepo
+roslyngate setup claude
+```
+
+`setup claude` downloads and caches the native Windows binary, writes
+`.mcp.json` in the repository, and uses the native binary path directly. Open
+Claude Code, run `/mcp`, and approve `roslyngate`.
+
+You can inspect the file before writing:
+
+```powershell
+roslyngate setup claude --dry-run
+roslyngate setup claude --print
+```
+
+If you prefer a manual binary setup, download `roslyngate-win-x64.exe` and its
+`.sha256` from [Releases](https://github.com/SammyBytes/RoslynGate/releases),
+verify the hash, and place it at a stable path such as
+`C:\Tools\roslyngate\roslyngate.exe`.
 
 ```powershell
 Get-FileHash "C:\Tools\roslyngate\roslyngate.exe" -Algorithm SHA256
@@ -108,7 +128,7 @@ claude mcp list
 If you prefer the npm wrapper, Windows requires `cmd /c`:
 
 ```powershell
-claude mcp add --scope user --transport stdio roslyngate -- cmd /c npx -y roslyngate@0.1.1 --solution "C:\Dev\MyRepo"
+claude mcp add --scope user --transport stdio roslyngate -- cmd /c npx -y roslyngate@0.1.2 --solution "C:\Dev\MyRepo"
 ```
 
 Test `npx` directly in PowerShell before using it from Claude Code. Use project
