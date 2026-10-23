@@ -56,9 +56,10 @@
 
 ## F4 - Search and errors
 
-- [ ] Implement `search_symbols` with deterministic ranking.
-- [ ] Add the error catalog with `hint` and `try`.
-- [ ] Add budget and error catalog tests.
+- [x] Implement `search_symbols` with deterministic ranking.
+- [x] Add the error catalog with `hint` and `try`.
+- [x] Add budget and error catalog tests.
+- [x] Expose `search_symbols` over MCP with kind and namespace filters.
 
 ## F5 - Distribution
 

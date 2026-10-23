@@ -7,25 +7,26 @@ namespace RoslynGate.Mcp;
 
 public static class HierarchyJson
 {
-    public static CallToolResult Hierarchy(HierarchyResult result, DetailLevel detail)
+    public static CallToolResult Hierarchy(
+        HierarchyResult result,
+        DetailLevel detail,
+        string? searchQuery = null)
     {
         var json = detail == DetailLevel.Verbose
-            ? WriteVerbose(result)
-            : WriteCompact(result);
+            ? WriteVerbose(result, searchQuery)
+            : WriteCompact(result, searchQuery);
 
         return ToolJson.Text(json);
     }
 
-    private static string WriteCompact(HierarchyResult result)
+    private static string WriteCompact(HierarchyResult result, string? searchQuery)
     {
         using var stream = new MemoryStream();
         using (var writer = new Utf8JsonWriter(stream, ToolJson.WriterOptions))
         {
             if (result.Type is null && !result.Ambiguous)
             {
-                writer.WriteStartObject();
-                writer.WriteNull("type");
-                writer.WriteEndObject();
+                ToolJson.WriteNotFound(writer, "type", searchQuery);
             }
             else if (result.Ambiguous)
             {
@@ -57,7 +58,7 @@ public static class HierarchyJson
         return Encoding.UTF8.GetString(stream.ToArray());
     }
 
-    private static string WriteVerbose(HierarchyResult result)
+    private static string WriteVerbose(HierarchyResult result, string? searchQuery)
     {
         using var stream = new MemoryStream();
         using (var writer = new Utf8JsonWriter(stream, ToolJson.WriterOptions))
@@ -67,6 +68,10 @@ public static class HierarchyJson
             if (result.Type is null)
             {
                 writer.WriteNull("type");
+                if (searchQuery is not null)
+                {
+                    ToolJson.WriteSuggestion(writer, searchQuery);
+                }
             }
             else
             {

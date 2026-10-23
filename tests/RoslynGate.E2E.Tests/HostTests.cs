@@ -31,13 +31,14 @@ public sealed class HostTests
 
             Assert.Equal(2, toolsList.RootElement.GetProperty("id").GetInt32());
             var tools = toolsList.RootElement.GetProperty("result").GetProperty("tools");
-            Assert.Equal(3, tools.GetArrayLength());
+            Assert.Equal(4, tools.GetArrayLength());
             var names = Enumerable.Range(0, tools.GetArrayLength())
                 .Select(index => tools[index].GetProperty("name").GetString())
                 .ToArray();
             Assert.Contains(ToolNames.GetSymbolDefinition, names);
             Assert.Contains(ToolNames.FindSymbolReferences, names);
             Assert.Contains(ToolNames.GetTypeHierarchy, names);
+            Assert.Contains(ToolNames.SearchSymbols, names);
 
             await process.StandardInput.WriteLineAsync(
                 """{"jsonrpc":"2.0","id":3,"method":"ping"}""");

@@ -7,25 +7,26 @@ namespace RoslynGate.Mcp;
 
 public static class ReferencesJson
 {
-    public static CallToolResult References(ReferencesResult result, DetailLevel detail)
+    public static CallToolResult References(
+        ReferencesResult result,
+        DetailLevel detail,
+        string? searchQuery = null)
     {
         var json = detail == DetailLevel.Verbose
-            ? WriteVerbose(result)
-            : WriteCompact(result);
+            ? WriteVerbose(result, searchQuery)
+            : WriteCompact(result, searchQuery);
 
         return ToolJson.Text(json);
     }
 
-    private static string WriteCompact(ReferencesResult result)
+    private static string WriteCompact(ReferencesResult result, string? searchQuery)
     {
         using var stream = new MemoryStream();
         using (var writer = new Utf8JsonWriter(stream, ToolJson.WriterOptions))
         {
             if (result.Symbol is null && !result.Ambiguous)
             {
-                writer.WriteStartObject();
-                writer.WriteNull("symbol");
-                writer.WriteEndObject();
+                ToolJson.WriteNotFound(writer, "symbol", searchQuery);
             }
             else if (result.Ambiguous)
             {
@@ -56,7 +57,7 @@ public static class ReferencesJson
         return Encoding.UTF8.GetString(stream.ToArray());
     }
 
-    private static string WriteVerbose(ReferencesResult result)
+    private static string WriteVerbose(ReferencesResult result, string? searchQuery)
     {
         using var stream = new MemoryStream();
         using (var writer = new Utf8JsonWriter(stream, ToolJson.WriterOptions))
@@ -66,6 +67,10 @@ public static class ReferencesJson
             if (result.Symbol is null)
             {
                 writer.WriteNull("symbol");
+                if (searchQuery is not null)
+                {
+                    ToolJson.WriteSuggestion(writer, searchQuery);
+                }
             }
             else
             {

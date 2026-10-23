@@ -43,7 +43,8 @@ public static class McpHost
             .WithStdioServerTransport()
             .WithTools<DefinitionTool>()
             .WithTools<ReferencesTool>()
-            .WithTools<HierarchyTool>();
+            .WithTools<HierarchyTool>()
+            .WithTools<SearchTool>();
 
         using var host = builder.Build();
 
