@@ -163,7 +163,8 @@ dotnet format RoslynGate.sln --verify-no-changes
 npm test --prefix packaging/npm
 ```
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for the trunk-based workflow and
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the trunk-based workflow,
+[CHANGELOG.md](CHANGELOG.md) for release history, and
 [docs/BENCHMARKS.md](docs/BENCHMARKS.md) for token and latency measurements.
 
 ## License

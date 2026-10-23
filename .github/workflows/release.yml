@@ -62,8 +62,8 @@ jobs:
           mkdir -p artifacts/release
           cp "artifacts/${{ matrix.rid }}/${{ matrix.executable }}" \
              "artifacts/release/${{ matrix.asset }}"
-          sha256sum "artifacts/release/${{ matrix.asset }}" \
-            > "artifacts/release/${{ matrix.asset }}.sha256"
+          cd artifacts/release
+          sha256sum "${{ matrix.asset }}" > "${{ matrix.asset }}.sha256"
 
       - uses: actions/upload-artifact@v4
         with:
