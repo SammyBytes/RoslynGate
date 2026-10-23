@@ -118,7 +118,7 @@ test("setup writes config without downloading when a binary is provided", async 
 
   try {
     await runSetup(["claude"], {
-      version: "0.1.4",
+      version: "0.1.5",
       cwd: root,
       env: { ROSLYGATE_BINARY: binary }
     });

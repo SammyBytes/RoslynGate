@@ -8,7 +8,7 @@ python3 tests/published/e2e.py \
   --solution fixtures/SampleSolution/SampleSolution.sln
 
 python3 tests/published/e2e.py \
-  --command "npx -y roslyngate@0.1.4" \
+  --command "npx -y roslyngate@0.1.5" \
   --solution fixtures/SampleSolution/SampleSolution.sln
 ```
 

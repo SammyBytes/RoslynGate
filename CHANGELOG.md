@@ -6,6 +6,24 @@ All notable changes to RoslynGate are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.1.5] - 2026-10-23
+
+**In plain terms:** `roslyngate upgrade` updates the global npm package, gets
+the matching native binary, and points the current `.mcp.json` at it. One
+command keeps the wrapper, the binary, and Claude Code in sync.
+
+### Added
+
+- Add `roslyngate upgrade`, with `--check` and `--dry-run`.
+- Preserve the existing `args`, `timeout`, and other MCP servers while updating
+  only the `roslyngate.command` path.
+- Print a setup hint when the current directory has no `.mcp.json`.
+
+### Tests
+
+- Cover version comparison, latest-version lookup, installs, config updates,
+  and the read-only `--check` path.
+
 ## [0.1.4] - 2026-10-23
 
 **In plain terms:** when a reference or search result has more items than fit
