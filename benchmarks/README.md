@@ -46,14 +46,18 @@ Use symbols that exist in your repository. For a custom task:
 The script:
 
 1. Copies the MCP config and creates an empty `mcpServers` config.
-2. Runs `claude -p --output-format json --strict-mcp-config`.
-3. Alternates with/without order to reduce cache bias.
-4. Reads `usage`, `total_cost_usd`, and prints the median token reduction.
-5. Saves raw JSON and stderr under a temporary directory.
+2. Restricts built-in tools with `--tools`: the RoslynGate run has none, and
+   the baseline has only `Read`, `Grep`, and `Glob`.
+3. Runs `claude -p --output-format json --strict-mcp-config`.
+4. Alternates with/without order to reduce cache bias.
+5. Reports per-run input, output, cache, turn, and duration data, plus median
+   tokens and cost.
+6. Saves raw JSON and stderr under a temporary directory.
 
 A single small question often shows no gain because the four tool schemas and
 server instructions add fixed context. Use several symbols and a real repository
-to measure the net effect.
+to measure the net effect. On a large solution, the first call also pays the
+workspace-load time; `--no-prewarm` makes that cost visible in the run duration.
 
 If Claude Code reports an error about a missing `usage` field, inspect the raw
 JSON printed by the script; the field layout varies by Claude Code version.

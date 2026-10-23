@@ -31,8 +31,11 @@ searches plus file reads, so the baseline undercounts the grep workflow.
 
 ## Interpretation
 
-- **Token efficiency is clear:** compact, resolved JSON uses 76-92% fewer
+- **Tool-output efficiency is clear:** compact, resolved JSON uses 76-92% fewer
   characters than text-search output for the same questions.
+- **End-to-end agent efficiency is workload-dependent:** the initial Claude
+  Code A/B below shows a 33.9% token reduction for symbol lookups, but it also
+  shows a large latency cost. The two measurements answer different questions.
 - **Warm queries are comparable to grep:** 4-11 ms vs roughly 10 ms. The gain
   is token volume and precision, not raw wall-clock speed.
 - **The first query pays for MSBuild:** ~11 s for the RoslynGate solution. The
@@ -57,9 +60,31 @@ RoslynGate and compares the real `usage` tokens:
 
 See [benchmarks/README.md](../benchmarks/README.md) for details.
 
+### Initial Windows result
+
+Measured on 2026-10-23 with Claude Code and Sonnet against a 99-project legacy
+solution (net9.0 plus .NET Framework packages), using `--no-prewarm` and three
+runs with alternating order. The `with` arm could use only the four RoslynGate
+MCP tools; the baseline could use only `Read`, `Grep`, and `Glob`.
+
+| Metric | With RoslynGate | Without | Difference |
+| --- | ---: | ---: | ---: |
+| Tokens, median of 3 | 94,158 | 142,506 | 33.9% fewer |
+| Cost USD, median of 3 | 0.07 | 0.10 | 30% lower |
+| Duration ms, median of 3 | 88,146 | 29,240 | 3.0x slower |
+
+The solution took about 24 seconds to load. The `with` arm found roughly 90
+references across projects, including generated Razor code. This is one model,
+one solution, and three symbols: treat it as directional, not universal.
+Token counts include cache reads; cost comes from Claude Code's
+`total_cost_usd`. The benchmark does not yet verify that both arms returned the
+same set of references.
+
 ## Caveats
 
 - Characters are not tokens; use a model tokenizer for exact costs.
+- The table above measures tool-output volume, not end-to-end agent usage. The
+  Claude Code A/B is the end-to-end measurement.
 - Grep output is raw text, not semantic results. The comparison measures
   context volume, not correctness.
 - Language, SDK, CPU, filesystem cache, and the first single-file extraction
