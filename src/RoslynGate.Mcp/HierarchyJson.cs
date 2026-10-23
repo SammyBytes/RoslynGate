@@ -51,6 +51,11 @@ public static class HierarchyJson
                 WriteArray(writer, "i", hierarchy.Interfaces);
                 WriteArray(writer, "d", hierarchy.DerivedTypes);
                 WriteArray(writer, "m", hierarchy.Implementations);
+                if (hierarchy.Truncated)
+                {
+                    writer.WriteBoolean("truncated", true);
+                }
+
                 writer.WriteEndObject();
             }
         }
@@ -98,6 +103,7 @@ public static class HierarchyJson
                 WriteVerboseArray(writer, "interfaces", result.Type.Interfaces);
                 WriteVerboseArray(writer, "derivedTypes", result.Type.DerivedTypes);
                 WriteVerboseArray(writer, "implementations", result.Type.Implementations);
+                writer.WriteBoolean("truncated", result.Type.Truncated);
             }
 
             writer.WriteEndObject();

@@ -41,3 +41,6 @@ jobs:
 
       - name: Format
         run: dotnet format RoslynGate.sln --verify-no-changes --no-restore
+
+      - name: Wrapper tests
+        run: npm test --prefix packaging/npm

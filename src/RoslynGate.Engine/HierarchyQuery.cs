@@ -48,17 +48,28 @@ public static class HierarchyQuery
                 .ConfigureAwait(false)
             : [];
 
+        var baseTypes = BaseTypesOf(type);
+        var interfaces = type.AllInterfaces
+            .Select(SymbolFormatting.BuildQualifiedName)
+            .Distinct(StringComparer.Ordinal)
+            .OrderBy(name => name, StringComparer.Ordinal)
+            .ToArray();
+        var derived = OrderedNames(derivedTypes);
+        var implemented = OrderedNames(implementations);
+
+        var truncated = baseTypes.Count > HierarchyLimits.MaxMembers
+            || interfaces.Length > HierarchyLimits.MaxMembers
+            || derived.Length > HierarchyLimits.MaxMembers
+            || implemented.Length > HierarchyLimits.MaxMembers;
+
         return new HierarchyResult(
             new TypeHierarchy(
                 resolution.Matches[0].Definition,
-                BaseTypesOf(type),
-                type.AllInterfaces
-                    .Select(SymbolFormatting.BuildQualifiedName)
-                    .Distinct(StringComparer.Ordinal)
-                    .OrderBy(name => name, StringComparer.Ordinal)
-                    .ToArray(),
-                OrderedNames(derivedTypes),
-                OrderedNames(implementations)),
+                baseTypes.Take(HierarchyLimits.MaxMembers).ToArray(),
+                interfaces.Take(HierarchyLimits.MaxMembers).ToArray(),
+                derived.Take(HierarchyLimits.MaxMembers).ToArray(),
+                implemented.Take(HierarchyLimits.MaxMembers).ToArray(),
+                truncated),
             Ambiguous: false,
             Array.Empty<SymbolDefinition>());
     }

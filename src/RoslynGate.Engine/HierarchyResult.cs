@@ -5,7 +5,8 @@ public sealed record TypeHierarchy(
     IReadOnlyList<string> BaseTypes,
     IReadOnlyList<string> Interfaces,
     IReadOnlyList<string> DerivedTypes,
-    IReadOnlyList<string> Implementations);
+    IReadOnlyList<string> Implementations,
+    bool Truncated);
 
 public sealed record HierarchyResult(
     TypeHierarchy? Type,
