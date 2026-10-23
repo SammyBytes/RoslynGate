@@ -34,7 +34,7 @@ public sealed class DefinitionTool(Workspace workspace, ServerOptions options)
                 .GetAsync(snapshot, new SymbolTarget(name, file, line, column), cancellationToken)
                 .ConfigureAwait(false);
 
-            return ToolJson.Definition(result, detail ?? options.Detail);
+            return DefinitionJson.Definition(result, detail ?? options.Detail);
         }
         catch (DefinitionException exception)
         {

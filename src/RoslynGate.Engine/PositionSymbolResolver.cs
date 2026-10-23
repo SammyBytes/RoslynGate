@@ -3,9 +3,9 @@ using Microsoft.CodeAnalysis;
 
 namespace RoslynGate.Engine;
 
-internal static class PositionDefinitionQuery
+internal static class PositionSymbolResolver
 {
-    public static async Task<DefinitionResult> GetAsync(
+    public static async Task<SymbolResolution> ResolveAsync(
         WorkspaceSnapshot snapshot,
         SymbolTarget target,
         CancellationToken cancellationToken)
@@ -68,23 +68,18 @@ internal static class PositionDefinitionQuery
         var semanticModel = await document.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false);
         if (root is null || semanticModel is null)
         {
-            return DefinitionQuery.CreateResult([]);
+            return new SymbolResolution([]);
         }
 
         var token = root.FindToken(offset);
-        var symbols = FindSymbols(semanticModel, token, cancellationToken);
-        var definitions = new Dictionary<string, SymbolDefinition>(StringComparer.Ordinal);
+        var matches = new Dictionary<string, ResolvedSymbol>(StringComparer.Ordinal);
 
-        foreach (var symbol in symbols)
+        foreach (var symbol in FindSymbols(semanticModel, token, cancellationToken))
         {
-            var definition = SymbolFormatting.ToDefinition(symbol, snapshot);
-            if (definition is not null)
-            {
-                definitions.TryAdd(SymbolFormatting.DefinitionKey(definition), definition);
-            }
+            SymbolResolver.AddMatch(matches, symbol, snapshot);
         }
 
-        return DefinitionQuery.CreateResult(definitions.Values);
+        return SymbolResolver.CreateResolution(matches.Values);
     }
 
     private static ImmutableArray<ISymbol> FindSymbols(

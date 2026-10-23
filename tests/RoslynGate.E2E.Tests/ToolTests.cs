@@ -7,16 +7,22 @@ namespace RoslynGate.E2E.Tests;
 public sealed class ToolTests(McpFixture fixture) : IClassFixture<McpFixture>
 {
     [Fact]
-    public async Task ListsDefinitionTool()
+    public async Task ListsRegisteredTools()
     {
         using var response = await fixture.Session.SendRequestAsync("tools/list");
         var tools = response.RootElement.GetProperty("result").GetProperty("tools");
 
-        Assert.Equal(1, tools.GetArrayLength());
-        var tool = tools[0];
-        Assert.Equal(ToolNames.GetSymbolDefinition, tool.GetProperty("name").GetString());
+        Assert.Equal(3, tools.GetArrayLength());
+        var names = Enumerable.Range(0, tools.GetArrayLength())
+            .Select(index => tools[index].GetProperty("name").GetString())
+            .ToArray();
+        Assert.Contains(ToolNames.GetSymbolDefinition, names);
+        Assert.Contains(ToolNames.FindSymbolReferences, names);
+        Assert.Contains(ToolNames.GetTypeHierarchy, names);
 
-        var properties = tool.GetProperty("inputSchema").GetProperty("properties");
+        var definition = tools.EnumerateArray()
+            .Single(tool => tool.GetProperty("name").GetString() == ToolNames.GetSymbolDefinition);
+        var properties = definition.GetProperty("inputSchema").GetProperty("properties");
         Assert.True(properties.TryGetProperty("name", out _));
         Assert.True(properties.TryGetProperty("file", out _));
         Assert.True(properties.TryGetProperty("line", out _));
@@ -65,6 +71,103 @@ public sealed class ToolTests(McpFixture fixture) : IClassFixture<McpFixture>
         var symbol = text.GetProperty("symbol");
         Assert.Equal("SampleSdk", symbol.GetProperty("namespace").GetString());
         Assert.True(symbol.GetProperty("location").GetProperty("column").GetInt32() > 0);
+    }
+
+    [Fact]
+    public async Task FindsReferencesByPosition()
+    {
+        var line = FixtureSource.LineOf("SampleSdk/Widget.cs", "public Task Open(string doorId)");
+        using var response = await fixture.Session.CallToolAsync(
+            ToolNames.FindSymbolReferences,
+            new { file = "SampleSdk/Widget.cs", line, limit = 10 });
+        var text = ToolText(response);
+
+        Assert.False(IsError(response));
+        Assert.Equal("SampleSdk.Widget.Open", text.GetProperty("q").GetString());
+        Assert.True(text.GetProperty("total").GetInt32() >= 2);
+        Assert.True(text.GetProperty("refs").GetArrayLength() > 0);
+
+        var reference = text.GetProperty("refs")[0];
+        Assert.Equal("SampleSdk/DoorController.cs", reference[0].GetString());
+        Assert.True(reference[1].GetInt32() > 0);
+        Assert.Equal("call", reference[2].GetString());
+    }
+
+    [Fact]
+    public async Task ReferencesRespectThePageLimit()
+    {
+        var line = FixtureSource.LineOf("SampleSdk/Widget.cs", "public Task Open(string doorId)");
+        using var response = await fixture.Session.CallToolAsync(
+            ToolNames.FindSymbolReferences,
+            new { file = "SampleSdk/Widget.cs", line, limit = 1 });
+        var text = ToolText(response);
+
+        Assert.Equal(1, text.GetProperty("refs").GetArrayLength());
+        Assert.True(text.GetProperty("truncated").GetBoolean());
+    }
+
+    [Fact]
+    public async Task ReferencesReturnCandidatesForOverloads()
+    {
+        using var response = await fixture.Session.CallToolAsync(
+            ToolNames.FindSymbolReferences,
+            new { name = "SampleSdk.Widget.Open" });
+        var text = ToolText(response);
+
+        Assert.False(IsError(response));
+        Assert.True(text.GetProperty("ambiguous").GetBoolean());
+        Assert.Equal(2, text.GetProperty("candidates").GetArrayLength());
+    }
+
+    [Fact]
+    public async Task ReturnsTypeHierarchy()
+    {
+        using var response = await fixture.Session.CallToolAsync(
+            ToolNames.GetTypeHierarchy,
+            new { name = "SampleSdk.Widget" });
+        var text = ToolText(response);
+
+        Assert.False(IsError(response));
+        Assert.Equal("SampleSdk.Widget", text.GetProperty("t").GetString());
+        Assert.Contains(
+            "SampleSdk.DeviceBase",
+            text.GetProperty("b").EnumerateArray().Select(value => value.GetString()));
+        Assert.Contains(
+            "SampleSdk.IOpenable",
+            text.GetProperty("i").EnumerateArray().Select(value => value.GetString()));
+        Assert.Contains(
+            "SampleSdk.SecureWidget",
+            text.GetProperty("d").EnumerateArray().Select(value => value.GetString()));
+    }
+
+    [Fact]
+    public async Task ReturnsInterfaceImplementations()
+    {
+        using var response = await fixture.Session.CallToolAsync(
+            ToolNames.GetTypeHierarchy,
+            new { name = "SampleSdk.IOpenable" });
+        var text = ToolText(response);
+        var implementations = text.GetProperty("m")
+            .EnumerateArray()
+            .Select(value => value.GetString())
+            .ToArray();
+
+        Assert.Contains("SampleSdk.Widget", implementations);
+        Assert.Contains("SampleSdk.Gate", implementations);
+    }
+
+    [Fact]
+    public async Task HierarchyRejectsNonTypeSymbols()
+    {
+        using var response = await fixture.Session.CallToolAsync(
+            ToolNames.GetTypeHierarchy,
+            new { name = "SampleSdk.Widget.Echo" });
+        var text = ToolText(response);
+
+        Assert.True(IsError(response));
+        Assert.Equal(
+            DefinitionErrorCodes.NotAType,
+            text.GetProperty("error").GetProperty("code").GetString());
     }
 
     [Fact]

@@ -72,9 +72,11 @@ internal static class SymbolFormatting
             return null;
         }
 
-        var span = location.GetLineSpan();
-        var fullPath = Path.GetFullPath(span.Path, snapshot.RootPath);
-        var relativePath = Path.GetRelativePath(snapshot.RootPath, fullPath).Replace('\\', '/');
+        var symbolLocation = ToLocation(location, snapshot);
+        if (symbolLocation is null)
+        {
+            return null;
+        }
 
         return new SymbolDefinition(
             symbol.Name,
@@ -84,10 +86,24 @@ internal static class SymbolFormatting
             ContainingTypeOf(symbol),
             symbol.ToDisplayString(SignatureFormat),
             DocumentationOf(symbol),
-            new SymbolLocation(
-                relativePath,
-                span.StartLinePosition.Line + 1,
-                span.StartLinePosition.Character + 1));
+            symbolLocation);
+    }
+
+    public static SymbolLocation? ToLocation(Location location, WorkspaceSnapshot snapshot)
+    {
+        if (!location.IsInSource)
+        {
+            return null;
+        }
+
+        var span = location.GetLineSpan();
+        var fullPath = Path.GetFullPath(span.Path, snapshot.RootPath);
+        var relativePath = Path.GetRelativePath(snapshot.RootPath, fullPath).Replace('\\', '/');
+
+        return new SymbolLocation(
+            relativePath,
+            span.StartLinePosition.Line + 1,
+            span.StartLinePosition.Character + 1);
     }
 
     public static string DefinitionKey(SymbolDefinition definition)
@@ -119,7 +135,11 @@ internal static class SymbolFormatting
 
         try
         {
-            return Collapse(XElement.Parse(xml).Value);
+            var element = XElement.Parse(xml);
+            var text = string.Join(
+                " ",
+                element.DescendantNodes().OfType<XText>().Select(node => node.Value));
+            return Collapse(text);
         }
         catch (XmlException)
         {

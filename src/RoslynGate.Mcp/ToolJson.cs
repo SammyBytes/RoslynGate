@@ -8,21 +8,12 @@ namespace RoslynGate.Mcp;
 
 public static class ToolJson
 {
-    private const string AmbiguousHint = "Use file + line from one candidate.";
+    internal const string AmbiguousHint = "Use file + line from one candidate.";
 
-    private static readonly JsonWriterOptions WriterOptions = new()
+    internal static readonly JsonWriterOptions WriterOptions = new()
     {
         Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
     };
-
-    public static CallToolResult Definition(DefinitionResult result, DetailLevel detail)
-    {
-        var json = detail == DetailLevel.Verbose
-            ? WriteVerbose(result)
-            : WriteCompact(result);
-
-        return Text(json);
-    }
 
     public static CallToolResult Error(string code, string message, string hint)
     {
@@ -41,98 +32,14 @@ public static class ToolJson
         return Text(Encoding.UTF8.GetString(stream.ToArray()), isError: true);
     }
 
-    private static string WriteCompact(DefinitionResult result)
-    {
-        using var stream = new MemoryStream();
-        using (var writer = new Utf8JsonWriter(stream, WriterOptions))
+    internal static CallToolResult Text(string json, bool isError = false)
+        => new()
         {
-            if (result.Symbol is not null)
-            {
-                WriteCompactSymbol(writer, result.Symbol);
-            }
-            else if (result.Ambiguous)
-            {
-                writer.WriteStartObject();
-                writer.WriteBoolean("ambiguous", true);
-                writer.WriteStartArray("candidates");
-                foreach (var candidate in result.Candidates)
-                {
-                    WriteCompactCandidate(writer, candidate);
-                }
+            IsError = isError,
+            Content = [new TextContentBlock { Text = json }]
+        };
 
-                writer.WriteEndArray();
-                writer.WriteString("hint", AmbiguousHint);
-                writer.WriteEndObject();
-            }
-            else
-            {
-                writer.WriteStartObject();
-                writer.WriteNull("symbol");
-                writer.WriteEndObject();
-            }
-        }
-
-        return Encoding.UTF8.GetString(stream.ToArray());
-    }
-
-    private static string WriteVerbose(DefinitionResult result)
-    {
-        using var stream = new MemoryStream();
-        using (var writer = new Utf8JsonWriter(stream, WriterOptions))
-        {
-            writer.WriteStartObject();
-
-            if (result.Symbol is not null)
-            {
-                writer.WritePropertyName("symbol");
-                WriteVerboseSymbol(writer, result.Symbol);
-            }
-            else
-            {
-                writer.WriteNull("symbol");
-            }
-
-            writer.WriteBoolean("ambiguous", result.Ambiguous);
-
-            if (result.Ambiguous)
-            {
-                writer.WriteStartArray("candidates");
-                foreach (var candidate in result.Candidates)
-                {
-                    WriteVerboseSymbol(writer, candidate);
-                }
-
-                writer.WriteEndArray();
-                writer.WriteString("hint", AmbiguousHint);
-            }
-
-            writer.WriteEndObject();
-        }
-
-        return Encoding.UTF8.GetString(stream.ToArray());
-    }
-
-    private static void WriteCompactSymbol(Utf8JsonWriter writer, SymbolDefinition symbol)
-    {
-        writer.WriteStartObject();
-        writer.WriteString("n", symbol.Name);
-        writer.WriteString("q", symbol.QualifiedName);
-        writer.WriteString("k", symbol.Kind);
-        writer.WriteString("s", symbol.Signature);
-
-        if (symbol.Documentation is { Length: > 0 } documentation)
-        {
-            writer.WriteString(
-                "d",
-                Truncate(documentation, OutputLimits.CompactDocumentationChars));
-        }
-
-        writer.WriteString("f", symbol.Location.File);
-        writer.WriteNumber("l", symbol.Location.Line);
-        writer.WriteEndObject();
-    }
-
-    private static void WriteCompactCandidate(Utf8JsonWriter writer, SymbolDefinition symbol)
+    internal static void WriteCompactCandidate(Utf8JsonWriter writer, SymbolDefinition symbol)
     {
         writer.WriteStartArray();
         writer.WriteStringValue(symbol.QualifiedName);
@@ -143,7 +50,7 @@ public static class ToolJson
         writer.WriteEndArray();
     }
 
-    private static void WriteVerboseSymbol(Utf8JsonWriter writer, SymbolDefinition symbol)
+    internal static void WriteVerboseSymbol(Utf8JsonWriter writer, SymbolDefinition symbol)
     {
         writer.WriteStartObject();
         writer.WriteString("name", symbol.Name);
@@ -177,13 +84,6 @@ public static class ToolJson
         writer.WriteEndObject();
     }
 
-    private static string Truncate(string value, int maximum)
+    internal static string Truncate(string value, int maximum)
         => value.Length <= maximum ? value : value[..maximum] + "...";
-
-    private static CallToolResult Text(string json, bool isError = false)
-        => new()
-        {
-            IsError = isError,
-            Content = [new TextContentBlock { Text = json }]
-        };
 }
