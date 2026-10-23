@@ -5,8 +5,9 @@ Roslyn. Agents read this file before changing code.
 
 ## Invariants
 
-1. `stdout` carries MCP messages only. Logs, banners, progress, and exceptions
-   go to `stderr`. The SDK owns the transport.
+1. `stdout` carries MCP messages only while the server runs. Logs, banners,
+   progress, and exceptions go to `stderr`. The SDK owns the transport.
+   `--help`, `--version`, and `--check` are the only stdout exceptions.
 2. Never guess. If a name matches more than one symbol, return candidates.
 3. Determinism. Same workspace and query produce the same response: stable
    order, solution-relative paths, no timestamps, no random IDs.
