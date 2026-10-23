@@ -45,6 +45,18 @@ searches plus file reads, so the baseline undercounts the grep workflow.
   compatible.
 - **Memory:** ~266 MB RSS after loading and querying the solution.
 
+## Measure with Claude Code on Windows
+
+The repository includes [`benchmarks/claude-ab.ps1`](../benchmarks/claude-ab.ps1),
+an A/B harness that runs the same prompt through Claude Code with and without
+RoslynGate and compares the real `usage` tokens:
+
+```powershell
+.\benchmarks\claude-ab.ps1 -Symbols "Namespace.TypeA","Namespace.TypeB" -Runs 3
+```
+
+See [benchmarks/README.md](../benchmarks/README.md) for details.
+
 ## Caveats
 
 - Characters are not tokens; use a model tokenizer for exact costs.
