@@ -16,8 +16,8 @@ roslyngate setup claude
 Or run it without installing:
 
 ```bash
-npx -y roslyngate@0.2.1 setup claude
-bunx roslyngate@0.2.1 setup claude
+npx -y roslyngate@0.2.2 setup claude
+bunx roslyngate@0.2.2 setup claude
 ```
 
 `setup claude` writes or merges `.mcp.json` with the native binary path and
@@ -31,11 +31,12 @@ The skill is opt-in and an existing file is left unchanged. To configure
 OpenCode instead:
 
 ```bash
-roslyngate setup opencode --solution .
+roslyngate setup opencode --solution . --skill
 ```
 
 This writes or merges `opencode.jsonc` with the server under
-`mcp.servers.roslyngate` and disables Code Mode so the tools stay native.
+`mcp.servers.roslyngate`, disables Code Mode, and adds the strict
+`.opencode/skills/roslyn-symbols` skill to `instructions`.
 
 To use the CLI directly:
 

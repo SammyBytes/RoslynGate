@@ -63,3 +63,24 @@ Use fully qualified names for ambiguous symbols such as `Doors`, and raise
 
 If Claude Code reports an error about a missing `usage` field, inspect the raw
 JSON printed by the script; the field layout varies by Claude Code version.
+
+## OpenCode A/B
+
+`opencode-ab.js` measures `opencode run --format json` with and without
+RoslynGate. It writes a strict temporary project config, hides the skill for the
+baseline, restores the original files, and reports tokens, cost, duration, and
+tool count.
+
+```bash
+node benchmarks/opencode-ab.js \
+  --solution /path/to/repo \
+  --symbols "SampleSdk.Widget.Open" \
+  --runs 3 \
+  --model opencode-go/deepseek-v4.1-flash
+```
+
+The with arm permits RoslynGate tools and loads
+`.opencode/skills/roslyn-symbols/SKILL.md`; the baseline permits only
+read/glob/grep. Small fixtures usually favor the baseline because fixed schema
+and skill overhead dominates. Use a medium or large repository for the token
+comparison.

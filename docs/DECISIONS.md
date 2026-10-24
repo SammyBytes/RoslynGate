@@ -28,3 +28,4 @@ pull request.
 | D-21 | The watcher is on by default and updates `.cs` files incrementally; structural changes set `stale` and require `reload_workspace`. | A full reload after every edit would cost ~27 s. Incremental updates keep the common edit-query loop fast while making stale results explicit. |
 | D-22 | Overloads accept `parameterTypes` before file + line. | A type hint is less context and fewer turns than selecting a candidate by position. |
 | D-23 | OpenCode setup writes `mcp.servers.roslyngate` with `codemode: false`. | It matches OpenCode V2's configuration shape and keeps RoslynGate tools native instead of wrapping them in Code Mode. |
+| D-24 | OpenCode's strict skill is loaded through `instructions` and is opt-in. | A skill description alone does not force tool use; loading the text keeps the one-call/parameterTypes rules in context without changing Claude's setup. |
