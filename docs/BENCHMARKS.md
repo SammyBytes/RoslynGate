@@ -115,6 +115,51 @@ counts include cache reads; cost comes from Claude Code's `total_cost_usd`. The
 latency cost is real: for interactive use, prewarm can move the load earlier,
 but it cannot remove it.
 
+## OpenCode A/B
+
+`benchmarks/opencode-ab.js` runs the same prompt through `opencode run
+--format json` with and without the RoslynGate MCP server. It temporarily
+swaps the project config, hides the skill in the baseline, restores everything
+afterwards, and sums `step_finish` tokens and cost.
+
+Run it from a configured project:
+
+```bash
+node benchmarks/opencode-ab.js \
+  --solution /path/to/repo \
+  --symbols "SampleSdk.Widget.Open" \
+  --runs 3 \
+  --model opencode-go/deepseek-v4.1-flash
+```
+
+The `with` config denies built-in read/glob/grep/shell/edit/execute/subagent
+tools, allows only RoslynGate, and loads the strict
+`.opencode/skills/roslyn-symbols/SKILL.md`. The baseline allows read/glob/grep
+only.
+
+On the two-project fixture, the direct engine measured:
+
+| Metric | Result |
+| --- | ---: |
+| `--check` load | 4.68 s |
+| First MCP query | 6.98 s |
+| Warm MCP query | 10–19 ms |
+
+The OpenCode A/B on that fixture (deepseek-v4.1-flash, 1 run) was not a win:
+
+| Mode | Tokens | Cost | Duration | Tools |
+| --- | ---: | ---: | ---: | ---: |
+| With RoslynGate | 232,105 | $0.00616 | 100.97 s | 22 |
+| Without | 81,541 | $0.00156 | 40.44 s | 15 |
+
+The model used many RoslynGate calls and did not follow the one-call skill
+strictly. On a two-project fixture, the fixed MCP/skill overhead is larger than
+the saved file reads. Treat this as a model-behavior result, not an engine
+result.
+
+Use medium/large repositories for a meaningful token A/B. On small fixtures,
+RoslynGate is better judged by correctness and warm-query latency.
+
 ## Caveats
 
 - Characters are not tokens; use a model tokenizer for exact costs.

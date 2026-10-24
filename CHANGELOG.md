@@ -6,6 +6,22 @@ All notable changes to RoslynGate are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.2.2] - 2026-10-24
+
+**In plain terms:** OpenCode now gets a strict RoslynGate skill and a benchmark
+harness. The skill tells the model to resolve symbols in one call, use
+`parameterTypes`, follow `nextOffset`, and reload when stale. The docs are
+explicit that RoslynGate pays off on medium and large repositories, not tiny
+fixtures.
+
+### Added
+
+- `roslyngate setup opencode --skill`, which writes
+  `.opencode/skills/roslyn-symbols/SKILL.md` and adds it to `instructions`.
+- `benchmarks/opencode-ab.js`, an OpenCode A/B harness with temporary strict
+  configs, token/cost accounting, and automatic config restore.
+- OpenCode fixture measurements and medium/large guidance.
+
 ## [0.2.1] - 2026-10-24
 
 **In plain terms:** `roslyngate setup opencode` configures OpenCode with the

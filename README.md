@@ -56,6 +56,11 @@ repository). The MCP handshake takes ~0.33 s after the first run; the first run
 also extracts the single-file binary (~1.4 s). See
 [docs/BENCHMARKS.md](docs/BENCHMARKS.md) for methodology and caveats.
 
+RoslynGate pays off most on **medium and large projects**, where resolving
+symbols avoids many file reads. On small fixtures, MCP schema and agent/tool
+overhead can cost more tokens than it saves. Measure with the OpenCode or
+Claude A/B harness before promising a percentage.
+
 ## Requirements
 
 - .NET SDK. RoslynGate does not install or bundle the SDK; it uses the one
@@ -89,8 +94,8 @@ roslyngate setup claude
 Or run it without installing:
 
 ```bash
-npx -y roslyngate@0.2.1 setup claude
-bunx roslyngate@0.2.1 setup claude
+npx -y roslyngate@0.2.2 setup claude
+bunx roslyngate@0.2.2 setup claude
 ```
 
 `setup claude` writes `.mcp.json` with the native binary path, solution path,
@@ -109,12 +114,13 @@ An existing skill is left unchanged.
 For OpenCode, use:
 
 ```bash
-roslyngate setup opencode --solution .
+roslyngate setup opencode --solution . --skill
 ```
 
 That writes or merges `opencode.jsonc` under `mcp.servers.roslyngate`, with
-`codemode: false` and the native binary path. Then open OpenCode and run
-`/mcps`.
+`codemode: false`, the native binary path, and a strict OpenCode skill under
+`.opencode/skills/roslyn-symbols/SKILL.md`. The skill is also added to
+`instructions` so it is always active. Then open OpenCode and run `/mcps`.
 
 To use it as a plain CLI:
 

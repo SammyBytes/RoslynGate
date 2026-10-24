@@ -11,6 +11,7 @@ const {
   runSetup
 } = require("../src/setup-opencode");
 const { readConfig, stripJsonc } = require("../src/jsonc");
+const { skillPath } = require("../src/opencode-skill");
 
 function temporaryDirectory() {
   return fs.mkdtempSync(path.join(os.tmpdir(), "roslyngate-opencode-"));
@@ -21,13 +22,15 @@ test("parses opencode setup options", () => {
     solution: ".",
     print: false,
     dryRun: false,
-    global: false
+    global: false,
+    skill: false
   });
-  assert.deepEqual(parseArgs(["opencode", "--solution=repo", "--global"]), {
+  assert.deepEqual(parseArgs(["opencode", "--solution=repo", "--global", "--skill"]), {
     solution: "repo",
     print: false,
     dryRun: false,
-    global: true
+    global: true,
+    skill: true
   });
 });
 
@@ -67,8 +70,8 @@ test("writes opencode.jsonc with the roslyngate server", async () => {
   fs.writeFileSync(binary, "");
 
   try {
-    await runSetup(["opencode", "--solution", root], {
-      version: "0.2.1",
+    await runSetup(["opencode", "--skill", "--solution", root], {
+      version: "0.2.2",
       cwd: root,
       env: { ROSLYGATE_BINARY: binary }
     });
@@ -83,6 +86,7 @@ test("writes opencode.jsonc with the roslyngate server", async () => {
       root
     ]);
     assert.equal(config.mcp.servers.roslyngate.codemode, false);
+    assert.ok(config.instructions.includes(".opencode/skills/roslyn-symbols/SKILL.md"));
   } finally {
     fs.rmSync(root, { recursive: true, force: true });
   }
@@ -100,7 +104,7 @@ test("preserves an existing OpenCode config", async () => {
 
   try {
     await runSetup(["opencode"], {
-      version: "0.2.1",
+      version: "0.2.2",
       cwd: root,
       env: { ROSLYGATE_BINARY: binary }
     });
@@ -109,6 +113,26 @@ test("preserves an existing OpenCode config", async () => {
     assert.equal(config.model, "sonnet");
     assert.equal(config.mcp.servers.other.type, "local");
     assert.equal(config.mcp.servers.roslyngate.type, "local");
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("writes the opt-in RoslynGate skill", async () => {
+  const root = temporaryDirectory();
+  const binary = path.join(root, "roslyngate");
+  fs.writeFileSync(binary, "");
+
+  try {
+    await runSetup(["opencode", "--skill"], {
+      version: "0.2.2",
+      cwd: root,
+      env: { ROSLYGATE_BINARY: binary }
+    });
+
+    const file = skillPath(root);
+    assert.equal(fs.existsSync(file), true);
+    assert.match(fs.readFileSync(file, "utf8"), /includeDefinition=true/);
   } finally {
     fs.rmSync(root, { recursive: true, force: true });
   }
