@@ -8,10 +8,9 @@ const {
   configFile,
   mergeConfig,
   parseArgs,
-  readConfig,
-  runSetup,
-  stripJsonc
+  runSetup
 } = require("../src/setup-opencode");
+const { readConfig, stripJsonc } = require("../src/jsonc");
 
 function temporaryDirectory() {
   return fs.mkdtempSync(path.join(os.tmpdir(), "roslyngate-opencode-"));
