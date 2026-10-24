@@ -55,6 +55,7 @@
 - [x] Expose `find_symbol_references` and `get_type_hierarchy` over MCP.
 - [x] Return the resolved definition from `find_symbol_references` when
       `includeDefinition=true`.
+- [x] Disambiguate overloads with `parameterTypes`.
 
 ## F4 - Search and errors
 
@@ -69,12 +70,14 @@
 
 - [x] Add the release workflow for linux-x64, win-x64, and osx-arm64.
 - [x] Add the npm wrapper with checksum verification and cache.
-- [x] Publish the npm wrapper (`roslyngate@0.1.8`).
+- [x] Publish the npm wrapper (`roslyngate@0.2.0`).
 - [x] Add `roslyngate setup claude` with `--print` and `--dry-run`.
 - [x] Add opt-in `setup claude --skill` for a committable project skill.
 - [x] Add `roslyngate upgrade` with `--check`, `--dry-run`, and `--no-config`;
       refresh only managed binary paths and preserve the rest of `.mcp.json`.
 - [x] Auto-detect npm or Bun for `upgrade` and allow `--manager` to override.
+- [x] Add `reload_workspace`, `stale`/`file_not_indexed`, and a default-on
+      incremental watcher for `.cs` files.
 - [x] Honor `global.json` when selecting the .NET SDK and show it in `--check`.
 - [x] Fail with an actionable hint when the required SDK is not installed.
 - [x] Document installation paths and `npx` usage.
@@ -97,7 +100,7 @@
 - [x] Write a formal `CHANGELOG.md` with plain-language summaries.
 - [x] Publish GitHub Releases for `v0.1.0` and `v0.1.1` with changelog bodies.
 - [x] Run published E2E on Linux x64 against the release binary.
-- [x] Run published E2E on Linux x64 through `npx roslyngate@0.1.8`.
-- [x] Run published E2E on Linux x64 against the `v0.1.8` release binary.
+- [x] Run published E2E on Linux x64 through `npx roslyngate@0.2.0`.
+- [x] Run published E2E on Linux x64 against the `v0.2.0` release binary.
 - [x] Verify `roslyngate setup claude` against the published npm package.
 - [ ] Smoke-test the Windows and macOS binaries on their platforms.

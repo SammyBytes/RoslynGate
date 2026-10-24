@@ -128,7 +128,7 @@ claude mcp list
 If you prefer the npm wrapper, Windows requires `cmd /c`:
 
 ```powershell
-claude mcp add --scope user --transport stdio roslyngate -- cmd /c npx -y roslyngate@0.1.8 --solution "C:\Dev\MyRepo"
+claude mcp add --scope user --transport stdio roslyngate -- cmd /c npx -y roslyngate@0.2.0 --solution "C:\Dev\MyRepo"
 ```
 
 Test `npx` directly in PowerShell before using it from Claude Code. Use project

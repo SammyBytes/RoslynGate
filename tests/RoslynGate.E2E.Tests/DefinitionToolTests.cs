@@ -6,6 +6,7 @@ namespace RoslynGate.E2E.Tests;
 [Collection(McpTestGroup.Name)]
 public sealed class DefinitionToolTests(McpFixture fixture)
 {
+    private static readonly string[] StringParameter = ["string"];
     [Fact]
     public async Task ResolvesDefinitionByNameInCompactMode()
     {
@@ -20,6 +21,32 @@ public sealed class DefinitionToolTests(McpFixture fixture)
         Assert.Equal("method", text.GetProperty("k").GetString());
         Assert.EndsWith(".cs", text.GetProperty("f").GetString(), StringComparison.Ordinal);
         Assert.True(text.GetProperty("l").GetInt32() > 0);
+    }
+
+    [Fact]
+    public async Task ResolvesOverloadByParameterTypes()
+    {
+        using var response = await fixture.Session.CallToolAsync(
+            ToolNames.GetSymbolDefinition,
+            new { name = "SampleSdk.Widget.Open", parameterTypes = StringParameter });
+        var text = ToolTestHelpers.ToolText(response);
+
+        Assert.False(ToolTestHelpers.IsError(response));
+        Assert.Equal("SampleSdk.Widget.Open", text.GetProperty("q").GetString());
+        Assert.Contains("string", text.GetProperty("s").GetString(), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task FileTargetOutsideWorkspaceIsActionable()
+    {
+        using var response = await fixture.Session.CallToolAsync(
+            ToolNames.GetSymbolDefinition,
+            new { file = "SampleSdk/NotYetLoaded.cs", line = 1 });
+        var text = ToolTestHelpers.ToolText(response);
+
+        Assert.True(ToolTestHelpers.IsError(response));
+        Assert.Equal("file_not_indexed", text.GetProperty("error").GetProperty("code").GetString());
+        Assert.Contains("reload_workspace", text.GetProperty("error").GetProperty("hint").GetString(), StringComparison.Ordinal);
     }
 
     [Fact]

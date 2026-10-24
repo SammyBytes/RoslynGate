@@ -23,6 +23,8 @@ public sealed class DefinitionTool(Workspace workspace, ServerOptions options)
         int? line = null,
         [Description("1-based column. Optional; defaults to the first token on the line.")]
         int? column = null,
+        [Description("Optional parameter type names to disambiguate overloads, e.g. [\"string\", \"int\"].")]
+        string[]? parameterTypes = null,
         [Description("compact (default) or verbose.")]
         DetailLevel? detail = null,
         CancellationToken cancellationToken = default)
@@ -30,14 +32,24 @@ public sealed class DefinitionTool(Workspace workspace, ServerOptions options)
         try
         {
             var snapshot = await workspace.GetAsync(cancellationToken).ConfigureAwait(false);
+            if (file is not null && !workspace.IsFileIndexed(file))
+            {
+                return ToolJson.FileNotIndexed(file);
+            }
+
             var result = await DefinitionQuery
-                .GetAsync(snapshot, new SymbolTarget(name, file, line, column), cancellationToken)
+                .GetAsync(
+                    snapshot,
+                    new SymbolTarget(name, file, line, column, parameterTypes),
+                    cancellationToken)
                 .ConfigureAwait(false);
 
-            return DefinitionJson.Definition(
-                result,
-                detail ?? options.Detail,
-                ToolJson.SearchQueryFor(name));
+            return ToolJson.WithState(
+                DefinitionJson.Definition(
+                    result,
+                    detail ?? options.Detail,
+                    ToolJson.SearchQueryFor(name)),
+                workspace.GetState());
         }
         catch (QueryException exception)
         {

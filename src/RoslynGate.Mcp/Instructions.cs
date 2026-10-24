@@ -13,11 +13,16 @@ public static class Instructions
         find_symbol_references with includeDefinition=true instead of calling
         get_symbol_definition and find_symbol_references separately.
 
+        If overloads are ambiguous, pass parameterTypes (for example
+        ["string", "int"]) instead of selecting by file and line.
+
         A target is either a qualified name or "file" plus a 1-based "line".
         Prefer detail=compact. It omits namespace, containing type, and column
         unless detail=verbose is requested.
 
         If a page is truncated, call the same tool again with offset=nextOffset.
-        If a call returns isError, read error.hint and run error.try when present.
+        If a response has stale=true, do not treat empty results as confirmed;
+        call reload_workspace and retry. If a call returns isError, read
+        error.hint and run error.try when present.
         """;
 }

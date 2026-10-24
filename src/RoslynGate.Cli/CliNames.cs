@@ -11,5 +11,7 @@ public static class CliNames
     public const string SearchLimit = "--search-limit";
     public const string Prewarm = "--prewarm";
     public const string NoPrewarm = "--no-prewarm";
+    public const string Watch = "--watch";
+    public const string NoWatch = "--no-watch";
     public const string Check = "--check";
 }

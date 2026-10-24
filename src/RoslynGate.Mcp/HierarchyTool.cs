@@ -30,14 +30,21 @@ public sealed class HierarchyTool(Workspace workspace, ServerOptions options)
         try
         {
             var snapshot = await workspace.GetAsync(cancellationToken).ConfigureAwait(false);
+            if (file is not null && !workspace.IsFileIndexed(file))
+            {
+                return ToolJson.FileNotIndexed(file);
+            }
+
             var result = await HierarchyQuery
                 .GetAsync(snapshot, new SymbolTarget(name, file, line, column), cancellationToken)
                 .ConfigureAwait(false);
 
-            return HierarchyJson.Hierarchy(
-                result,
-                detail ?? options.Detail,
-                ToolJson.SearchQueryFor(name));
+            return ToolJson.WithState(
+                HierarchyJson.Hierarchy(
+                    result,
+                    detail ?? options.Detail,
+                    ToolJson.SearchQueryFor(name)),
+                workspace.GetState());
         }
         catch (QueryException exception)
         {

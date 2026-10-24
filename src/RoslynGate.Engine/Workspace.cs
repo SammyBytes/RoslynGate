@@ -5,11 +5,12 @@ using Microsoft.Extensions.Logging.Abstractions;
 
 namespace RoslynGate.Engine;
 
-public sealed class Workspace : IDisposable
+public sealed partial class Workspace : IDisposable
 {
     private readonly string? _solutionPath;
     private readonly ILogger<Workspace> _logger;
     private readonly SemaphoreSlim _gate = new(1, 1);
+    private readonly bool _watch;
 
     private WorkspaceSnapshot? _snapshot;
     private Task<WorkspaceSnapshot>? _loading;
@@ -21,10 +22,13 @@ public sealed class Workspace : IDisposable
 
     public static DotNetSdk? Sdk => MsBuildRegistration.Sdk;
 
-    public Workspace(string? solutionPath, ILogger<Workspace>? logger = null)
+    public bool WatchEnabled => _watch;
+
+    public Workspace(string? solutionPath, ILogger<Workspace>? logger = null, bool watch = true)
     {
         _solutionPath = solutionPath;
         _logger = logger ?? NullLogger<Workspace>.Instance;
+        _watch = watch;
     }
 
     public async Task<WorkspaceSnapshot> GetAsync(CancellationToken cancellationToken)
@@ -121,10 +125,12 @@ public sealed class Workspace : IDisposable
 
             _diagnostics = failures.Take(WorkspaceLimits.MaxLoadDiagnostics).ToArray();
             _msbuildWorkspace = msbuildWorkspace;
-            return new WorkspaceSnapshot(
+            var snapshot = new WorkspaceSnapshot(
                 solutionPath,
                 Path.GetDirectoryName(solutionPath) ?? Environment.CurrentDirectory,
                 solution);
+            StartWatcher(snapshot.RootPath);
+            return snapshot;
         }
         catch (OperationCanceledException)
         {
@@ -153,6 +159,7 @@ public sealed class Workspace : IDisposable
         }
 
         _disposed = true;
+        DisposeFreshness();
         _msbuildWorkspace?.Dispose();
         _gate.Dispose();
     }

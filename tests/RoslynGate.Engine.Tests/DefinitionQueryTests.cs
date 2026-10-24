@@ -67,6 +67,18 @@ public sealed class DefinitionQueryTests : IAsyncLifetime, IDisposable
     }
 
     [Fact]
+    public async Task ResolvesOverloadByParameterTypes()
+    {
+        var result = await GetAsync(
+            name: "SampleSdk.Widget.Open",
+            parameterTypes: ["string"]);
+
+        var symbol = Assert.IsType<SymbolDefinition>(result.Symbol);
+        Assert.False(result.Ambiguous);
+        Assert.Contains("string", symbol.Signature, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public async Task UnqualifiedNameReturnsCandidates()
     {
         var result = await GetAsync(name: "Open");
@@ -156,12 +168,13 @@ public sealed class DefinitionQueryTests : IAsyncLifetime, IDisposable
         string? name = null,
         string? file = null,
         int? line = null,
-        int? column = null)
+        int? column = null,
+        IReadOnlyList<string>? parameterTypes = null)
     {
         var snapshot = Assert.IsType<WorkspaceSnapshot>(_snapshot);
         return await DefinitionQuery.GetAsync(
             snapshot,
-            new SymbolTarget(name, file, line, column),
+            new SymbolTarget(name, file, line, column, parameterTypes),
             CancellationToken.None);
     }
 

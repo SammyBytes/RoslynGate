@@ -62,6 +62,16 @@ public static class CommandLine
             Description = "Disable background loading."
         };
 
+        var watch = new Option<bool>(CliNames.Watch)
+        {
+            Description = "Watch for .cs changes and refresh the workspace (default)."
+        };
+
+        var noWatch = new Option<bool>(CliNames.NoWatch)
+        {
+            Description = "Disable the file watcher."
+        };
+
         var check = new Option<bool>(CliNames.Check)
         {
             Description = "Validate configuration and exit."
@@ -75,6 +85,8 @@ public static class CommandLine
         root.Options.Add(searchLimit);
         root.Options.Add(prewarm);
         root.Options.Add(noPrewarm);
+        root.Options.Add(watch);
+        root.Options.Add(noWatch);
         root.Options.Add(check);
 
         root.SetAction(async (parseResult, cancellationToken) =>
@@ -100,6 +112,21 @@ public static class CommandLine
                     ? !parseResult.GetValue(noPrewarm)
                     : defaults.Options.Prewarm;
 
+            var watchSpecified = parseResult.GetResult(watch) is { Implicit: false };
+            var noWatchSpecified = parseResult.GetResult(noWatch) is { Implicit: false };
+            if (watchSpecified && noWatchSpecified)
+            {
+                Console.Error.WriteLine(
+                    $"{CliText.ErrorPrefix}Use either {CliNames.Watch} or {CliNames.NoWatch}, not both.");
+                return ExitCodes.InvalidConfiguration;
+            }
+
+            var watchValue = watchSpecified
+                ? parseResult.GetValue(watch)
+                : noWatchSpecified
+                    ? !parseResult.GetValue(noWatch)
+                    : defaults.Options.Watch;
+
             var solutionPath = parseResult.GetValue(solution);
             if (solutionPath is not null)
             {
@@ -120,7 +147,8 @@ public static class CommandLine
                 parseResult.GetValue(referenceLimit),
                 parseResult.GetValue(searchLimit),
                 prewarmValue,
-                parseResult.GetValue(logLevel));
+                parseResult.GetValue(logLevel),
+                watchValue);
 
             if (parseResult.GetValue(check))
             {

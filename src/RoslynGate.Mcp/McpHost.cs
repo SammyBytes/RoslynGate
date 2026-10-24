@@ -23,7 +23,8 @@ public static class McpHost
         builder.Services.AddSingleton(options);
         builder.Services.AddSingleton(serviceProvider => new Workspace(
             options.SolutionPath,
-            serviceProvider.GetRequiredService<ILogger<Workspace>>()));
+            serviceProvider.GetRequiredService<ILogger<Workspace>>(),
+            options.Watch));
 
         builder.Services
             .AddMcpServer(server =>
@@ -44,7 +45,8 @@ public static class McpHost
             .WithTools<DefinitionTool>()
             .WithTools<ReferencesTool>()
             .WithTools<HierarchyTool>()
-            .WithTools<SearchTool>();
+            .WithTools<SearchTool>()
+            .WithTools<ReloadTool>();
 
         using var host = builder.Build();
 

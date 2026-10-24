@@ -43,7 +43,9 @@ public sealed class SearchTool(Workspace workspace, ServerOptions options)
                     cancellationToken)
                 .ConfigureAwait(false);
 
-            return SearchJson.Search(result, detail ?? options.Detail);
+            return ToolJson.WithState(
+                SearchJson.Search(result, detail ?? options.Detail),
+                workspace.GetState());
         }
         catch (QueryException exception)
         {

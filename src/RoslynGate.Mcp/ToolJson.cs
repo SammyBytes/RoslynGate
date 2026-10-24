@@ -1,13 +1,15 @@
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using ModelContextProtocol.Protocol;
+using RoslynGate.Engine;
 
 namespace RoslynGate.Mcp;
 
 public static partial class ToolJson
 {
-    internal const string AmbiguousHint = "Use file + line from one candidate.";
+    internal const string AmbiguousHint = "Use parameterTypes to choose an overload, or file + line from one candidate.";
 
     internal static readonly JsonWriterOptions WriterOptions = new()
     {
@@ -77,6 +79,12 @@ public static partial class ToolJson
             $"Call {tool} again with offset={nextOffset} and the same arguments.");
     }
 
+    internal static CallToolResult FileNotIndexed(string file)
+        => Error(new ToolError(
+            "file_not_indexed",
+            $"The file is not part of the loaded workspace: {file}.",
+            "Call reload_workspace, then retry."));
+
     internal static string? SearchQueryFor(string? name)
     {
         if (string.IsNullOrWhiteSpace(name))
@@ -136,12 +144,43 @@ public static partial class ToolJson
         }
     }
 
-    internal static CallToolResult Text(string json, bool isError = false)
+    public static CallToolResult Text(string json, bool isError = false)
         => new()
         {
             IsError = isError,
             Content = [new TextContentBlock { Text = json }]
         };
+
+    public static CallToolResult WithState(CallToolResult result, WorkspaceState state)
+    {
+        if (result.IsError == true || !state.Stale)
+        {
+            return result;
+        }
+
+        var text = result.Content.OfType<TextContentBlock>().Single().Text;
+        if (JsonNode.Parse(text) is not JsonObject root)
+        {
+            return result;
+        }
+
+        var changed = new JsonArray();
+        foreach (var path in state.ChangedFiles)
+        {
+            changed.Add(path);
+        }
+
+        root["stale"] = true;
+        root["changed"] = changed;
+        root["hint"] = "The workspace changed after it was loaded. Call reload_workspace, then retry.";
+        root["try"] = new JsonObject
+        {
+            ["tool"] = ToolNames.ReloadWorkspace,
+            ["arguments"] = new JsonObject()
+        };
+
+        return Text(root.ToJsonString());
+    }
 
     internal static string Truncate(string value, int maximum)
         => value.Length <= maximum ? value : value[..maximum] + "...";

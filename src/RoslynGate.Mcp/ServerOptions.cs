@@ -9,7 +9,8 @@ public sealed record ServerOptions(
     int ReferenceLimit,
     int SearchLimit,
     bool Prewarm,
-    LogLevel LogLevel)
+    LogLevel LogLevel,
+    bool Watch = true)
 {
     public const int DefaultReferenceLimit = QueryLimits.DefaultReferenceLimit;
     public const int MaxReferenceLimit = QueryLimits.MaxReferenceLimit;

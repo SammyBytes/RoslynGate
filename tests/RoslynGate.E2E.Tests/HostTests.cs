@@ -31,7 +31,7 @@ public sealed class HostTests
 
             Assert.Equal(2, toolsList.RootElement.GetProperty("id").GetInt32());
             var tools = toolsList.RootElement.GetProperty("result").GetProperty("tools");
-            Assert.Equal(4, tools.GetArrayLength());
+            Assert.Equal(5, tools.GetArrayLength());
             var names = Enumerable.Range(0, tools.GetArrayLength())
                 .Select(index => tools[index].GetProperty("name").GetString())
                 .ToArray();

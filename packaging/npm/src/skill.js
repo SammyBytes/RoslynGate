@@ -16,11 +16,15 @@ When a task involves a .NET symbol:
    \`includeDefinition=true\`; do not call \`get_symbol_definition\` separately.
 2. If the name is ambiguous or you only know a fragment, call
    \`search_symbols\` and retry with the file and line.
-3. If \`truncated\` is true, call the same tool again with
+3. If overloads are ambiguous, pass \`parameterTypes\` (for example
+   \`["string"]\`) instead of choosing by file and line.
+4. If \`truncated\` is true, call the same tool again with
    \`offset=nextOffset\` until it is false.
-4. Prefer RoslynGate over Grep or Read for symbol locations. Read source only
+5. If \`stale\` is true, call \`reload_workspace\` and retry; do not treat an
+   empty result as confirmed.
+6. Prefer RoslynGate over Grep or Read for symbol locations. Read source only
    when the text itself matters.
-5. Answer with \`file:line\` entries.
+7. Answer with \`file:line\` entries.
 `;
 
 function skillPath(root) {

@@ -20,5 +20,6 @@ public sealed class ContractTests
         Assert.Contains("find_symbol_references", instructions);
         Assert.Contains("get_type_hierarchy", instructions);
         Assert.Contains("search_symbols", instructions);
+        Assert.Contains("reload_workspace", instructions);
     }
 }

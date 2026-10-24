@@ -41,6 +41,7 @@ public static class Check
             Write(output, CheckText.RefLimit, options.ReferenceLimit.ToString());
             Write(output, CheckText.SearchLimit, options.SearchLimit.ToString());
             Write(output, CheckText.Prewarm, options.Prewarm ? CheckText.On : CheckText.Off);
+            Write(output, CheckText.Watch, options.Watch ? CheckText.On : CheckText.Off);
             Write(output, CheckText.LogLevel, options.LogLevel.ToString().ToLowerInvariant());
             Write(output, CheckText.Status, CheckText.Ok);
             return ExitCodes.Success;
