@@ -8,6 +8,10 @@ Roslyn instead of text search. It returns compact, deterministic results so an
 agent can find a definition, reference, or hierarchy without dumping code into
 the context window.
 
+It is built for **medium and large .NET solutions**. On a couple of projects,
+the MCP schema and the extra turns can cost more than the file reads they
+replace. Measure before expecting a win.
+
 ## Tools
 
 | Tool | Purpose |
@@ -49,23 +53,26 @@ trusting an empty result. Disable the watcher with `--no-watch`.
 
 ## Performance
 
-Against `rg` on this repository, compact responses used **76-92% fewer
-characters** for definition, references, hierarchy, and search tasks. Warm
+Against `rg` on this repository, compact tool output used **76-92% fewer
+characters** for definition, references, hierarchy, and search tasks. That is
+tool output, not session tokens. Warm
 queries took 4-11 ms; the first query includes MSBuild loading (~11 s on this
 repository). The MCP handshake takes ~0.33 s after the first run; the first run
 also extracts the single-file binary (~1.4 s). See
 [docs/BENCHMARKS.md](docs/BENCHMARKS.md) for methodology and caveats.
 
-RoslynGate pays off most on **medium and large projects**, where resolving
-symbols avoids many file reads. On small fixtures, MCP schema and agent/tool
-overhead can cost more tokens than it saves. Measure with the OpenCode or
-Claude A/B harness before promising a percentage.
+The OpenCode A/B on a two-project fixture was a token loss (232k against 81k),
+because the fixed MCP and skill overhead was larger than the saved reads. Use
+medium and large repositories for a meaningful token A/B; on small projects,
+judge RoslynGate by correctness and warm-query latency instead. Measure with
+the OpenCode or Claude A/B harness before promising a percentage.
 
 ## Requirements
 
 - .NET SDK. RoslynGate does not install or bundle the SDK; it uses the one
   selected by the solution's `global.json`, or the latest installed SDK.
-- Linux, macOS, or Windows
+- Linux x64, Windows x64, or macOS arm64 (Apple Silicon). Intel Macs are not
+  supported.
 
 The binary is self-contained, so the .NET runtime is included. The SDK is still
 required because `MSBuildWorkspace` uses MSBuild to evaluate projects, targets,
