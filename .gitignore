@@ -32,3 +32,6 @@ Thumbs.db
 # Python
 __pycache__/
 *.pyc
+
+# TypeScript product build
+products/typescript/dist/

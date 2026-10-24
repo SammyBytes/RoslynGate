@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "symbol-definition",
+  "type": "object",
+  "properties": {
+    "n": { "type": "string" },
+    "q": { "type": "string" },
+    "k": { "type": "string" },
+    "s": { "type": "string" },
+    "f": { "type": "string" },
+    "l": { "type": "integer", "minimum": 1 }
+  },
+  "required": ["n", "q", "k", "s", "f", "l"]
+}

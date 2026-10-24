@@ -1,0 +1,9 @@
+{
+  "private": true,
+  "workspaces": ["products/typescript", "packaging/npm"],
+  "scripts": {
+    "ts:build": "npm --workspace roslyngate-ts run build",
+    "ts:test": "npm --workspace roslyngate-ts test",
+    "ts:check": "npm --workspace roslyngate-ts run check"
+  }
+}

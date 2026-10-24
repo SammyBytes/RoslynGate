@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "find_symbol_references",
+  "type": "object",
+  "properties": {
+    "q": { "type": ["string", "null"] },
+    "definition": { "$ref": "definition.schema.json" },
+    "total": { "type": "integer", "minimum": 0 },
+    "offset": { "type": "integer", "minimum": 0 },
+    "truncated": { "type": "boolean" },
+    "nextOffset": { "type": "integer", "minimum": 0 },
+    "hint": { "type": "string" },
+    "stale": { "type": "boolean" },
+    "changed": { "type": "array", "items": { "type": "string" } },
+    "refs": {
+      "type": "array",
+      "items": {
+        "type": "array",
+        "prefixItems": [
+          { "type": "string" },
+          { "type": "integer", "minimum": 1 },
+          { "type": "string" }
+        ],
+        "minItems": 3,
+        "maxItems": 3
+      }
+    }
+  },
+  "required": ["total", "offset", "truncated", "refs"]
+}

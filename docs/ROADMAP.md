@@ -106,3 +106,14 @@
 - [x] Run published E2E on Linux x64 against the `v0.2.2` release binary.
 - [x] Verify `roslyngate setup claude` against the published npm package.
 - [ ] Smoke-test the Windows and macOS binaries on their platforms.
+
+## F7 - TypeScript product
+
+- [x] Add `products/typescript` with Program/TypeChecker/LanguageService.
+- [x] Expose the five MCP tools with hierarchy and paging.
+- [x] Add TS/TSX/JS/JSX fixture and engine test.
+- [x] Add `setup claude`/`setup opencode` for `roslyngate-ts`.
+- [x] Add shared JSON Schema contracts and a TS CI job.
+- [ ] Add contract-parity between .NET and TS.
+- [ ] Publish `roslyngate-ts` and move the .NET product under `products/dotnet`.
+- [ ] Add incremental LanguageService watch and a larger-repo benchmark.

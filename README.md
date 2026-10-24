@@ -67,6 +67,22 @@ medium and large repositories for a meaningful token A/B; on small projects,
 judge RoslynGate by correctness and warm-query latency instead. Measure with
 the OpenCode or Claude A/B harness before promising a percentage.
 
+## TypeScript product (MVP)
+
+A separate `roslyngate-ts` product lives under `products/typescript`. It uses
+the TypeScript compiler API (`Program`, `TypeChecker`, `LanguageService`) for
+`.ts`, `.tsx`, `.js`, and `.jsx`.
+
+```bash
+cd products/typescript
+npm install
+npm run build
+node dist/cli.js --check --solution ../../fixtures/TsSample
+```
+
+The five MCP tools are the same contract as the .NET product. See
+[`docs/TODO-TS.md`](docs/TODO-TS.md) for the remaining release work.
+
 ## Requirements
 
 - .NET SDK. RoslynGate does not install or bundle the SDK; it uses the one

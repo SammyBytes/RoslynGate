@@ -1,5 +1,9 @@
 {
   "$schema": "https://opencode.ai/config.json",
+  "experimental": {
+    // Show the agent task list in OpenCode.
+    "todo": true
+  },
   "mcp": {
     "servers": {
       "roslyngate": {
@@ -9,7 +13,7 @@
           "src/RoslynGate.Cli/bin/Debug/net10.0/roslyngate.dll"
         ],
         "cwd": ".",
-        // Expose the four tools directly instead of through Code Mode.
+        // Expose the tools directly instead of through Code Mode.
         "codemode": false
       }
     }
