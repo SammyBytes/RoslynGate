@@ -25,7 +25,45 @@ public static class SymbolResolver
                 "Pass name, or file with a 1-based line.");
         }
 
-        return await FromNameAsync(snapshot, target.Name, cancellationToken).ConfigureAwait(false);
+        var resolution = await FromNameAsync(snapshot, target.Name, cancellationToken).ConfigureAwait(false);
+        return target.ParameterTypes is { Count: > 0 }
+            ? FilterByParameterTypes(resolution, target.ParameterTypes)
+            : resolution;
+    }
+
+    private static SymbolResolution FilterByParameterTypes(
+        SymbolResolution resolution,
+        IReadOnlyList<string> parameterTypes)
+    {
+        var filtered = resolution.Matches
+            .Where(match => match.Symbol is IMethodSymbol method
+                && MatchesParameters(method, parameterTypes))
+            .ToArray();
+
+        return new SymbolResolution(filtered);
+    }
+
+    private static bool MatchesParameters(IMethodSymbol method, IReadOnlyList<string> expected)
+    {
+        if (method.Parameters.Length != expected.Count)
+        {
+            return false;
+        }
+
+        for (var index = 0; index < expected.Count; index += 1)
+        {
+            var actual = method.Parameters[index].Type;
+            var name = expected[index].Trim();
+            if (!string.Equals(name, actual.Name, StringComparison.Ordinal)
+                && !string.Equals(name, actual.ToDisplayString(), StringComparison.Ordinal)
+                && !string.Equals(name, actual.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)
+                    .Replace("global::", string.Empty, StringComparison.Ordinal), StringComparison.Ordinal))
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     internal static void AddMatch(

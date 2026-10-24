@@ -6,6 +6,28 @@ All notable changes to RoslynGate are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-10-24
+
+**In plain terms:** RoslynGate now keeps a `.cs` edit fresh without reloading
+the whole solution, warns when the workspace is stale, and offers a reload tool
+for project-level changes. It can also disambiguate overloads by parameter type.
+
+### Added
+
+- `parameterTypes` on `get_symbol_definition` and `find_symbol_references`.
+- `stale` and `changed` on responses when the workspace is out of date, with a
+  `try` pointing to `reload_workspace`.
+- `file_not_indexed` for file targets that are not in the loaded workspace.
+- `reload_workspace` as a fifth MCP tool.
+- `--watch` / `--no-watch`; the watcher is on by default and updates `.cs`
+  files incrementally.
+- `watch` in `--check`.
+
+### Changed
+
+- Structural changes (`.csproj`, `.props`, `.targets`, `.razor`, `global.json`)
+  mark the workspace stale instead of triggering a slow automatic reload.
+
 ## [0.1.8] - 2026-10-23
 
 **In plain terms:** before loading a solution, RoslynGate now checks for a

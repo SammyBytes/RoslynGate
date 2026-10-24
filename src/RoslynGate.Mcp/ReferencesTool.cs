@@ -25,6 +25,8 @@ public sealed class ReferencesTool(Workspace workspace, ServerOptions options)
         int? column = null,
         [Description("Include declaration locations. Defaults to false.")]
         bool includeDeclarations = false,
+        [Description("Optional parameter type names to disambiguate overloads, e.g. [\"string\", \"int\"].")]
+        string[]? parameterTypes = null,
         [Description("Include the resolved definition in the response. Defaults to false.")]
         bool includeDefinition = false,
         [Description("References to skip. Defaults to 0.")]
@@ -38,21 +40,28 @@ public sealed class ReferencesTool(Workspace workspace, ServerOptions options)
         try
         {
             var snapshot = await workspace.GetAsync(cancellationToken).ConfigureAwait(false);
+            if (file is not null && !workspace.IsFileIndexed(file))
+            {
+                return ToolJson.FileNotIndexed(file);
+            }
+
             var result = await ReferenceQuery
                 .GetAsync(
                     snapshot,
-                    new SymbolTarget(name, file, line, column),
+                    new SymbolTarget(name, file, line, column, parameterTypes),
                     includeDeclarations,
                     offset ?? 0,
                     limit ?? options.ReferenceLimit,
                     cancellationToken)
                 .ConfigureAwait(false);
 
-            return ReferencesJson.References(
-                result,
-                detail ?? options.Detail,
-                ToolJson.SearchQueryFor(name),
-                includeDefinition);
+            return ToolJson.WithState(
+                ReferencesJson.References(
+                    result,
+                    detail ?? options.Detail,
+                    ToolJson.SearchQueryFor(name),
+                    includeDefinition),
+                workspace.GetState());
         }
         catch (QueryException exception)
         {

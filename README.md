@@ -16,6 +16,7 @@ the context window.
 | `find_symbol_references` | Find semantic references, paginated; `includeDefinition=true` also returns the resolved symbol. |
 | `get_type_hierarchy` | Base types, interfaces, derived types, implementations. |
 | `search_symbols` | Find symbols by name fragment before resolving. |
+| `reload_workspace` | Reload after project or structural changes. |
 
 Every response is JSON. `detail=compact` (default) keeps the wire small;
 `detail=verbose` adds namespace, container, column, and longer documentation.
@@ -32,6 +33,19 @@ return `nextOffset` and a `hint`:
   "hint": "Call find_symbol_references again with offset=50 and the same arguments."
 }
 ```
+
+Use `parameterTypes` to disambiguate overloads:
+
+```json
+{
+  "name": "SampleSdk.Widget.Open",
+  "parameterTypes": ["string"]
+}
+```
+
+With the default watcher, `.cs` edits are applied incrementally. Structural
+changes set `stale: true`; the agent should call `reload_workspace` before
+trusting an empty result. Disable the watcher with `--no-watch`.
 
 ## Performance
 
@@ -75,8 +89,8 @@ roslyngate setup claude
 Or run it without installing:
 
 ```bash
-npx -y roslyngate@0.1.8 setup claude
-bunx roslyngate@0.1.8 setup claude
+npx -y roslyngate@0.2.0 setup claude
+bunx roslyngate@0.2.0 setup claude
 ```
 
 `setup claude` writes `.mcp.json` with the native binary path, solution path,
@@ -203,9 +217,10 @@ Flags override environment variables, which override defaults.
 | `--ref-limit` | `ROSLYGATE_REF_LIMIT` | `50` (max 200) |
 | `--search-limit` | `ROSLYGATE_SEARCH_LIMIT` | `20` (max 50) |
 | `--prewarm` / `--no-prewarm` | `ROSLYGATE_PREWARM` | `on` |
+| `--watch` / `--no-watch` | `ROSLYGATE_WATCH` | `on` |
 | `--check` | - | - |
 | `-h, --help` | - | - |
-| `-V, --version` | - | - |
+| `-V`, `-v`, `--version` | - | - |
 
 Exit codes: `0` normal end of input or successful check, `1` invalid
 configuration or solution, `2` fatal startup failure.

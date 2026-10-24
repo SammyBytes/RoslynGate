@@ -11,6 +11,7 @@ public static class CheckText
     public const string RefLimit = "ref-limit";
     public const string SearchLimit = "search-limit";
     public const string Prewarm = "prewarm";
+    public const string Watch = "watch";
     public const string LogLevel = "log-level";
     public const string Status = "status";
     public const string On = "on";

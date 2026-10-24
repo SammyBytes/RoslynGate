@@ -51,6 +51,22 @@ public sealed class ToolJsonTests
     }
 
     [Fact]
+    public void StaleStateAddsRefreshHint()
+    {
+        var result = ToolJson.Text("""{"q":"SampleSdk.Widget"}""");
+
+        var json = ReadText(ToolJson.WithState(
+            result,
+            new WorkspaceState(true, ["SampleSdk/Widget.cs"])));
+
+        Assert.True(json.GetProperty("stale").GetBoolean());
+        Assert.Equal("SampleSdk/Widget.cs", json.GetProperty("changed")[0].GetString());
+        Assert.Equal(
+            ToolNames.ReloadWorkspace,
+            json.GetProperty("try").GetProperty("tool").GetString());
+    }
+
+    [Fact]
     public void CompactReferencesIncludeDefinitionWhenRequested()
     {
         var result = new ReferencesResult(

@@ -10,4 +10,5 @@ public static class EnvironmentVariables
     public const string RefLimit = Prefix + "REF_LIMIT";
     public const string SearchLimit = Prefix + "SEARCH_LIMIT";
     public const string Prewarm = Prefix + "PREWARM";
+    public const string Watch = Prefix + "WATCH";
 }

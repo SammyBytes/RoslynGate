@@ -27,7 +27,11 @@ internal sealed record CliDefaults(ServerOptions Options, string? Error)
                 Environment.GetEnvironmentVariable(EnvironmentVariables.Prewarm),
                 defaultValue: true)),
             Read(errors, LogLevel.Error, () => OptionValues.ParseLogLevel(
-                Environment.GetEnvironmentVariable(EnvironmentVariables.LogLevel))));
+                Environment.GetEnvironmentVariable(EnvironmentVariables.LogLevel))),
+            Read(errors, true, () => OptionValues.ParseBool(
+                EnvironmentVariables.Watch,
+                Environment.GetEnvironmentVariable(EnvironmentVariables.Watch),
+                defaultValue: true)));
 
         return new CliDefaults(options, errors.Count == 0 ? null : string.Join("; ", errors));
     }

@@ -14,7 +14,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <Version>0.1.8</Version>
+    <Version>0.2.0</Version>
     <Authors>SammyBytes</Authors>
     <RepositoryUrl>https://github.com/SammyBytes/RoslynGate</RepositoryUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>

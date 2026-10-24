@@ -11,7 +11,7 @@ public sealed class ToolCatalogTests(McpFixture fixture)
         using var response = await fixture.Session.SendRequestAsync("tools/list");
         var tools = response.RootElement.GetProperty("result").GetProperty("tools");
 
-        Assert.Equal(4, tools.GetArrayLength());
+        Assert.Equal(5, tools.GetArrayLength());
         var names = Enumerable.Range(0, tools.GetArrayLength())
             .Select(index => tools[index].GetProperty("name").GetString())
             .ToArray();
@@ -19,6 +19,7 @@ public sealed class ToolCatalogTests(McpFixture fixture)
         Assert.Contains(ToolNames.FindSymbolReferences, names);
         Assert.Contains(ToolNames.GetTypeHierarchy, names);
         Assert.Contains(ToolNames.SearchSymbols, names);
+        Assert.Contains(ToolNames.ReloadWorkspace, names);
 
         var definition = tools.EnumerateArray()
             .Single(tool => tool.GetProperty("name").GetString() == ToolNames.GetSymbolDefinition);

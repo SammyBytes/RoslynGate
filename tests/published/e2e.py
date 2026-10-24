@@ -85,7 +85,7 @@ def main() -> int:
     parser.add_argument("--command", required=True, help="Binary path or wrapper command.")
     parser.add_argument("--solution", required=True, type=Path)
     parser.add_argument("--repo", default=Path("."), type=Path)
-    parser.add_argument("--version", default="0.1.8")
+    parser.add_argument("--version", default="0.2.0")
     args = parser.parse_args()
 
     command = shlex.split(args.command)
@@ -114,6 +114,7 @@ def main() -> int:
             "find_symbol_references",
             "get_type_hierarchy",
             "search_symbols",
+            "reload_workspace",
         }
         if names != expected:
             raise AssertionError(f"Unexpected tools: {sorted(names)}")
@@ -144,10 +145,14 @@ def main() -> int:
         search = session.call_tool("search_symbols", {"query": "Widget", "limit": 10})
         if search.get("total", 0) == 0 or not search.get("hits"):
             raise AssertionError(f"Unexpected search: {search}")
+
+        reloaded = session.call_tool("reload_workspace", {})
+        if reloaded.get("status") != "reloaded" or reloaded.get("projects", 0) < 1:
+            raise AssertionError(f"Unexpected reload: {reloaded}")
     finally:
         session.close()
 
-    print(f"published E2E ok: RoslynGate {version}, 4 tools")
+    print(f"published E2E ok: RoslynGate {version}, 5 tools")
     return 0
 
 
