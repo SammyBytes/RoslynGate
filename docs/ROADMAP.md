@@ -70,9 +70,10 @@
 
 - [x] Add the release workflow for linux-x64, win-x64, and osx-arm64.
 - [x] Add the npm wrapper with checksum verification and cache.
-- [x] Publish the npm wrapper (`roslyngate@0.2.0`).
+- [x] Publish the npm wrapper (`roslyngate@0.2.1`).
 - [x] Add `roslyngate setup claude` with `--print` and `--dry-run`.
 - [x] Add opt-in `setup claude --skill` for a committable project skill.
+- [x] Add `setup opencode` with project/global config merge and native tools.
 - [x] Add `roslyngate upgrade` with `--check`, `--dry-run`, and `--no-config`;
       refresh only managed binary paths and preserve the rest of `.mcp.json`.
 - [x] Auto-detect npm or Bun for `upgrade` and allow `--manager` to override.
@@ -100,7 +101,7 @@
 - [x] Write a formal `CHANGELOG.md` with plain-language summaries.
 - [x] Publish GitHub Releases for `v0.1.0` and `v0.1.1` with changelog bodies.
 - [x] Run published E2E on Linux x64 against the release binary.
-- [x] Run published E2E on Linux x64 through `npx roslyngate@0.2.0`.
-- [x] Run published E2E on Linux x64 against the `v0.2.0` release binary.
+- [x] Run published E2E on Linux x64 through `npx roslyngate@0.2.1`.
+- [x] Run published E2E on Linux x64 against the `v0.2.1` release binary.
 - [x] Verify `roslyngate setup claude` against the published npm package.
 - [ ] Smoke-test the Windows and macOS binaries on their platforms.

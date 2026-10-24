@@ -6,6 +6,19 @@ All notable changes to RoslynGate are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-10-24
+
+**In plain terms:** `roslyngate setup opencode` configures OpenCode with the
+same native binary and solution path as the Claude Code setup, writing the
+server under `mcp.servers.roslyngate`.
+
+### Added
+
+- `setup opencode` with `--solution`, `--global`, `--print`, and `--dry-run`.
+- Safe merge of `opencode.jsonc`/`opencode.json` with JSONC comments and
+  trailing commas.
+- `codemode: false` so RoslynGate tools stay native in OpenCode.
+
 ## [0.2.0] - 2026-10-24
 
 **In plain terms:** RoslynGate now keeps a `.cs` edit fresh without reloading
