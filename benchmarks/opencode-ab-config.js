@@ -39,7 +39,7 @@ function withoutConfig() {
 }
 
 function deniedBuiltins() {
-  return ["read", "glob", "grep", "shell", "edit", "execute", "webfetch", "websearch", "subagent"].map(
+  return ["read", "glob", "grep", "shell", "edit", "webfetch", "websearch", "subagent"].map(
     (action) => ({ action, resource: "*", effect: "deny" })
   );
 }

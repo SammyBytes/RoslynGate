@@ -65,6 +65,10 @@ export function runSetup(target: "claude" | "opencode", args: string[]) {
     config.mcp ??= {};
     config.mcp.servers ??= {};
     config.mcp.servers[SERVER] = entry;
+    config.permissions = [
+      ...deniedBuiltins(),
+      { action: "skill", resource: "roslyn-symbols-ts", effect: "allow" }
+    ];
     if (skill) {
       config.instructions ??= [];
       const instruction = ".opencode/skills/roslyn-symbols-ts/SKILL.md";
@@ -88,6 +92,12 @@ export function runSetup(target: "claude" | "opencode", args: string[]) {
     fs.writeFileSync(skillFile, SKILL);
     process.stdout.write(`roslyngate-ts: wrote ${skillFile}\n`);
   }
+}
+
+function deniedBuiltins() {
+  return ["read", "glob", "grep", "shell", "edit", "webfetch", "websearch", "subagent"].map(
+    (action) => ({ action, resource: "*", effect: "deny" })
+  );
 }
 
 function resolveRoot(solution: string): string {
