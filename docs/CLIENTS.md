@@ -46,6 +46,34 @@ claude mcp add roslyngate -- roslyngate --solution /absolute/path/to/repository
 Or add the server to the project `.mcp.json` using the generic `mcpServers`
 shape above.
 
+## OpenCode
+
+Use the setup command:
+
+```bash
+roslyngate setup opencode --solution /absolute/path/to/repository
+```
+
+It writes or merges `opencode.jsonc` with:
+
+```jsonc
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "servers": {
+      "roslyngate": {
+        "type": "local",
+        "command": ["/path/to/roslyngate", "--solution", "/absolute/path/to/repository"],
+        "codemode": false
+      }
+    }
+  }
+}
+```
+
+Use `--global` for `~/.config/opencode/opencode.jsonc`, and `--print` or
+`--dry-run` to inspect before writing. Then open OpenCode and run `/mcps`.
+
 ## Cursor
 
 Add the generic `mcpServers` block to `.cursor/mcp.json` in the project, or to
@@ -128,7 +156,7 @@ claude mcp list
 If you prefer the npm wrapper, Windows requires `cmd /c`:
 
 ```powershell
-claude mcp add --scope user --transport stdio roslyngate -- cmd /c npx -y roslyngate@0.2.0 --solution "C:\Dev\MyRepo"
+claude mcp add --scope user --transport stdio roslyngate -- cmd /c npx -y roslyngate@0.2.1 --solution "C:\Dev\MyRepo"
 ```
 
 Test `npx` directly in PowerShell before using it from Claude Code. Use project
