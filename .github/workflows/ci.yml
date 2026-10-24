@@ -44,3 +44,19 @@ jobs:
 
       - name: Wrapper tests
         run: npm test --prefix packaging/npm
+
+  typescript:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: products/typescript/package-lock.json
+      - name: Install
+        run: npm ci --prefix products/typescript
+      - name: Build and test
+        run: |
+          npm --prefix products/typescript run build
+          npm --prefix products/typescript test
