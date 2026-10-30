@@ -13,7 +13,7 @@
     <PackageVersion Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" Version="5.9.0" />
 
     <!-- CLI -->
-    <PackageVersion Include="System.CommandLine" Version="2.0.13" />
+    <PackageVersion Include="System.CommandLine" Version="2.0.14" />
 
     <!-- MCP -->
     <PackageVersion Include="ModelContextProtocol" Version="2.3.0" />
