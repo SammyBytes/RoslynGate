@@ -66,7 +66,7 @@ jobs:
           cd artifacts/release
           sha256sum "${{ matrix.asset }}" > "${{ matrix.asset }}.sha256"
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: ${{ matrix.rid }}
           path: artifacts/release/*
