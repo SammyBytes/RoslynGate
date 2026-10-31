@@ -113,7 +113,11 @@
 - [x] Expose the five MCP tools with hierarchy and paging.
 - [x] Add TS/TSX/JS/JSX fixture and engine test.
 - [x] Add `setup claude`/`setup opencode` for `roslyngate-ts`.
-- [x] Add shared JSON Schema contracts and a TS CI job.
-- [ ] Add contract-parity between .NET and TS.
-- [ ] Publish `roslyngate-ts` and move the .NET product under `products/dotnet`.
+- [x] Add shared JSON Schema contracts and generated TS/C# types.
+- [x] Add contract-parity between .NET and TS, including errors and paging.
+- [x] Add TS stdio E2E tests for tools, errors, paging, and `stale`.
+- [x] Publish `roslyngate-ts@0.3.0`.
+- [x] Add `roslyngate-ts upgrade`, autodetection, and `--dotnet`/`--ts`.
+- [ ] Publish `roslyngate@0.3.0` and create the `v0.3.0` release.
+- [ ] Move the .NET product under `products/dotnet` after TS validation.
 - [ ] Add incremental LanguageService watch and a larger-repo benchmark.

@@ -6,6 +6,44 @@ All notable changes to RoslynGate are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-10-31
+
+**In plain terms:** RoslynGate is now a monorepo with two MCP products that
+share one contract. `roslyngate` keeps serving .NET solutions, and
+`roslyngate-ts` serves TypeScript and JavaScript with the same five tools.
+Both servers return the same `tools/list`, compact and verbose shapes, paging,
+and teaching errors. Each product now detects the wrong project type and tells
+you which package to use.
+
+### Added
+
+- `roslyngate-ts` product for `.ts`, `.tsx`, `.js`, and `.jsx` with the five
+  MCP tools, hierarchy, paging, `parameterTypes`, `stale`, and reload.
+- Canonical JSON Schema under `contracts/schema` plus a dependency-free
+  generator for TS types and C# DTOs.
+- Required `contract-parity` CI job comparing `tools/list` and behavior from
+  both servers.
+- TypeScript stdio E2E tests for definitions, overloads, ambiguity, verbose
+  output, references, hierarchy, search, errors, reload, and watcher `stale`.
+- `roslyngate-ts upgrade` with `--check`, `--dry-run`, `--no-config`, and
+  `--manager npm|bun`; managed MCP entries are re-pointed at the current CLI.
+- Project autodetection and explicit `--dotnet`/`--ts` flags in both products,
+  with `wrong_project` errors that point to the other package.
+- `version.json` plus `eng/check-version` to keep product, npm, contract, and
+  tag versions in lockstep.
+
+### Changed
+
+- Tool descriptions are product-neutral so both servers expose an identical
+  catalog.
+- TS qualified names use the module path plus the declaration chain, and symbol
+  kinds use the .NET vocabulary.
+- The TS server uses the low-level MCP `Server` with generated raw JSON Schema
+  to keep `tools/list` byte-for-byte compatible with .NET.
+- Fixture overloads now include `open(doorId: number)` for deterministic
+  `parameterTypes` coverage.
+- Release validation now checks `version.json` and the tag before publishing.
+
 ### Added
 
 - TypeScript/Node MVP under `products/typescript`: Program/TypeChecker/

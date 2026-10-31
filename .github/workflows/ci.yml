@@ -45,6 +45,9 @@ jobs:
       - name: Wrapper tests
         run: npm test --prefix packaging/npm
 
+      - name: Version check
+        run: npm run version:check
+
   typescript:
     runs-on: ubuntu-latest
     steps:
@@ -60,3 +63,34 @@ jobs:
         run: |
           npm --prefix products/typescript run build
           npm --prefix products/typescript test
+      - name: Contracts
+        run: npm run contracts:check
+
+  contract-parity:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: 10.0.x
+          cache: true
+          cache-dependency-path: "**/packages.lock.json"
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: products/typescript/package-lock.json
+      - name: Install
+        run: npm ci --prefix products/typescript
+      - name: Restore
+        run: dotnet restore --locked-mode
+      - name: Restore fixture
+        run: dotnet restore fixtures/SampleSolution/SampleSolution.sln
+      - name: Build
+        run: dotnet build RoslynGate.sln -warnaserror --no-restore
+      - name: Build TS
+        run: npm --prefix products/typescript run build
+      - name: Contracts
+        run: npm run contracts:check
+      - name: Parity
+        run: python3 tests/contract/parity.py

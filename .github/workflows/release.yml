@@ -39,8 +39,9 @@ jobs:
       - name: Validate version
         run: |
           version="${GITHUB_REF_NAME#v}"
-          props_version="$(sed -n 's:.*<Version>\(.*\)</Version>.*:\1:p' Directory.Build.props | head -1)"
-          test "$version" = "$props_version"
+          npm run version:check
+          manifest_version="$(node -p "require('./version.json').version")"
+          test "$version" = "$manifest_version"
           npm test --prefix packaging/npm
 
       - name: Publish
@@ -91,3 +92,63 @@ jobs:
             --title "$GITHUB_REF_NAME" \
             --generate-notes \
             --verify-tag
+
+  npm:
+    needs: release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+
+      - name: Check npm token
+        id: token
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          if [ -n "$NODE_AUTH_TOKEN" ]; then
+            echo "publish=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "publish=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Version check
+        if: steps.token.outputs.publish == 'true'
+        run: npm run version:check
+
+      - name: Build TypeScript
+        if: steps.token.outputs.publish == 'true'
+        run: |
+          npm ci --prefix products/typescript
+          npm --prefix products/typescript run build
+
+      - name: Publish TypeScript package
+        if: steps.token.outputs.publish == 'true'
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          if npm view "roslyngate-ts@$version" version >/dev/null 2>&1; then
+            echo "roslyngate-ts@$version already exists; skipping."
+          else
+            npm publish ./products/typescript --access public
+          fi
+
+      - name: Publish .NET wrapper
+        if: steps.token.outputs.publish == 'true'
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          if npm view "roslyngate@$version" version >/dev/null 2>&1; then
+            echo "roslyngate@$version already exists; skipping."
+          else
+            npm publish ./packaging/npm --access public
+          fi
+
+      - name: npm token missing
+        if: steps.token.outputs.publish != 'true'
+        run: echo "NPM_TOKEN is not configured; publish both packages manually."

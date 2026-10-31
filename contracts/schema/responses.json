@@ -1,0 +1,259 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "contractVersion": "1.0.0",
+  "$defs": {
+    "location": {
+      "type": "object",
+      "properties": {
+        "file": { "type": "string" },
+        "line": { "type": "integer", "minimum": 1 },
+        "column": { "type": "integer", "minimum": 1 }
+      },
+      "required": ["file", "line", "column"]
+    },
+    "compactSymbol": {
+      "type": "object",
+      "properties": {
+        "n": { "type": "string" },
+        "q": { "type": "string" },
+        "k": { "type": "string" },
+        "s": { "type": "string" },
+        "d": { "type": "string" },
+        "f": { "type": "string" },
+        "l": { "type": "integer", "minimum": 1 }
+      },
+      "required": ["n", "q", "k", "s", "f", "l"]
+    },
+    "verboseSymbol": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "qualifiedName": { "type": "string" },
+        "kind": { "type": "string" },
+        "namespace": { "type": "string" },
+        "containingType": { "type": "string" },
+        "signature": { "type": "string" },
+        "documentation": { "type": "string" },
+        "location": { "$ref": "#/$defs/location" }
+      },
+      "required": ["name", "qualifiedName", "kind", "signature", "location"]
+    },
+    "candidate": {
+      "type": "array",
+      "prefixItems": [
+        { "type": "string" },
+        { "type": "string" },
+        { "type": "string" },
+        { "type": "string" },
+        { "type": "integer", "minimum": 1 }
+      ],
+      "minItems": 5,
+      "maxItems": 5
+    },
+    "try": {
+      "type": "object",
+      "properties": {
+        "tool": { "type": "string" },
+        "arguments": { "type": "object" }
+      },
+      "required": ["tool", "arguments"]
+    },
+    "ambiguous": {
+      "type": "object",
+      "properties": {
+        "ambiguous": { "type": "boolean" },
+        "candidates": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/candidate" }
+        },
+        "hint": { "type": "string" }
+      },
+      "required": ["ambiguous", "candidates", "hint"]
+    },
+    "notFound": {
+      "type": "object",
+      "properties": {
+        "symbol": { "type": "null" },
+        "type": { "type": "null" },
+        "hint": { "type": "string" },
+        "try": { "$ref": "#/$defs/try" }
+      },
+      "required": []
+    },
+    "definitionCompact": {
+      "oneOf": [
+        { "$ref": "#/$defs/compactSymbol" },
+        { "$ref": "#/$defs/ambiguous" },
+        { "$ref": "#/$defs/notFound" }
+      ]
+    },
+    "definitionVerbose": {
+      "type": "object",
+      "properties": {
+        "symbol": {
+          "oneOf": [{ "$ref": "#/$defs/verboseSymbol" }, { "type": "null" }]
+        },
+        "ambiguous": { "type": "boolean" },
+        "candidates": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/verboseSymbol" }
+        },
+        "hint": { "type": "string" },
+        "try": { "$ref": "#/$defs/try" }
+      },
+      "required": ["symbol", "ambiguous"]
+    },
+    "referenceCompact": {
+      "type": "array",
+      "prefixItems": [
+        { "type": "string" },
+        { "type": "integer", "minimum": 1 },
+        { "type": "string" }
+      ],
+      "minItems": 3,
+      "maxItems": 3
+    },
+    "referenceVerbose": {
+      "type": "object",
+      "properties": {
+        "kind": { "type": "string" },
+        "file": { "type": "string" },
+        "line": { "type": "integer", "minimum": 1 },
+        "column": { "type": "integer", "minimum": 1 }
+      },
+      "required": ["kind", "file", "line", "column"]
+    },
+    "referencesCompact": {
+      "type": "object",
+      "properties": {
+        "q": { "type": "string" },
+        "definition": { "$ref": "#/$defs/compactSymbol" },
+        "total": { "type": "integer", "minimum": 0 },
+        "offset": { "type": "integer", "minimum": 0 },
+        "truncated": { "type": "boolean" },
+        "refs": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/referenceCompact" }
+        },
+        "nextOffset": { "type": "integer", "minimum": 0 },
+        "hint": { "type": "string" }
+      },
+      "required": ["q", "total", "offset", "truncated", "refs"]
+    },
+    "referencesVerbose": {
+      "type": "object",
+      "properties": {
+        "symbol": {
+          "oneOf": [{ "$ref": "#/$defs/verboseSymbol" }, { "type": "null" }]
+        },
+        "ambiguous": { "type": "boolean" },
+        "total": { "type": "integer", "minimum": 0 },
+        "offset": { "type": "integer", "minimum": 0 },
+        "limit": { "type": "integer", "minimum": 1 },
+        "truncated": { "type": "boolean" },
+        "references": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/referenceVerbose" }
+        },
+        "nextOffset": { "type": "integer", "minimum": 0 },
+        "hint": { "type": "string" }
+      },
+      "required": ["symbol", "ambiguous", "total", "offset", "limit", "truncated", "references"]
+    },
+    "hierarchyCompact": {
+      "type": "object",
+      "properties": {
+        "t": { "type": "string" },
+        "b": { "type": "array", "items": { "type": "string" } },
+        "i": { "type": "array", "items": { "type": "string" } },
+        "d": { "type": "array", "items": { "type": "string" } },
+        "m": { "type": "array", "items": { "type": "string" } },
+        "truncated": { "type": "boolean" }
+      },
+      "required": ["t"]
+    },
+    "hierarchyVerbose": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "oneOf": [{ "$ref": "#/$defs/verboseSymbol" }, { "type": "null" }]
+        },
+        "ambiguous": { "type": "boolean" },
+        "baseTypes": { "type": "array", "items": { "type": "string" } },
+        "interfaces": { "type": "array", "items": { "type": "string" } },
+        "derivedTypes": { "type": "array", "items": { "type": "string" } },
+        "implementations": { "type": "array", "items": { "type": "string" } },
+        "truncated": { "type": "boolean" }
+      },
+      "required": ["type", "ambiguous"]
+    },
+    "searchCompact": {
+      "type": "object",
+      "properties": {
+        "total": { "type": "integer", "minimum": 0 },
+        "offset": { "type": "integer", "minimum": 0 },
+        "truncated": { "type": "boolean" },
+        "hits": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "prefixItems": [
+              { "type": "string" },
+              { "type": "string" },
+              { "type": "string" },
+              { "type": "integer", "minimum": 1 }
+            ],
+            "minItems": 4,
+            "maxItems": 4
+          }
+        },
+        "nextOffset": { "type": "integer", "minimum": 0 },
+        "hint": { "type": "string" }
+      },
+      "required": ["total", "offset", "truncated", "hits"]
+    },
+    "searchVerbose": {
+      "type": "object",
+      "properties": {
+        "total": { "type": "integer", "minimum": 0 },
+        "offset": { "type": "integer", "minimum": 0 },
+        "limit": { "type": "integer", "minimum": 1 },
+        "truncated": { "type": "boolean" },
+        "hits": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/verboseSymbol" }
+        },
+        "nextOffset": { "type": "integer", "minimum": 0 },
+        "hint": { "type": "string" }
+      },
+      "required": ["total", "offset", "limit", "truncated", "hits"]
+    },
+    "toolError": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "type": "object",
+          "properties": {
+            "code": { "type": "string" },
+            "message": { "type": "string" },
+            "hint": { "type": "string" },
+            "try": { "$ref": "#/$defs/try" }
+          },
+          "required": ["code", "message", "hint"]
+        }
+      },
+      "required": ["error"]
+    },
+    "reload": {
+      "type": "object",
+      "properties": {
+        "status": { "type": "string" },
+        "projects": { "type": "integer", "minimum": 0 },
+        "files": { "type": "integer", "minimum": 0 },
+        "sdk": { "type": "string" },
+        "watch": { "type": "string", "enum": ["on", "off"] }
+      },
+      "required": ["status", "watch"]
+    }
+  }
+}

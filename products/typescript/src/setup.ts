@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { detectTypeScriptProject } from "./project.js";
 
 const SERVER = "roslyngate-ts";
 const SKILL = `---
@@ -43,6 +44,7 @@ export function parseSetup(args: string[]) {
 export function runSetup(target: "claude" | "opencode", args: string[]) {
   const { solution, skill, dryRun } = parseSetup(args);
   const root = resolveRoot(solution);
+  detectTypeScriptProject(root);
   const cli = fileURLToPath(new URL("./cli.js", import.meta.url));
   const entry = target === "claude"
     ? { command: process.execPath, args: [cli, "--solution", root] }

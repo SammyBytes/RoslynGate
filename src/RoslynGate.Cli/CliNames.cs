@@ -14,4 +14,6 @@ public static class CliNames
     public const string Watch = "--watch";
     public const string NoWatch = "--no-watch";
     public const string Check = "--check";
+    public const string DotNet = "--dotnet";
+    public const string TypeScript = "--ts";
 }

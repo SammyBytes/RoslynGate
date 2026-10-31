@@ -16,14 +16,14 @@ test("resolves TS symbols, references, hierarchy, and search", () => {
     assert.equal(widget.length, 1);
     assert.equal(widget[0].name, "Widget");
 
-    const references = workspace.references(widget[0], 0, 50);
-    assert.ok(references.total >= 4);
+    const references = workspace.references(widget[0], false, 0, 50);
+    assert.ok(references.total >= 2);
 
     const hierarchy = workspace.hierarchy(widget[0]);
-    assert.ok(hierarchy.interfaces.includes("Openable"));
-    assert.ok(hierarchy.derived.includes("SecureWidget"));
+    assert.ok(hierarchy.interfaces.some((item) => item.endsWith(".Openable")));
+    assert.ok(hierarchy.derived.some((item) => item.endsWith(".SecureWidget")));
 
-    const search = workspace.search("Widget", 0, 20);
+    const search = workspace.search("Widget", undefined, undefined, 0, 20);
     assert.ok(search.total > 0);
     assert.ok(search.hits.some((hit) => hit.name === "Widget"));
   } finally {

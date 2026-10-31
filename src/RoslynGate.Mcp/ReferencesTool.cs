@@ -13,7 +13,7 @@ public sealed class ReferencesTool(Workspace workspace, ServerOptions options)
         ReadOnly = true,
         Idempotent = true,
         OpenWorld = false)]
-    [Description("Find semantic references to a .NET symbol, with deterministic paging. Set includeDefinition=true to return the resolved definition in the same call.")]
+    [Description("Find semantic references to a symbol, with deterministic paging. Set includeDefinition=true to return the resolved definition in the same call.")]
     public async Task<CallToolResult> FindSymbolReferencesAsync(
         [Description("Qualified or partial symbol name, e.g. SampleSdk.Widget.Open. Ignored when file is provided.")]
         string? name = null,

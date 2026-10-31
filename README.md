@@ -80,15 +80,39 @@ npm run build
 node dist/cli.js --check --solution ../../fixtures/TsSample
 ```
 
-The five MCP tools are the same contract as the .NET product. See
-[`docs/TODO-TS.md`](docs/TODO-TS.md) for the remaining release work.
+The five MCP tools use the same contract as the .NET product, generated from
+`contracts/schema/tools.json`. A repository with a `tsconfig.json` or
+`jsconfig.json` is detected automatically; a `.sln` workspace returns a
+teaching error that points to the `roslyngate` package.
+
+```bash
+npm install -g roslyngate-ts
+cd /path/to/typescript-repo
+roslyngate-ts setup claude --skill
+```
+
+Or run it without installing:
+
+```bash
+npx -y roslyngate-ts@0.3.0 --check --solution .
+npx -y roslyngate-ts@0.3.0 upgrade --check
+```
+
+`roslyngate-ts upgrade` updates the global package and re-points managed
+`.mcp.json` or `opencode.jsonc` entries at the current CLI. Use `--dotnet` or
+`--ts` to force a product; the opposite product returns a `wrong_project`
+error with the exact package to install.
+
+See [`docs/TODO-TS.md`](docs/TODO-TS.md) for the remaining benchmark and
+validation work.
 
 ## Requirements
 
 - .NET SDK. RoslynGate does not install or bundle the SDK; it uses the one
   selected by the solution's `global.json`, or the latest installed SDK.
-- Linux x64, Windows x64, or macOS arm64 (Apple Silicon). Intel Macs are not
-  supported.
+- Node.js 20 or later for the TypeScript product.
+- Linux x64, Windows x64, or macOS arm64 (Apple Silicon) for the .NET
+  binaries. Intel Macs are not supported.
 
 The binary is self-contained, so the .NET runtime is included. The SDK is still
 required because `MSBuildWorkspace` uses MSBuild to evaluate projects, targets,
@@ -117,8 +141,8 @@ roslyngate setup claude
 Or run it without installing:
 
 ```bash
-npx -y roslyngate@0.2.2 setup claude
-bunx roslyngate@0.2.2 setup claude
+npx -y roslyngate@0.3.0 setup claude
+bunx roslyngate@0.3.0 setup claude
 ```
 
 `setup claude` writes `.mcp.json` with the native binary path, solution path,

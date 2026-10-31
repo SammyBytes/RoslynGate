@@ -7,7 +7,8 @@
     "roslyngate-ts": "dist/cli.js"
   },
   "files": [
-    "dist"
+    "dist",
+    "!dist/test"
   ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
@@ -16,8 +17,7 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "1.32.2",
-    "typescript": "5.9.3",
-    "zod": "4.6.7"
+    "typescript": "5.9.3"
   },
   "engines": {
     "node": ">=20"

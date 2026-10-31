@@ -1,0 +1,63 @@
+#!/usr/bin/env node
+const fs = require("node:fs");
+const path = require("node:path");
+
+const root = path.resolve(__dirname, "..");
+const manifest = JSON.parse(read("version.json"));
+const errors = [];
+
+check("version", manifest.version);
+check("contract version", manifest.contractVersion);
+
+const props = read("Directory.Build.props");
+const propsVersion = props.match(/<Version>([^<]+)<\/Version>/)?.[1];
+compare("Directory.Build.props", propsVersion, manifest.version);
+
+compare(
+  "packaging/npm/package.json",
+  JSON.parse(read("packaging/npm/package.json")).version,
+  manifest.npm.roslyngate
+);
+compare(
+  "products/typescript/package.json",
+  JSON.parse(read("products/typescript/package.json")).version,
+  manifest.npm["roslyngate-ts"]
+);
+compare("version.json products.dotnet", manifest.products.dotnet, manifest.version);
+compare("version.json products.typescript", manifest.products.typescript, manifest.version);
+compare("version.json npm.roslyngate", manifest.npm.roslyngate, manifest.version);
+compare("version.json npm.roslyngate-ts", manifest.npm["roslyngate-ts"], manifest.version);
+
+const tools = JSON.parse(read("contracts/schema/tools.json"));
+const responses = JSON.parse(read("contracts/schema/responses.json"));
+compare("contracts/schema/tools.json", tools.contractVersion, manifest.contractVersion);
+compare("contracts/schema/responses.json", responses.contractVersion, manifest.contractVersion);
+
+const cli = read("products/typescript/src/cli.ts");
+const cliVersion = cli.match(/const VERSION = "([^"]+)"/)?.[1];
+compare("products/typescript/src/cli.ts", cliVersion, manifest.version);
+
+if (errors.length > 0) {
+  for (const error of errors) {
+    console.error(`version: ${error}`);
+  }
+  process.exit(1);
+}
+
+console.log(`version: ${manifest.version} (contract ${manifest.contractVersion})`);
+
+function read(relative) {
+  return fs.readFileSync(path.join(root, relative), "utf8");
+}
+
+function compare(label, actual, expected) {
+  if (actual !== expected) {
+    errors.push(`${label} is ${actual ?? "missing"}, expected ${expected}`);
+  }
+}
+
+function check(label, value) {
+  if (!value) {
+    errors.push(`${label} is missing`);
+  }
+}

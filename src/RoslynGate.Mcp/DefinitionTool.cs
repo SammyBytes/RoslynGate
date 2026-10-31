@@ -13,7 +13,7 @@ public sealed class DefinitionTool(Workspace workspace, ServerOptions options)
         ReadOnly = true,
         Idempotent = true,
         OpenWorld = false)]
-    [Description("Resolve one .NET symbol by qualified name or by solution-relative file and 1-based line.")]
+    [Description("Resolve one symbol by qualified name or by solution-relative file and 1-based line.")]
     public async Task<CallToolResult> GetSymbolDefinitionAsync(
         [Description("Qualified or partial symbol name, e.g. SampleSdk.Widget.Open. Ignored when file is provided.")]
         string? name = null,

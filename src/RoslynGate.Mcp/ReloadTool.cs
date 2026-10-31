@@ -15,7 +15,7 @@ public sealed class ReloadTool(Workspace workspace)
         ReadOnly = true,
         Idempotent = true,
         OpenWorld = false)]
-    [Description("Reload the .NET solution after project or structural file changes.")]
+    [Description("Reload the workspace after project or structural file changes.")]
     public async Task<CallToolResult> ReloadWorkspaceAsync(CancellationToken cancellationToken = default)
     {
         try
