@@ -5,7 +5,8 @@ export interface Openable {
 export class Widget implements Openable {
   open(): void;
   open(doorId: string): void;
-  open(doorId?: string): void {
+  open(doorId: number): void;
+  open(doorId?: string | number): void {
     void doorId;
   }
 }

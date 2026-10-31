@@ -3,16 +3,53 @@ import path from "node:path";
 import ts from "typescript";
 
 export type SymbolLocation = { file: string; line: number; column: number };
+
 export type SymbolInfo = {
   name: string;
   qualifiedName: string;
   kind: string;
   signature: string;
+  documentation?: string;
+  namespace: string;
+  containingType?: string;
   location: SymbolLocation;
   declaration: ts.Declaration;
 };
-export type ReferenceInfo = { file: string; line: number; kind: string };
+
+export type ReferenceInfo = {
+  file: string;
+  line: number;
+  column: number;
+  kind: string;
+};
+
 export type WorkspaceState = { stale: boolean; changed: string[] };
+
+export type ReferencePage = {
+  total: number;
+  refs: ReferenceInfo[];
+  truncated: boolean;
+  limit: number;
+};
+
+export type HierarchyResult = {
+  base: string[];
+  interfaces: string[];
+  derived: string[];
+  implementations: string[];
+  truncated: boolean;
+};
+
+export type SearchPage = {
+  total: number;
+  hits: SymbolInfo[];
+  truncated: boolean;
+  limit: number;
+};
+
+const MAX_HIERARCHY = 200;
+const COMPACT_DOCUMENTATION = 400;
+const VERBOSE_DOCUMENTATION = 800;
 
 export class TsWorkspace {
   readonly root: string;
@@ -46,7 +83,8 @@ export class TsWorkspace {
       path.dirname(this.configPath)
     );
     if (parsed.errors.length > 0) {
-      throw new Error(parsed.errors.map((e) => ts.flattenDiagnosticMessageText(e.messageText, "\n")).join("\n"));
+      throw new Error(parsed.errors.map((error) =>
+        ts.flattenDiagnosticMessageText(error.messageText, "\n")).join("\n"));
     }
 
     this.options = parsed.options;
@@ -76,31 +114,44 @@ export class TsWorkspace {
   }
 
   sourceFileCount(): number {
-    return this.program.getSourceFiles().filter((file) => !file.isDeclarationFile).length;
+    return this.localSources().length;
+  }
+
+  projectCount(): number {
+    return this.program.getProjectReferences()?.length ?? 0;
+  }
+
+  typescriptVersion(): string {
+    return ts.version;
+  }
+
+  isFileIndexed(file: string): boolean {
+    return this.program.getSourceFile(path.resolve(this.root, file)) !== undefined;
   }
 
   resolve(name?: string, file?: string, line?: number, column?: number): SymbolInfo[] {
     if (file) {
       const source = this.program.getSourceFile(path.resolve(this.root, file));
       if (!source) return [];
-      const position = source.getPositionOfLineAndCharacter((line ?? 1) - 1, (column ?? 1) - 1);
+      const position = positionAt(source, (line ?? 1) - 1, (column ?? 1) - 1);
       const node = findNodeAt(source, position);
       const symbol = node ? this.checker.getSymbolAtLocation(node) : undefined;
-      return symbol ? [this.toInfo(symbol)] : [];
+      if (!symbol) return [];
+      return this.infos(this.realSymbol(symbol));
     }
 
-    if (!name) return [];
-    const simple = name.split(".").pop()!;
+    if (!name || name.trim().length === 0) return [];
+    const target = normalizeTarget(name);
     const found = new Map<string, SymbolInfo>();
-    for (const source of this.program.getSourceFiles()) {
-      if (source.isDeclarationFile || source.fileName.includes("/node_modules/")) continue;
+    for (const source of this.localSources()) {
       const visit = (node: ts.Node): void => {
-        if (ts.isIdentifier(node) && node.text === simple) {
+        if (ts.isIdentifier(node) && matchesTarget(node.text, target)) {
           const symbol = this.checker.getSymbolAtLocation(node);
-          if (symbol && hasRealDeclaration(symbol)) {
-            const info = this.toInfo(symbol);
-            if (matchesName(info.qualifiedName, name)) {
-              found.set(`${info.location.file}:${info.location.line}:${info.location.column}`, info);
+          if (symbol) {
+            for (const info of this.infos(this.realSymbol(symbol))) {
+              if (matchesTarget(info.qualifiedName, target) || matchesTarget(info.name, target)) {
+                found.set(keyOf(info), info);
+              }
             }
           }
         }
@@ -108,71 +159,78 @@ export class TsWorkspace {
       };
       visit(source);
     }
-    return [...found.values()].sort((a, b) =>
-      a.location.file.localeCompare(b.location.file)
-      || a.location.line - b.location.line
-      || a.location.column - b.location.column);
+    return sortSymbols([...found.values()]);
   }
 
-  references(symbol: SymbolInfo, offset: number, limit: number): {
-    total: number; refs: ReferenceInfo[]; truncated: boolean;
-  } {
+  references(
+    symbol: SymbolInfo,
+    includeDeclarations: boolean,
+    offset: number,
+    limit: number
+  ): ReferencePage {
+    const appliedLimit = Math.max(1, Math.min(limit, 200));
+    const appliedOffset = Math.max(0, offset);
     const declaration = symbol.declaration;
     const source = declaration.getSourceFile();
     const start = declaration.getStart(source);
     const groups = this.languageService.findReferences(source.fileName, start) ?? [];
     const refs = new Map<string, ReferenceInfo>();
+
     for (const group of groups) {
-      for (const ref of group.references) {
-        const refSource = this.program.getSourceFile(ref.fileName);
+      for (const reference of group.references) {
+        if (!includeDeclarations && isDefinition(reference, group.definition)) continue;
+        const absoluteName = absoluteFile(this.root, reference.fileName);
+        const refSource = this.program.getSourceFile(absoluteName);
         if (!refSource) continue;
-        const loc = refSource.getLineAndCharacterOfPosition(ref.textSpan.start);
-        const file = relative(this.root, ref.fileName);
-        const key = `${file}:${loc.line + 1}`;
-        if (!refs.has(key)) {
-          refs.set(key, { file, line: loc.line + 1, kind: kindOf(ref) });
-        }
+        const loc = refSource.getLineAndCharacterOfPosition(reference.textSpan.start);
+        const file = relative(this.root, absoluteName);
+        const kind = referenceKind(refSource, reference.textSpan.start, reference.isWriteAccess);
+        const info = { file, line: loc.line + 1, column: loc.character + 1, kind };
+        refs.set(`${file}:${info.line}:${info.column}`, info);
       }
     }
-    const ordered = [...refs.values()].sort((a, b) =>
-      a.file.localeCompare(b.file) || a.line - b.line);
-    const page = ordered.slice(offset, offset + limit);
-    return { total: ordered.length, refs: page, truncated: offset + page.length < ordered.length };
+
+    const ordered = [...refs.values()].sort(compareReferences);
+    const page = ordered.slice(appliedOffset, appliedOffset + appliedLimit);
+    return {
+      total: ordered.length,
+      refs: page,
+      truncated: appliedOffset + page.length < ordered.length,
+      limit: appliedLimit
+    };
   }
 
-  hierarchy(symbol: SymbolInfo): { base: string[]; interfaces: string[]; derived: string[]; implementations: string[] } {
+  hierarchy(symbol: SymbolInfo): HierarchyResult {
     const declaration = symbol.declaration;
-    const type = this.checker.getTypeAtLocation(declaration);
-    const target = (declaration as ts.ClassDeclaration).name
-      ? this.checker.getSymbolAtLocation((declaration as ts.ClassDeclaration).name!)
-      : type.symbol;
+    const target = symbolSymbol(this.checker, declaration);
     const base: string[] = [];
     const interfaces: string[] = [];
     const derived: string[] = [];
     const implementations: string[] = [];
 
-    for (const clause of (declaration as ts.ClassDeclaration).heritageClauses ?? []) {
+    for (const clause of heritageClauses(declaration)) {
       for (const typeNode of clause.types) {
-        const name = typeNode.expression.getText(typeNode.getSourceFile());
+        const name = this.typeName(typeNode);
         if (clause.token === ts.SyntaxKind.ExtendsKeyword) base.push(name);
         if (clause.token === ts.SyntaxKind.ImplementsKeyword) interfaces.push(name);
       }
     }
 
-    for (const source of this.program.getSourceFiles()) {
-      if (source.isDeclarationFile || source.fileName.includes("/node_modules/")) continue;
+    for (const source of this.localSources()) {
       const visit = (node: ts.Node): void => {
         if (ts.isClassDeclaration(node) || ts.isInterfaceDeclaration(node)) {
           const other = node.name ? this.checker.getSymbolAtLocation(node.name) : undefined;
-          if (other && other !== target) {
+          if (other && target && other !== target) {
             for (const clause of node.heritageClauses ?? []) {
               for (const typeNode of clause.types) {
-                const baseSymbol = this.checker.getSymbolAtLocation(typeNode.expression);
+                const baseSymbol = symbolSymbol(this.checker, typeNode.expression);
                 if (baseSymbol !== target) continue;
+                const info = this.infos(other)[0];
+                if (!info) continue;
                 if (clause.token === ts.SyntaxKind.ImplementsKeyword) {
-                  implementations.push(other.getName());
+                  implementations.push(info.qualifiedName);
                 } else {
-                  derived.push(other.getName());
+                  derived.push(info.qualifiedName);
                 }
               }
             }
@@ -182,53 +240,170 @@ export class TsWorkspace {
       };
       visit(source);
     }
-    return {
-      base,
-      interfaces,
-      derived: [...new Set(derived)].sort(),
-      implementations: [...new Set(implementations)].sort()
+
+    const result = {
+      base: uniqueSorted(base),
+      interfaces: uniqueSorted(interfaces),
+      derived: uniqueSorted(derived),
+      implementations: uniqueSorted(implementations)
     };
+    const size = result.base.length + result.interfaces.length
+      + result.derived.length + result.implementations.length;
+    return { ...result, truncated: size > MAX_HIERARCHY };
   }
 
-  search(query: string, offset: number, limit: number): { total: number; hits: SymbolInfo[]; truncated: boolean } {
+  search(
+    query: string,
+    kind: string | undefined,
+    namespace: string | undefined,
+    offset: number,
+    limit: number
+  ): SearchPage {
+    const appliedLimit = Math.max(1, Math.min(limit, 50));
+    const appliedOffset = Math.max(0, offset);
+    const needle = query.trim().toLowerCase();
     const found = new Map<string, SymbolInfo>();
-    for (const source of this.program.getSourceFiles()) {
-      if (source.isDeclarationFile || source.fileName.includes("/node_modules/")) continue;
+
+    for (const source of this.localSources()) {
       const visit = (node: ts.Node): void => {
-        if (ts.isIdentifier(node) && node.text.toLowerCase().includes(query.toLowerCase())) {
+        if (ts.isIdentifier(node) && node.text.toLowerCase().includes(needle)) {
           const symbol = this.checker.getSymbolAtLocation(node);
-          if (symbol && hasRealDeclaration(symbol)) {
-            const info = this.toInfo(symbol);
-            found.set(`${info.qualifiedName}|${info.location.file}:${info.location.line}`, info);
+          if (!symbol) return;
+          for (const info of this.infos(this.realSymbol(symbol))) {
+            if (!isSearchable(info)) continue;
+            if (!info.name.toLowerCase().includes(needle)
+              && !info.qualifiedName.toLowerCase().includes(needle)) continue;
+            if (kind && info.kind !== kind) continue;
+            if (namespace && !info.namespace.startsWith(namespace)) continue;
+            found.set(keyOf(info), info);
           }
         }
         ts.forEachChild(node, visit);
       };
       visit(source);
     }
-    const hits = [...found.values()].sort((a, b) => a.qualifiedName.localeCompare(b.qualifiedName));
-    const page = hits.slice(offset, offset + limit);
-    return { total: hits.length, hits: page, truncated: offset + page.length < hits.length };
+
+    const hits = sortSymbols([...found.values()]);
+    const page = hits.slice(appliedOffset, appliedOffset + appliedLimit);
+    return {
+      total: hits.length,
+      hits: page,
+      truncated: appliedOffset + page.length < hits.length,
+      limit: appliedLimit
+    };
   }
 
-  private toInfo(symbol: ts.Symbol): SymbolInfo {
-    const declaration = symbol.declarations?.find(isRealDeclaration) ?? symbol.valueDeclaration;
-    if (!declaration) throw new Error(`No declaration for ${symbol.getName()}`);
+  compact(info: SymbolInfo): Record<string, unknown> {
+    const value: Record<string, unknown> = {
+      n: info.name,
+      q: info.qualifiedName,
+      k: info.kind,
+      s: info.signature
+    };
+    if (info.documentation) {
+      value.d = truncate(info.documentation, COMPACT_DOCUMENTATION);
+    }
+    value.f = info.location.file;
+    value.l = info.location.line;
+    return value;
+  }
+
+  verbose(info: SymbolInfo): Record<string, unknown> {
+    const value: Record<string, unknown> = {
+      name: info.name,
+      qualifiedName: info.qualifiedName,
+      kind: info.kind
+    };
+    if (info.namespace) value.namespace = info.namespace;
+    if (info.containingType) value.containingType = info.containingType;
+    value.signature = info.signature;
+    if (info.documentation) {
+      value.documentation = truncate(info.documentation, VERBOSE_DOCUMENTATION);
+    }
+    value.location = {
+      file: info.location.file,
+      line: info.location.line,
+      column: info.location.column
+    };
+    return value;
+  }
+
+  compactCandidate(info: SymbolInfo): [string, string, string, string, number] {
+    return [
+      info.qualifiedName,
+      info.kind,
+      info.signature,
+      info.location.file,
+      info.location.line
+    ];
+  }
+
+  private infos(symbol: ts.Symbol): SymbolInfo[] {
+    const declarations = (symbol.declarations ?? []).filter(isRealDeclaration);
+    const selected = declarations.length > 0
+      ? declarations
+      : symbol.valueDeclaration ? [symbol.valueDeclaration] : [];
+    const infos = selected.map((declaration) => this.toInfo(symbol, declaration));
+    return sortSymbols(infos);
+  }
+
+  private toInfo(symbol: ts.Symbol, declaration: ts.Declaration): SymbolInfo {
     const source = declaration.getSourceFile();
     const loc = source.getLineAndCharacterOfPosition(declaration.getStart(source));
+    const qualifiedName = this.qualifiedName(declaration);
+    const namespace = relative(this.root, source.fileName).replace(/\.(d\.)?[cm]?[jt]sx?$/, "");
+    const containingType = containingTypeOf(declaration);
     return {
       name: symbol.getName(),
-      qualifiedName: this.qualifiedName(symbol),
-      kind: ts.SyntaxKind[declaration.kind],
-      signature: declaration.getText(source).split("\n")[0].trim(),
-      location: { file: relative(this.root, source.fileName), line: loc.line + 1, column: loc.character + 1 },
+      qualifiedName,
+      kind: kindOf(declaration),
+      signature: signatureOf(declaration),
+      documentation: documentationOf(this.checker, symbol),
+      namespace,
+      containingType,
+      location: {
+        file: relative(this.root, source.fileName),
+        line: loc.line + 1,
+        column: loc.character + 1
+      },
       declaration
     };
   }
 
-  private qualifiedName(symbol: ts.Symbol): string {
-    try { return this.checker.getFullyQualifiedName(symbol); }
-    catch { return symbol.getName(); }
+  private qualifiedName(declaration: ts.Declaration): string {
+    const source = declaration.getSourceFile();
+    const moduleName = relative(this.root, source.fileName)
+      .replace(/\.(d\.)?[cm]?[jt]sx?$/, "")
+      .replace(/\/index$/, "");
+    const chain = nameChain(declaration);
+    return [moduleName, ...chain].filter(Boolean).join(".");
+  }
+
+  private realSymbol(symbol: ts.Symbol): ts.Symbol {
+    if (symbol.flags & ts.SymbolFlags.Alias) {
+      try {
+        return this.checker.getAliasedSymbol(symbol);
+      } catch {
+        return symbol;
+      }
+    }
+    return symbol;
+  }
+
+  private typeName(typeNode: ts.ExpressionWithTypeArguments): string {
+    const symbol = symbolSymbol(this.checker, typeNode.expression);
+    if (symbol) {
+      const info = this.infos(this.realSymbol(symbol))[0];
+      if (info) return info.qualifiedName;
+    }
+    return typeNode.expression.getText(typeNode.getSourceFile());
+  }
+
+  private localSources(): ts.SourceFile[] {
+    return this.program.getSourceFiles().filter((source) =>
+      !source.isDeclarationFile
+      && !source.fileName.includes("/node_modules/")
+      && !source.fileName.includes("\\node_modules\\"));
   }
 
   private createHost(): ts.LanguageServiceHost {
@@ -255,11 +430,11 @@ export class TsWorkspace {
     try {
       this.watcher = fs.watch(this.root, { recursive: true }, (_, file) => {
         if (!file) return;
-        const name = file.toString();
-        if (!/\.(ts|tsx|js|jsx|json|mts|cts)$/.test(name)) return;
-        if (name.includes("node_modules") || name.includes("dist/")) return;
+        const name = file.toString().replaceAll("\\", "/");
+        if (!/\.(ts|tsx|js|jsx|mts|cts|json)$/.test(name)) return;
+        if (name.includes("node_modules") || name.includes("/dist/")) return;
         this.stale = true;
-        this.changed.add(name.replaceAll("\\", "/"));
+        this.changed.add(name);
       });
     } catch {
       this.stale = false;
@@ -279,8 +454,43 @@ function relative(root: string, file: string): string {
   return path.relative(root, file).replaceAll("\\", "/");
 }
 
-function matchesName(qualified: string, expected: string): boolean {
-  return qualified === expected || qualified.endsWith(`.${expected}`);
+function normalizeTarget(value: string): string {
+  return value.trim().replace(/\(.*$/, "").replace(/^\.\//, "");
+}
+
+function matchesTarget(value: string, target: string): boolean {
+  return value === target
+    || value.endsWith(`.${target}`)
+    || target.endsWith(`.${value}`);
+}
+
+function keyOf(info: SymbolInfo): string {
+  return `${info.qualifiedName}|${info.location.file}:${info.location.line}:${info.location.column}`;
+}
+
+function sortSymbols(items: SymbolInfo[]): SymbolInfo[] {
+  return items.sort((a, b) =>
+    a.qualifiedName.localeCompare(b.qualifiedName)
+    || a.location.file.localeCompare(b.location.file)
+    || a.location.line - b.location.line
+    || a.location.column - b.location.column);
+}
+
+function compareReferences(a: ReferenceInfo, b: ReferenceInfo): number {
+  return a.file.localeCompare(b.file) || a.line - b.line || a.column - b.column;
+}
+
+function uniqueSorted(values: string[]): string[] {
+  return [...new Set(values.filter(Boolean))].sort();
+}
+
+function positionAt(source: ts.SourceFile, line: number, column: number): number {
+  const safeLine = Math.max(0, Math.min(line, source.getLineStarts().length - 1));
+  const start = source.getLineStarts()[safeLine];
+  const end = safeLine + 1 < source.getLineStarts().length
+    ? source.getLineStarts()[safeLine + 1]
+    : source.getEnd();
+  return Math.max(start, Math.min(start + Math.max(0, column), end));
 }
 
 function findNodeAt(source: ts.SourceFile, position: number): ts.Node | undefined {
@@ -295,6 +505,133 @@ function findNodeAt(source: ts.SourceFile, position: number): ts.Node | undefine
   return found;
 }
 
+function absoluteFile(root: string, file: string): string {
+  return path.isAbsolute(file) ? file : path.resolve(root, file);
+}
+
+function isDefinition(reference: ts.ReferenceEntry, definition: ts.ReferencedSymbolDefinitionInfo): boolean {
+  return path.resolve(reference.fileName) === path.resolve(definition.fileName)
+    && reference.textSpan.start === definition.textSpan.start;
+}
+
+function isSearchable(info: SymbolInfo): boolean {
+  if (info.kind === "parameter") return false;
+  if (info.kind !== "field") return true;
+  const parent = info.declaration.parent;
+  return ts.isSourceFile(parent)
+    || ts.isClassDeclaration(parent)
+    || ts.isClassExpression(parent)
+    || ts.isInterfaceDeclaration(parent);
+}
+
+function referenceKind(source: ts.SourceFile, position: number, write: boolean): string {
+  const node = findNodeAt(source, position);
+  const heritage = node ? findParent(node, ts.isHeritageClause) : undefined;
+  if (heritage) return "inherit";
+  return write ? "write" : "read";
+}
+
+function findParent<T extends ts.Node>(
+  node: ts.Node,
+  predicate: (value: ts.Node) => value is T
+): T | undefined {
+  let current: ts.Node | undefined = node;
+  while (current) {
+    if (predicate(current)) return current;
+    current = current.parent;
+  }
+  return undefined;
+}
+
+function heritageClauses(declaration: ts.Declaration): ts.HeritageClause[] {
+  const node = declaration as ts.ClassDeclaration | ts.InterfaceDeclaration;
+  return (node.heritageClauses ?? []) as ts.HeritageClause[];
+}
+
+function symbolSymbol(checker: ts.TypeChecker, node: ts.Node): ts.Symbol | undefined {
+  const name = (node as ts.NamedDeclaration).name;
+  if (name) {
+    const symbol = checker.getSymbolAtLocation(name);
+    if (symbol) return symbol;
+  }
+  return checker.getSymbolAtLocation(node);
+}
+
+function containingTypeOf(declaration: ts.Declaration): string | undefined {
+  const chain = nameChain(declaration);
+  if (chain.length <= 1) return undefined;
+  return chain.slice(0, -1).join(".");
+}
+
+function nameChain(declaration: ts.Declaration): string[] {
+  const chain: string[] = [];
+  let node: ts.Node | undefined = declaration;
+  while (node && !ts.isSourceFile(node)) {
+    const name = (node as ts.NamedDeclaration).name;
+    if (name && ts.isIdentifier(name) && !chain.includes(name.text)) {
+      chain.unshift(name.text);
+    }
+    node = node.parent;
+  }
+  return chain;
+}
+
+function kindOf(declaration: ts.Declaration): string {
+  if (ts.isClassDeclaration(declaration)) return "class";
+  if (ts.isInterfaceDeclaration(declaration)) return "interface";
+  if (ts.isEnumDeclaration(declaration)) return "enum";
+  if (ts.isEnumMember(declaration)) return "enum";
+  if (ts.isTypeAliasDeclaration(declaration)) return "type";
+  if (ts.isFunctionDeclaration(declaration)) return "method";
+  if (ts.isMethodDeclaration(declaration) || ts.isMethodSignature(declaration)) return "method";
+  if (ts.isConstructorDeclaration(declaration)) return "constructor";
+  if (ts.isPropertyDeclaration(declaration) || ts.isPropertySignature(declaration)) return "property";
+  if (ts.isGetAccessor(declaration) || ts.isSetAccessor(declaration)) return "property";
+  if (ts.isVariableDeclaration(declaration)) return "field";
+  if (ts.isParameter(declaration)) return "parameter";
+  if (ts.isModuleDeclaration(declaration)) return "namespace";
+  if (ts.isTypeParameterDeclaration(declaration)) return "type";
+  return ts.SyntaxKind[declaration.kind].replace(/Declaration$/, "").toLowerCase();
+}
+
+function signatureOf(declaration: ts.Declaration): string {
+  const source = declaration.getSourceFile();
+  const name = (declaration as ts.NamedDeclaration).name;
+  const simple = name && ts.isIdentifier(name) ? name.text : "";
+  if (ts.isClassDeclaration(declaration)) {
+    return `class ${simple}`;
+  }
+  if (ts.isInterfaceDeclaration(declaration)) {
+    return `interface ${simple}`;
+  }
+  if (ts.isEnumDeclaration(declaration)) {
+    return `enum ${simple}`;
+  }
+  if (ts.isTypeAliasDeclaration(declaration)) {
+    return `type ${simple}`;
+  }
+  const header = declaration.getText(source)
+    .split("\n")[0]
+    .replace(/^export\s+/, "")
+    .replace(/^declare\s+/, "")
+    .trim();
+  const withoutBody = header.split("{")[0].trim().replace(/;$/, "");
+  return withoutBody.length > 0 ? withoutBody : simple;
+}
+
+function documentationOf(checker: ts.TypeChecker, symbol: ts.Symbol): string | undefined {
+  try {
+    const text = ts.displayPartsToString(symbol.getDocumentationComment(checker)).trim();
+    return text.length > 0 ? text : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+function truncate(value: string, maximum: number): string {
+  return value.length <= maximum ? value : `${value.slice(0, maximum)}...`;
+}
+
 function isRealDeclaration(declaration: ts.Declaration): boolean {
   return !ts.isImportSpecifier(declaration)
     && !ts.isImportClause(declaration)
@@ -302,10 +639,17 @@ function isRealDeclaration(declaration: ts.Declaration): boolean {
     && !ts.isNamespaceImport(declaration);
 }
 
-function hasRealDeclaration(symbol: ts.Symbol): boolean {
-  return (symbol.declarations ?? []).some(isRealDeclaration);
-}
-
-function kindOf(ref: ts.ReferenceEntry): string {
-  return ref.isWriteAccess ? "write" : "read";
+export function matchesParameterTypes(info: SymbolInfo, parameterTypes?: string[]): boolean {
+  if (!parameterTypes || parameterTypes.length === 0) return true;
+  const declaration = info.declaration as ts.SignatureDeclaration;
+  if (!declaration.parameters || declaration.parameters.length !== parameterTypes.length) {
+    return false;
+  }
+  return declaration.parameters.every((parameter, index) => {
+    const actual = parameter.type?.getText(parameter.getSourceFile()) ?? "unknown";
+    const expected = parameterTypes[index];
+    return actual === expected
+      || actual.endsWith(`.${expected}`)
+      || actual.replaceAll(" ", "") === expected.replaceAll(" ", "");
+  });
 }

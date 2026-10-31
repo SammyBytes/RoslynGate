@@ -29,3 +29,9 @@ pull request.
 | D-22 | Overloads accept `parameterTypes` before file + line. | A type hint is less context and fewer turns than selecting a candidate by position. |
 | D-23 | OpenCode setup writes `mcp.servers.roslyngate` with `codemode: false`. | It matches OpenCode V2's configuration shape and keeps RoslynGate tools native instead of wrapping them in Code Mode. |
 | D-24 | OpenCode's strict skill is loaded through `instructions` and is opt-in. | A skill description alone does not force tool use; loading the text keeps the one-call/parameterTypes rules in context without changing Claude's setup. |
+| D-25 | One monorepo, two npm packages (`roslyngate`, `roslyngate-ts`). | A contract break must fail CI across both products, while neither runtime downloads the other's payload. |
+| D-26 | JSON Schema in `contracts/schema` is the source of truth; TS types and C# DTOs are generated. | Hand-maintained parallel shapes drift silently; `contracts:check` makes drift fail before release. |
+| D-27 | The TS server uses the low-level MCP `Server` with raw JSON Schema. | High-level `McpServer`/zod changes schema rendering; raw definitions guarantee exact `tools/list` parity. |
+| D-28 | `version.json` holds the release, contract, and per-product versions; `eng/check-version` enforces lockstep. | One tag must publish both products now, while leaving room for independent product versions later. |
+| D-29 | Each product autodetects its project type and points to the other package on mismatch. | Installing the wrong package should produce one actionable instruction instead of a solution-load failure. |
+| D-30 | `roslyngate-ts upgrade` refreshes managed MCP entries only. | Upgrades must not rewrite custom commands, but they should remove stale `npx` cache paths. |

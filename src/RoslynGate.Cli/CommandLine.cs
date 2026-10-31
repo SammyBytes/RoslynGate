@@ -77,6 +77,16 @@ public static class CommandLine
             Description = "Validate configuration and exit."
         };
 
+        var dotnet = new Option<bool>(CliNames.DotNet)
+        {
+            Description = "Force the .NET server (default when a solution is present)."
+        };
+
+        var typescript = new Option<bool>(CliNames.TypeScript)
+        {
+            Description = "Fail and point to the roslyngate-ts package."
+        };
+
         var root = new RootCommand($"{ProductInfo.Title} - Roslyn-powered MCP server for .NET symbols");
         root.Options.Add(solution);
         root.Options.Add(detail);
@@ -88,6 +98,8 @@ public static class CommandLine
         root.Options.Add(watch);
         root.Options.Add(noWatch);
         root.Options.Add(check);
+        root.Options.Add(dotnet);
+        root.Options.Add(typescript);
 
         root.SetAction(async (parseResult, cancellationToken) =>
         {
@@ -127,7 +139,20 @@ public static class CommandLine
                     ? !parseResult.GetValue(noWatch)
                     : defaults.Options.Watch;
 
+            var dotnetSpecified = parseResult.GetResult(dotnet) is { Implicit: false };
+            var typescriptSpecified = parseResult.GetResult(typescript) is { Implicit: false };
+
+            if (typescriptSpecified)
+            {
+                return WriteWrongProject("the --ts flag");
+            }
+
             var solutionPath = parseResult.GetValue(solution);
+            if (solutionPath is not null && ProjectKind.IsTypeScriptPath(solutionPath))
+            {
+                return WriteWrongProject(Path.GetFileName(solutionPath));
+            }
+
             if (solutionPath is not null)
             {
                 try
@@ -136,9 +161,19 @@ public static class CommandLine
                 }
                 catch (SolutionNotFoundException exception)
                 {
+                    if (!dotnetSpecified
+                        && TryTypeScriptProject(solutionPath, out var detail))
+                    {
+                        return WriteWrongProject(detail);
+                    }
+
                     Console.Error.WriteLine($"{CliText.ErrorPrefix}{exception.Message}");
                     return ExitCodes.InvalidConfiguration;
                 }
+            }
+            else if (!dotnetSpecified && TryTypeScriptProject(null, out var detail))
+            {
+                return WriteWrongProject(detail);
             }
 
             var options = new ServerOptions(
@@ -159,6 +194,35 @@ public static class CommandLine
         });
 
         return await root.Parse(args).InvokeAsync();
+    }
+
+    private static bool TryTypeScriptProject(string? path, out string detail)
+    {
+        detail = string.Empty;
+        var directory = path is null
+            ? Environment.CurrentDirectory
+            : Path.GetFullPath(path, Environment.CurrentDirectory);
+
+        if (!Directory.Exists(directory) || ProjectKind.HasDotNetSolution(directory))
+        {
+            return false;
+        }
+
+        var config = ProjectKind.FindTypeScriptConfig(directory);
+        if (config is null)
+        {
+            return false;
+        }
+
+        detail = Path.GetFileName(config);
+        return true;
+    }
+
+    private static int WriteWrongProject(string detail)
+    {
+        Console.Error.WriteLine($"{CliText.ErrorPrefix}{ProjectKind.Message(detail)}");
+        Console.Error.WriteLine($"{CliText.ErrorPrefix}{ProjectKind.Hint}");
+        return ExitCodes.InvalidConfiguration;
     }
 
     private static int ParseLimit(ArgumentResult result, string name, int defaultValue, int maximum)

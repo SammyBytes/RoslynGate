@@ -1,0 +1,12 @@
+{
+  "version": "0.3.0",
+  "contractVersion": "1.0.0",
+  "products": {
+    "dotnet": "0.3.0",
+    "typescript": "0.3.0"
+  },
+  "npm": {
+    "roslyngate": "0.3.0",
+    "roslyngate-ts": "0.3.0"
+  }
+}

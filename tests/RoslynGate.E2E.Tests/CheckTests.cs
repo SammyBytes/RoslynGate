@@ -70,4 +70,45 @@ public sealed class CheckTests
         Assert.Equal(ExitCodes.Success, result.ExitCode);
         Assert.Matches($@"{CheckText.Prewarm}\s+{CheckText.Off}", result.Stdout);
     }
+
+    [Fact]
+    public async Task PointsToTypeScriptPackageWhenOnlyTsconfigExists()
+    {
+        using var directory = new TempDirectory();
+        File.WriteAllText(Path.Combine(directory.Root, "tsconfig.json"), "{}");
+
+        var result = await CliRunner.RunAsync(directory.Root, string.Empty, CliNames.Check);
+
+        Assert.Equal(ExitCodes.InvalidConfiguration, result.ExitCode);
+        Assert.Contains("TypeScript workspace", result.Stderr);
+        Assert.Contains("roslyngate-ts", result.Stderr);
+    }
+
+    [Fact]
+    public async Task TypeScriptFlagPointsToTheOtherPackage()
+    {
+        var result = await CliRunner.RunAsync(
+            TestPaths.SampleSolutionDirectory,
+            string.Empty,
+            CliNames.TypeScript);
+
+        Assert.Equal(ExitCodes.InvalidConfiguration, result.ExitCode);
+        Assert.Contains("roslyngate-ts", result.Stderr);
+    }
+
+    [Fact]
+    public async Task DotNetFlagKeepsTheSolutionError()
+    {
+        using var directory = new TempDirectory();
+        File.WriteAllText(Path.Combine(directory.Root, "tsconfig.json"), "{}");
+
+        var result = await CliRunner.RunAsync(
+            directory.Root,
+            string.Empty,
+            CliNames.DotNet,
+            CliNames.Check);
+
+        Assert.Equal(ExitCodes.InvalidConfiguration, result.ExitCode);
+        Assert.Contains("No .sln or .slnx", result.Stderr);
+    }
 }

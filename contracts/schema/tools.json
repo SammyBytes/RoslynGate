@@ -1,0 +1,317 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "contractVersion": "1.0.0",
+  "tools": [
+    {
+      "name": "get_symbol_definition",
+      "description": "Resolve one symbol by qualified name or by solution-relative file and 1-based line.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "description": "Qualified or partial symbol name, e.g. SampleSdk.Widget.Open. Ignored when file is provided.",
+            "type": [
+              "string",
+              "null"
+            ],
+            "default": null
+          },
+          "file": {
+            "description": "Solution-relative or absolute file path. Requires line.",
+            "type": [
+              "string",
+              "null"
+            ],
+            "default": null
+          },
+          "line": {
+            "description": "1-based line number.",
+            "type": [
+              "integer",
+              "null"
+            ],
+            "default": null
+          },
+          "column": {
+            "description": "1-based column. Optional; defaults to the first token on the line.",
+            "type": [
+              "integer",
+              "null"
+            ],
+            "default": null
+          },
+          "parameterTypes": {
+            "description": "Optional parameter type names to disambiguate overloads, e.g. [\"string\", \"int\"].",
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "default": null
+          },
+          "detail": {
+            "description": "compact (default) or verbose.",
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "Compact",
+              "Verbose",
+              null
+            ],
+            "default": null
+          }
+        }
+      },
+      "annotations": {
+        "idempotentHint": true,
+        "openWorldHint": false,
+        "readOnlyHint": true
+      }
+    },
+    {
+      "name": "find_symbol_references",
+      "description": "Find semantic references to a symbol, with deterministic paging. Set includeDefinition=true to return the resolved definition in the same call.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "description": "Qualified or partial symbol name, e.g. SampleSdk.Widget.Open. Ignored when file is provided.",
+            "type": [
+              "string",
+              "null"
+            ],
+            "default": null
+          },
+          "file": {
+            "description": "Solution-relative or absolute file path. Requires line.",
+            "type": [
+              "string",
+              "null"
+            ],
+            "default": null
+          },
+          "line": {
+            "description": "1-based line number.",
+            "type": [
+              "integer",
+              "null"
+            ],
+            "default": null
+          },
+          "column": {
+            "description": "1-based column. Optional; defaults to the first token on the line.",
+            "type": [
+              "integer",
+              "null"
+            ],
+            "default": null
+          },
+          "includeDeclarations": {
+            "description": "Include declaration locations. Defaults to false.",
+            "type": "boolean",
+            "default": false
+          },
+          "parameterTypes": {
+            "description": "Optional parameter type names to disambiguate overloads, e.g. [\"string\", \"int\"].",
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "default": null
+          },
+          "includeDefinition": {
+            "description": "Include the resolved definition in the response. Defaults to false.",
+            "type": "boolean",
+            "default": false
+          },
+          "offset": {
+            "description": "References to skip. Defaults to 0.",
+            "type": [
+              "integer",
+              "null"
+            ],
+            "default": null
+          },
+          "limit": {
+            "description": "References to return. Defaults to the server reference limit.",
+            "type": [
+              "integer",
+              "null"
+            ],
+            "default": null
+          },
+          "detail": {
+            "description": "compact (default) or verbose.",
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "Compact",
+              "Verbose",
+              null
+            ],
+            "default": null
+          }
+        }
+      },
+      "annotations": {
+        "idempotentHint": true,
+        "openWorldHint": false,
+        "readOnlyHint": true
+      }
+    },
+    {
+      "name": "get_type_hierarchy",
+      "description": "Return base types, interfaces, derived types, and implementations for a type.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "description": "Qualified or partial type name, e.g. SampleSdk.Widget. Ignored when file is provided.",
+            "type": [
+              "string",
+              "null"
+            ],
+            "default": null
+          },
+          "file": {
+            "description": "Solution-relative or absolute file path. Requires line.",
+            "type": [
+              "string",
+              "null"
+            ],
+            "default": null
+          },
+          "line": {
+            "description": "1-based line number.",
+            "type": [
+              "integer",
+              "null"
+            ],
+            "default": null
+          },
+          "column": {
+            "description": "1-based column. Optional; defaults to the first token on the line.",
+            "type": [
+              "integer",
+              "null"
+            ],
+            "default": null
+          },
+          "detail": {
+            "description": "compact (default) or verbose.",
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "Compact",
+              "Verbose",
+              null
+            ],
+            "default": null
+          }
+        }
+      },
+      "annotations": {
+        "idempotentHint": true,
+        "openWorldHint": false,
+        "readOnlyHint": true
+      }
+    },
+    {
+      "name": "search_symbols",
+      "description": "Search types and members by name fragment before resolving a symbol.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "description": "Name fragment with at least 2 characters, e.g. Widget or Open.",
+            "type": [
+              "string",
+              "null"
+            ],
+            "default": null
+          },
+          "kind": {
+            "description": "Optional kind filter: class, interface, method, property, field, enum, struct, delegate.",
+            "type": [
+              "string",
+              "null"
+            ],
+            "default": null
+          },
+          "namespace": {
+            "description": "Optional namespace prefix filter, e.g. SampleSdk.",
+            "type": [
+              "string",
+              "null"
+            ],
+            "default": null
+          },
+          "offset": {
+            "description": "Hits to skip. Defaults to 0.",
+            "type": [
+              "integer",
+              "null"
+            ],
+            "default": null
+          },
+          "limit": {
+            "description": "Hits to return. Defaults to the server search limit.",
+            "type": [
+              "integer",
+              "null"
+            ],
+            "default": null
+          },
+          "detail": {
+            "description": "compact (default) or verbose.",
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "Compact",
+              "Verbose",
+              null
+            ],
+            "default": null
+          }
+        }
+      },
+      "annotations": {
+        "idempotentHint": true,
+        "openWorldHint": false,
+        "readOnlyHint": true
+      }
+    },
+    {
+      "name": "reload_workspace",
+      "description": "Reload the workspace after project or structural file changes.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      },
+      "annotations": {
+        "idempotentHint": true,
+        "openWorldHint": false,
+        "readOnlyHint": true
+      }
+    }
+  ]
+}

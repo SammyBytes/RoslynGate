@@ -71,7 +71,7 @@ test("writes opencode.jsonc with the roslyngate server", async () => {
 
   try {
     await runSetup(["opencode", "--skill", "--solution", root], {
-      version: "0.2.2",
+      version: "0.3.0",
       cwd: root,
       env: { ROSLYGATE_BINARY: binary }
     });
@@ -104,7 +104,7 @@ test("preserves an existing OpenCode config", async () => {
 
   try {
     await runSetup(["opencode"], {
-      version: "0.2.2",
+      version: "0.3.0",
       cwd: root,
       env: { ROSLYGATE_BINARY: binary }
     });
@@ -125,7 +125,7 @@ test("writes the opt-in RoslynGate skill", async () => {
 
   try {
     await runSetup(["opencode", "--skill"], {
-      version: "0.2.2",
+      version: "0.3.0",
       cwd: root,
       env: { ROSLYGATE_BINARY: binary }
     });

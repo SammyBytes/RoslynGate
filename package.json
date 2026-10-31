@@ -1,9 +1,16 @@
 {
   "private": true,
-  "workspaces": ["products/typescript", "packaging/npm"],
+  "workspaces": [
+    "products/typescript",
+    "packaging/npm"
+  ],
   "scripts": {
+    "contracts:generate": "node scripts/contracts/generate.mjs",
+    "contracts:check": "node scripts/contracts/generate.mjs --check",
+    "test:contract": "python3 tests/contract/parity.py",
     "ts:build": "npm --workspace roslyngate-ts run build",
     "ts:test": "npm --workspace roslyngate-ts test",
-    "ts:check": "npm --workspace roslyngate-ts run check"
+    "ts:check": "npm --workspace roslyngate-ts run check",
+    "version:check": "node eng/check-version"
   }
 }

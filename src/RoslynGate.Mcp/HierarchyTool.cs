@@ -13,7 +13,7 @@ public sealed class HierarchyTool(Workspace workspace, ServerOptions options)
         ReadOnly = true,
         Idempotent = true,
         OpenWorld = false)]
-    [Description("Return base types, interfaces, derived types, and implementations for a .NET type.")]
+    [Description("Return base types, interfaces, derived types, and implementations for a type.")]
     public async Task<CallToolResult> GetTypeHierarchyAsync(
         [Description("Qualified or partial type name, e.g. SampleSdk.Widget. Ignored when file is provided.")]
         string? name = null,
