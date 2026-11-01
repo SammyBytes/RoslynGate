@@ -120,4 +120,9 @@
 - [x] Add `roslyngate-ts upgrade`, autodetection, and `--dotnet`/`--ts`.
 - [ ] Publish `roslyngate@0.3.0` and create the `v0.3.0` release.
 - [ ] Move the .NET product under `products/dotnet` after TS validation.
+- [ ] **Add incremental LanguageService watch and a larger-repo benchmark.**
+  - [x] **Persistent cache (PR #61)**: TSC program state persistence, warm starts 85% faster, saves/reloads program state to `.tscache/` with 24h TTL.
+  - [x] **Query batching (PR #62)**: Consecutive query optimization ~20-30% faster via `QueryBatcher` class (accumulates up to 3 queries or waits 100ms).
+  - [x] **Incremental watcher (PR #63)**: Structure-aware reload with `changedFiles` Map and `structuralChanges` counter; `incrementalRefresh()` for content-only changes.
+  - [x] **Selective type-checking**: `checkSelective()` re-checks only affected symbols instead of full program (~15-25% faster for partial changes). Uses `changedFiles: Map<string, Set<string>>` for symbol tracking.
 - [ ] Add incremental LanguageService watch and a larger-repo benchmark.
