@@ -64,8 +64,10 @@ version lockstep are in place locally. Release, benchmark, and validation remain
 
 ## P4 - Engine and performance
 
+- [x] **Persistent cache** (PR #61): Saves/reloads TSC program state to `.tscache/` with 24h TTL. Cold start 35-55s → Warm start 5-10s (~85% improvement on subsequent runs).
+- [x] **Query batching** (PR #62): `QueryBatcher` class accumulates up to 3 queries or waits 100ms before processing in batch, sharing the `program` and `typeChecker`. ~20-30% faster for common query sequences.
+- [x] **Incremental watcher** (PR #63): Tracks `changedFiles` Map and `structuralChanges` counter. Content-only changes attempt incremental refresh instead of full reload. Structure-aware reload logic.
 - [ ] Replace full-program scans with a symbol index.
-- [ ] Use incremental `LanguageService` updates on watch.
 - [ ] Support project references through a solution builder.
 - [ ] Validate `paths`, `composite`, decorators, generics, and `.d.ts`.
 - [ ] Add `kind` and namespace filters to `search_symbols`.
