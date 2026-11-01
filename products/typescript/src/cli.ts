@@ -594,4 +594,53 @@ function serverFailure(message: string): void {
   process.exit(1);
 }
 
+type QueryResolver = (result: ToolResult) => void;
+
+class QueryBatcher {
+  private pending: Map<number, QueryResolver> = new Map();
+  private counter = 0;
+  private timer: NodeJS.Timeout | null = null;
+  private readonly BATCH_SIZE = 3;
+  private readonly BATCH_TIMEOUT_MS = 100;
+
+  enqueue(): number {
+    const id = this.counter++;
+    this.pending.set(id, null as unknown as QueryResolver);
+    this.maybeProcess();
+    return id;
+  }
+
+  setResult(id: number, result: ToolResult): void {
+    const resolver = this.pending.get(id);
+    if (resolver) resolver(result);
+    this.pending.delete(id);
+    this.maybeProcess();
+  }
+
+  private maybeProcess(): void {
+    if (this.pending.size >= this.BATCH_SIZE) {
+      this.processBatch();
+    } else if (!this.timer) {
+      this.timer = setTimeout(() => {
+        this.timer = null;
+        this.processBatch();
+      }, this.BATCH_TIMEOUT_MS);
+    }
+  }
+
+  private processBatch(): void {
+    if (this.pending.size === 0) return;
+    const promises: Promise<void>[] = [];
+    this.pending.forEach((_, id) => {
+      promises.push(Promise.resolve());
+    });
+    Promise.all(promises).then(() => {
+      this.pending.clear();
+    });
+    this.timer = null;
+  }
+}
+
+const queryBatcher = new QueryBatcher();
+
 main().catch((cause) => serverFailure(cause instanceof Error ? cause.message : String(cause)));
