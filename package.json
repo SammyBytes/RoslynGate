@@ -12,5 +12,8 @@
     "ts:test": "npm --workspace roslyngate-ts test",
     "ts:check": "npm --workspace roslyngate-ts run check",
     "version:check": "node eng/check-version"
+  },
+  "dependencies": {
+    "@tsconfig/bun": "^1.0.11"
   }
 }
