@@ -61,6 +61,8 @@ export class TsWorkspace {
   private options!: ts.CompilerOptions;
   private changed = new Set<string>();
   private stale = false;
+  private changedFiles: Map<string, number> = new Map<string, number>();
+  private structuralChanges = 0;
   private watcher?: fs.FSWatcher;
 
   constructor(root: string, configPath?: string) {
@@ -128,7 +130,16 @@ export class TsWorkspace {
 
   reload(): void {
     this.watcher?.close();
-    this.load();
+
+    // If no structural changes occurred, attempt incremental refresh
+    // instead of full rebuild (faster for content-only changes).
+    if (this.structuralChanges === 0 && this.changedFiles.size > 0) {
+      // TODO: implement incrementalRefresh() when ready
+      this.load();
+    } else {
+      // Full reload for structural changes or reset
+      this.load();
+    }
   }
 
   close(): void {
