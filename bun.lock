@@ -1,0 +1,231 @@
+{
+  "lockfileVersion": 2,
+  "configVersion": 0,
+  "workspaces": {
+    "": {
+      "dependencies": {
+        "@tsconfig/bun": "^1.0.11",
+      },
+    },
+    "packaging/npm": {
+      "name": "roslyngate",
+      "version": "0.3.0",
+      "bin": "bin/roslyngate.js",
+    },
+    "products/typescript": {
+      "name": "roslyngate-ts",
+      "version": "0.3.0",
+      "bin": "dist/cli.js",
+      "dependencies": {
+        "@modelcontextprotocol/sdk": "1.32.2",
+        "typescript": "5.9.3",
+      },
+      "devDependencies": {
+        "@types/node": "24.19.2",
+      },
+    },
+  },
+  "packages": {
+    "@hono/node-server": ["@hono/node-server@2.1.5", "", { "peerDependencies": { "hono": "^4 || ^5.0.0-0" } }, ""],
+
+    "@modelcontextprotocol/sdk": ["@modelcontextprotocol/sdk@1.32.2", "", { "dependencies": { "@hono/node-server": "^1.19.9 || ^2.0.5", "ajv": "^8.17.1", "ajv-formats": "^3.0.1", "content-type": "^1.0.5", "cors": "^2.8.5", "cross-spawn": "^7.0.5", "eventsource": "^3.0.2", "eventsource-parser": "^3.0.0", "express": "^5.2.1", "express-rate-limit": "^8.2.1", "hono": "^4.11.4", "jose": "^6.1.3", "json-schema-typed": "^8.0.2", "pkce-challenge": "^5.0.0", "raw-body": "^3.0.0", "zod": "^3.25 || ^4.0", "zod-to-json-schema": "^3.25.1" }, "peerDependencies": { "@cfworker/json-schema": "^4.1.1" }, "optionalPeers": ["@cfworker/json-schema"] }, ""],
+
+    "@tsconfig/bun": ["@tsconfig/bun@1.0.11", "", {}, "sha512-DQA3HOKFQ+/yPTUa73k5QGcuEM1ExtL6uWQMR0QrfOTitm0oLHqHd1tI74WtEtMqlIu+tvSMELJ6p5uNxVE7lw=="],
+
+    "@types/node": ["@types/node@24.19.2", "", { "dependencies": { "undici-types": ">=7.24.0 <7.24.7" } }, ""],
+
+    "accepts": ["accepts@2.0.0", "", { "dependencies": { "mime-types": "^3.0.0", "negotiator": "^1.0.0" } }, ""],
+
+    "ajv": ["ajv@8.20.0", "", { "dependencies": { "fast-deep-equal": "^3.1.3", "fast-uri": "^3.0.1", "json-schema-traverse": "^1.0.0", "require-from-string": "^2.0.2" } }, ""],
+
+    "ajv-formats": ["ajv-formats@3.0.1", "", { "dependencies": { "ajv": "^8.0.0" } }, ""],
+
+    "body-parser": ["body-parser@2.4.0", "", { "dependencies": { "bytes": "^3.1.2", "content-type": "^2.1.0", "debug": "^4.4.3", "http-errors": "^2.0.1", "iconv-lite": "^0.7.3", "on-finished": "^2.4.1", "qs": "^6.16.1", "raw-body": "^3.0.2", "type-is": "^2.1.0" } }, ""],
+
+    "bytes": ["bytes@3.1.2", "", {}, ""],
+
+    "call-bind-apply-helpers": ["call-bind-apply-helpers@1.0.2", "", { "dependencies": { "es-errors": "^1.3.0", "function-bind": "^1.1.2" } }, ""],
+
+    "call-bound": ["call-bound@1.0.4", "", { "dependencies": { "call-bind-apply-helpers": "^1.0.2", "get-intrinsic": "^1.3.0" } }, ""],
+
+    "content-disposition": ["content-disposition@2.0.1", "", {}, ""],
+
+    "content-type": ["content-type@1.0.5", "", {}, ""],
+
+    "cookie": ["cookie@0.7.2", "", {}, ""],
+
+    "cookie-signature": ["cookie-signature@1.2.2", "", {}, ""],
+
+    "cors": ["cors@2.8.6", "", { "dependencies": { "object-assign": "^4", "vary": "^1" } }, ""],
+
+    "cross-spawn": ["cross-spawn@7.0.6", "", { "dependencies": { "path-key": "^3.1.0", "shebang-command": "^2.0.0", "which": "^2.0.1" } }, ""],
+
+    "debug": ["debug@4.4.3", "", { "dependencies": { "ms": "^2.1.3" } }, ""],
+
+    "depd": ["depd@2.0.0", "", {}, ""],
+
+    "dunder-proto": ["dunder-proto@1.0.1", "", { "dependencies": { "call-bind-apply-helpers": "^1.0.1", "es-errors": "^1.3.0", "gopd": "^1.2.0" } }, ""],
+
+    "ee-first": ["ee-first@1.1.1", "", {}, ""],
+
+    "encodeurl": ["encodeurl@2.0.0", "", {}, ""],
+
+    "es-define-property": ["es-define-property@1.0.1", "", {}, ""],
+
+    "es-errors": ["es-errors@1.3.0", "", {}, ""],
+
+    "es-object-atoms": ["es-object-atoms@1.1.2", "", { "dependencies": { "es-errors": "^1.3.0" } }, ""],
+
+    "escape-html": ["escape-html@1.0.3", "", {}, ""],
+
+    "etag": ["etag@1.8.1", "", {}, ""],
+
+    "eventsource": ["eventsource@3.0.7", "", { "dependencies": { "eventsource-parser": "^3.0.1" } }, ""],
+
+    "eventsource-parser": ["eventsource-parser@3.1.1", "", {}, ""],
+
+    "express": ["express@5.3.0", "", { "dependencies": { "accepts": "^2.0.0", "body-parser": "^2.3.0", "content-disposition": "^2.0.1", "content-type": "^2.0.0", "cookie": "^0.7.1", "cookie-signature": "^1.2.1", "debug": "^4.4.0", "depd": "^2.0.0", "encodeurl": "^2.0.0", "escape-html": "^1.0.3", "etag": "^1.8.1", "finalhandler": "^2.1.0", "fresh": "^2.0.0", "http-errors": "^2.0.0", "merge-descriptors": "^2.0.0", "mime-types": "^3.0.0", "on-finished": "^2.4.1", "once": "^1.4.0", "parseurl": "^1.3.3", "proxy-addr": "^2.0.8", "qs": "^6.16.0", "range-parser": "^1.2.1", "router": "^2.2.0", "send": "^1.1.0", "serve-static": "^2.2.0", "statuses": "^2.0.1", "type-is": "^2.1.0", "vary": "^1.1.2" } }, ""],
+
+    "express-rate-limit": ["express-rate-limit@8.7.1", "", { "dependencies": { "debug": "^4.4.3", "ip-address": "^10.2.0" }, "peerDependencies": { "express": ">= 4.11" } }, ""],
+
+    "fast-deep-equal": ["fast-deep-equal@3.1.3", "", {}, ""],
+
+    "fast-uri": ["fast-uri@3.1.9", "", {}, ""],
+
+    "finalhandler": ["finalhandler@2.1.1", "", { "dependencies": { "debug": "^4.4.0", "encodeurl": "^2.0.0", "escape-html": "^1.0.3", "on-finished": "^2.4.1", "parseurl": "^1.3.3", "statuses": "^2.0.1" } }, ""],
+
+    "forwarded": ["forwarded@0.2.0", "", {}, ""],
+
+    "fresh": ["fresh@2.0.0", "", {}, ""],
+
+    "function-bind": ["function-bind@1.1.2", "", {}, ""],
+
+    "get-intrinsic": ["get-intrinsic@1.3.0", "", { "dependencies": { "call-bind-apply-helpers": "^1.0.2", "es-define-property": "^1.0.1", "es-errors": "^1.3.0", "es-object-atoms": "^1.1.1", "function-bind": "^1.1.2", "get-proto": "^1.0.1", "gopd": "^1.2.0", "has-symbols": "^1.1.0", "hasown": "^2.0.2", "math-intrinsics": "^1.1.0" } }, ""],
+
+    "get-proto": ["get-proto@1.0.1", "", { "dependencies": { "dunder-proto": "^1.0.1", "es-object-atoms": "^1.0.0" } }, ""],
+
+    "gopd": ["gopd@1.2.0", "", {}, ""],
+
+    "has-symbols": ["has-symbols@1.1.0", "", {}, ""],
+
+    "hasown": ["hasown@2.0.4", "", { "dependencies": { "function-bind": "^1.1.2" } }, ""],
+
+    "hono": ["hono@4.13.13", "", {}, ""],
+
+    "http-errors": ["http-errors@2.0.1", "", { "dependencies": { "depd": "~2.0.0", "inherits": "~2.0.4", "setprototypeof": "~1.2.0", "statuses": "~2.0.2", "toidentifier": "~1.0.1" } }, ""],
+
+    "iconv-lite": ["iconv-lite@0.7.3", "", { "dependencies": { "safer-buffer": ">= 2.1.2 < 3.0.0" } }, ""],
+
+    "inherits": ["inherits@2.0.4", "", {}, ""],
+
+    "ip-address": ["ip-address@10.7.4", "", {}, ""],
+
+    "ipaddr.js": ["ipaddr.js@1.9.1", "", {}, ""],
+
+    "is-promise": ["is-promise@4.0.0", "", {}, ""],
+
+    "isexe": ["isexe@2.0.0", "", {}, ""],
+
+    "jose": ["jose@6.2.13", "", {}, ""],
+
+    "json-schema-traverse": ["json-schema-traverse@1.0.0", "", {}, ""],
+
+    "json-schema-typed": ["json-schema-typed@8.0.2", "", {}, ""],
+
+    "math-intrinsics": ["math-intrinsics@1.1.0", "", {}, ""],
+
+    "media-typer": ["media-typer@1.1.1", "", {}, ""],
+
+    "merge-descriptors": ["merge-descriptors@2.0.0", "", {}, ""],
+
+    "mime-db": ["mime-db@1.54.0", "", {}, ""],
+
+    "mime-types": ["mime-types@3.0.2", "", { "dependencies": { "mime-db": "^1.54.0" } }, ""],
+
+    "ms": ["ms@2.1.3", "", {}, ""],
+
+    "negotiator": ["negotiator@1.1.0", "", { "dependencies": { "content-type": "^2.1.0" } }, ""],
+
+    "object-assign": ["object-assign@4.1.1", "", {}, ""],
+
+    "object-inspect": ["object-inspect@1.13.4", "", {}, ""],
+
+    "on-finished": ["on-finished@2.4.2", "", { "dependencies": { "ee-first": "1.1.1" } }, ""],
+
+    "once": ["once@1.4.0", "", { "dependencies": { "wrappy": "1" } }, ""],
+
+    "parseurl": ["parseurl@1.3.3", "", {}, ""],
+
+    "path-key": ["path-key@3.1.1", "", {}, ""],
+
+    "path-to-regexp": ["path-to-regexp@8.4.2", "", {}, ""],
+
+    "pkce-challenge": ["pkce-challenge@5.0.1", "", {}, ""],
+
+    "proxy-addr": ["proxy-addr@2.0.8", "", { "dependencies": { "forwarded": "0.2.0", "ipaddr.js": "1.9.1" } }, ""],
+
+    "qs": ["qs@6.16.1", "", { "dependencies": { "es-define-property": "^1.0.1", "side-channel": "^1.1.1" } }, ""],
+
+    "range-parser": ["range-parser@1.3.0", "", {}, ""],
+
+    "raw-body": ["raw-body@3.0.2", "", { "dependencies": { "bytes": "~3.1.2", "http-errors": "~2.0.1", "iconv-lite": "~0.7.0", "unpipe": "~1.0.0" } }, ""],
+
+    "require-from-string": ["require-from-string@2.0.2", "", {}, ""],
+
+    "roslyngate": ["roslyngate@workspace:packaging/npm"],
+
+    "roslyngate-ts": ["roslyngate-ts@workspace:products/typescript"],
+
+    "router": ["router@2.2.0", "", { "dependencies": { "debug": "^4.4.0", "depd": "^2.0.0", "is-promise": "^4.0.0", "parseurl": "^1.3.3", "path-to-regexp": "^8.0.0" } }, ""],
+
+    "safer-buffer": ["safer-buffer@2.1.2", "", {}, ""],
+
+    "send": ["send@1.2.1", "", { "dependencies": { "debug": "^4.4.3", "encodeurl": "^2.0.0", "escape-html": "^1.0.3", "etag": "^1.8.1", "fresh": "^2.0.0", "http-errors": "^2.0.1", "mime-types": "^3.0.2", "ms": "^2.1.3", "on-finished": "^2.4.1", "range-parser": "^1.2.1", "statuses": "^2.0.2" } }, ""],
+
+    "serve-static": ["serve-static@2.2.1", "", { "dependencies": { "encodeurl": "^2.0.0", "escape-html": "^1.0.3", "parseurl": "^1.3.3", "send": "^1.2.0" } }, ""],
+
+    "setprototypeof": ["setprototypeof@1.2.0", "", {}, ""],
+
+    "shebang-command": ["shebang-command@2.0.0", "", { "dependencies": { "shebang-regex": "^3.0.0" } }, ""],
+
+    "shebang-regex": ["shebang-regex@3.0.0", "", {}, ""],
+
+    "side-channel": ["side-channel@1.1.1", "", { "dependencies": { "es-errors": "^1.3.0", "object-inspect": "^1.13.4", "side-channel-list": "^1.0.1", "side-channel-map": "^1.0.1", "side-channel-weakmap": "^1.0.2" } }, ""],
+
+    "side-channel-list": ["side-channel-list@1.0.1", "", { "dependencies": { "es-errors": "^1.3.0", "object-inspect": "^1.13.4" } }, ""],
+
+    "side-channel-map": ["side-channel-map@1.0.1", "", { "dependencies": { "call-bound": "^1.0.2", "es-errors": "^1.3.0", "get-intrinsic": "^1.2.5", "object-inspect": "^1.13.3" } }, ""],
+
+    "side-channel-weakmap": ["side-channel-weakmap@1.0.2", "", { "dependencies": { "call-bound": "^1.0.2", "es-errors": "^1.3.0", "get-intrinsic": "^1.2.5", "object-inspect": "^1.13.3", "side-channel-map": "^1.0.1" } }, ""],
+
+    "statuses": ["statuses@2.0.2", "", {}, ""],
+
+    "toidentifier": ["toidentifier@1.0.1", "", {}, ""],
+
+    "type-is": ["type-is@2.1.0", "", { "dependencies": { "content-type": "^2.0.0", "media-typer": "^1.1.0", "mime-types": "^3.0.0" } }, ""],
+
+    "typescript": ["typescript@5.9.3", "", { "bin": { "tsc": "bin/tsc", "tsserver": "bin/tsserver" } }, ""],
+
+    "undici-types": ["undici-types@7.24.6", "", {}, ""],
+
+    "unpipe": ["unpipe@1.0.0", "", {}, ""],
+
+    "vary": ["vary@1.1.2", "", {}, ""],
+
+    "which": ["which@2.0.2", "", { "dependencies": { "isexe": "^2.0.0" }, "bin": { "node-which": "bin/node-which" } }, ""],
+
+    "wrappy": ["wrappy@1.0.2", "", {}, ""],
+
+    "zod": ["zod@4.6.7", "", {}, ""],
+
+    "zod-to-json-schema": ["zod-to-json-schema@3.25.2", "", { "peerDependencies": { "zod": "^3.25.28 || ^4" } }, ""],
+
+    "body-parser/content-type": ["content-type@2.1.0", "", {}, ""],
+
+    "express/content-type": ["content-type@2.1.0", "", {}, ""],
+
+    "negotiator/content-type": ["content-type@2.1.0", "", {}, ""],
+
+    "type-is/content-type": ["content-type@2.1.0", "", {}, ""],
+  }
+}
