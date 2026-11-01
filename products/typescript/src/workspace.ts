@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import ts from "typescript";
+import { FileSystemCache } from "./cache.js";
 
 export type SymbolLocation = { file: string; line: number; column: number };
 
@@ -72,6 +73,23 @@ export class TsWorkspace {
   }
 
   load(): void {
+    // Try to load from persistent cache first (fast path).
+    const cache = new FileSystemCache({ cacheDir: path.join(this.root, ".tscache") });
+    const cached = cache.load(ts, this.program, this.localSourcesMaps());
+    if (cached) {
+      this.program = cached.program;
+      // Update our internal map of file texts from cache.
+      this.setFileTextsFromCache(cached.fileTexts);
+      this.checker = this.program.getTypeChecker();
+      this.languageService = ts.createLanguageService(this.createHost());
+      this.stale = false;
+      this.changed.clear();
+      this.startWatcher();
+      console.log("roslyngate-ts: loaded from persistent cache");
+      return;
+    }
+
+    // Fall back to full rebuild (original behavior).
     const read = ts.readConfigFile(this.configPath, ts.sys.readFile);
     if (read.error) {
       throw new Error(ts.flattenDiagnosticMessageText(read.error.messageText, "\n"));
@@ -88,6 +106,7 @@ export class TsWorkspace {
     }
 
     this.options = parsed.options;
+    const sourceFiles = parsed.fileNames.map((f) => ts.createSourceFile(f, ts.sys.readFile(f) ?? "", ts.ScriptTarget.Latest, true));
     this.program = ts.createProgram({
       rootNames: parsed.fileNames,
       options: this.options,
@@ -98,6 +117,13 @@ export class TsWorkspace {
     this.stale = false;
     this.changed.clear();
     this.startWatcher();
+
+    // Persist the program state for future fast starts.
+    try {
+      cache.save(ts, this.program, this.localSourcesMaps());
+    } catch {
+      // Ignore cache save failures – not critical.
+    }
   }
 
   reload(): void {
@@ -111,6 +137,24 @@ export class TsWorkspace {
 
   state(): WorkspaceState {
     return { stale: this.stale, changed: [...this.changed].sort() };
+  }
+
+  /** Return a Map of filename → source text for all program source files. */
+  private localSourcesMaps(): Map<string, string> {
+    const map = new Map<string, string>();
+    for (const sf of this.program.getSourceFiles()) {
+      if (!sf.isDeclarationFile) {
+        const name = sf.fileName.replace(/\\/g, "/");
+        map.set(name, sf.getFullText());
+      }
+    }
+    return map;
+  }
+
+  /** Populate the internal file-text map from a cached entry. */
+  private setFileTextsFromCache(_cacheFileTexts: Map<string, string>): void {
+    // No-op for now – the cache is only used for program reuse.
+    // File texts are re-read from disk on each reload.
   }
 
   sourceFileCount(): number {
